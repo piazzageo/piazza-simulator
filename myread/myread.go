@@ -2,33 +2,23 @@ package main
 
 import (
 	"github.com/Shopify/sarama"
-
-	//"crypto/tls"
-	//"crypto/x509"
-	//"encoding/json"
-	//"flag"
-	//"fmt"
-	//"io/ioutil"
+	"github.com/mpgerlek/piazza-simulator/kafka"
 	"log"
-	//"net/http"
 	"os"
-
 	"os/signal"
 )
 
 func main() {
-	consumer, err := sarama.NewConsumer([]string{"localhost:9092"}, nil)
-	if err != nil {
-		panic(err)
-	}
+
+	r := kafka.NewReader()
 
 	defer func() {
-		if err := consumer.Close(); err != nil {
+		if err := r.Close(); err != nil {
 			log.Fatalln(err)
 		}
 	}()
 
-	partitionConsumer, err := consumer.ConsumePartition("test3", 0, sarama.OffsetNewest)
+	partitionConsumer, err := r.ConsumePartition("test3", 0, sarama.OffsetNewest)
 	if err != nil {
 		panic(err)
 	}
