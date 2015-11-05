@@ -1,7 +1,6 @@
 package main
 
 import (
-	"github.com/Shopify/sarama"
 	"github.com/mpgerlek/piazza-simulator/kafka"
 	"log"
 	"os"
@@ -18,7 +17,7 @@ func main() {
 		}
 	}()
 
-	partitionConsumer, err := r.ConsumePartition("test3", 0, sarama.OffsetNewest)
+	partitionConsumer, err := r.ConsumePartition("test3", 0, kafka.OffsetNewest)
 	if err != nil {
 		panic(err)
 	}

@@ -10,7 +10,6 @@
 package main
 
 import (
-	"github.com/Shopify/sarama"
 	"github.com/mpgerlek/piazza-simulator/kafka"
 	"log"
 	"os"
@@ -18,6 +17,12 @@ import (
 )
 
 func main() {
+	/*topics := kafka.GetTopics()
+	log.Println(topics)
+	kafka.AddTopic("foobar")
+	topics = kafka.GetTopics()
+	log.Println(topics)*/
+	
 	w := kafka.NewWriter()
 
 	defer func() {
@@ -36,7 +41,7 @@ func main() {
 ProducerLoop:
 	for {
 		select {
-		case w.Input() <- &sarama.ProducerMessage{Topic: "test3", Key: nil, Value: sarama.StringEncoder("testing 123")}:
+		case w.Input() <- kafka.NewMessage("test3", "testing 123"):
 			enqueued++
 		case err := <-w.Errors():
 			log.Println("Failed to produce message", err)
