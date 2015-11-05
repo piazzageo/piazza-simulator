@@ -22,7 +22,7 @@ func main() {
 	kafka.AddTopic("foobar")
 	topics = kafka.GetTopics()
 	log.Println(topics)*/
-	
+
 	w := kafka.NewWriter()
 
 	defer func() {

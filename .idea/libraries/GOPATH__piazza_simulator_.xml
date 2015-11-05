@@ -1,0 +1,47 @@
+<component name="libraryTable">
+  <library name="GOPATH &lt;piazza-simulator&gt;">
+    <CLASSES>
+      <root url="file://$PROJECT_DIR$/../../../gopkg.in" />
+      <root url="file://$PROJECT_DIR$/../../../code.google.com" />
+      <root url="file://$PROJECT_DIR$/../.." />
+      <root url="file://$PROJECT_DIR$/../../../9fans.net" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+    <excluded>
+      <root url="file://$PROJECT_DIR$/../../jeromer/syslogparser/.git" />
+      <root url="file://$PROJECT_DIR$/../../stealthly/go_kafka_client/.git" />
+      <root url="file://$PROJECT_DIR$/../../../gopkg.in/mcuadros/go-syslog.v2/.git" />
+      <root url="file://$PROJECT_DIR$/../../nsf/gocode/.git" />
+      <root url="file://$PROJECT_DIR$/../../aybabtme/tailf/.git" />
+      <root url="file://$PROJECT_DIR$/../../golang/protobuf/proto/testdata" />
+      <root url="file://$PROJECT_DIR$/../../../code.google.com/p/rog-go/exp/go/printer/testdata" />
+      <root url="file://$PROJECT_DIR$/../../mcuadros/go-syslog/.git" />
+      <root url="file://$PROJECT_DIR$/../../satori/go.uuid/.git" />
+      <root url="file://$PROJECT_DIR$/../../rcrowley/go-metrics/.git" />
+      <root url="file://$PROJECT_DIR$/../../cihub/seelog/.git" />
+      <root url="file://$PROJECT_DIR$/../../stealthly/siesta/.git" />
+      <root url="file://$PROJECT_DIR$/../../Shopify/sarama/.git" />
+      <root url="file://$PROJECT_DIR$" />
+      <root url="file://$PROJECT_DIR$/../../golang/snappy/.git" />
+      <root url="file://$PROJECT_DIR$/../../eapache/queue/.git" />
+      <root url="file://$PROJECT_DIR$/.git" />
+      <root url="file://$PROJECT_DIR$/../../eapache/go-resiliency/.git" />
+      <root url="file://$PROJECT_DIR$/../../sarama/.git" />
+      <root url="file://$PROJECT_DIR$/../../../gopkg.in/fsnotify.v1/.git" />
+      <root url="file://$PROJECT_DIR$/../../golang/example/.git" />
+      <root url="file://$PROJECT_DIR$/.idea" />
+      <root url="file://$PROJECT_DIR$/../../golang/protobuf/protoc-gen-go/testdata" />
+      <root url="file://$PROJECT_DIR$/../../klauspost/crc32/.git" />
+      <root url="file://$PROJECT_DIR$/../../nsf/gocode/_gccgo" />
+      <root url="file://$PROJECT_DIR$/../../../code.google.com/p/rog-go/.hg" />
+      <root url="file://$PROJECT_DIR$/../../nsf/gocode/_goremote" />
+      <root url="file://$PROJECT_DIR$/../../stealthly/go-avro/.git" />
+      <root url="file://$PROJECT_DIR$/../../jimlawless/cfg/.git" />
+      <root url="file://$PROJECT_DIR$/../../nsf/gocode/_testing" />
+      <root url="file://$PROJECT_DIR$/../../golang/protobuf/.git" />
+      <root url="file://$PROJECT_DIR$/../../samuel/go-zookeeper/.git" />
+      <root url="file://$PROJECT_DIR$/../../../9fans.net/go/.git" />
+    </excluded>
+  </library>
+</component>

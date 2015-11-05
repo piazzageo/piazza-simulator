@@ -16,12 +16,9 @@ type Reader struct {
 	consumer sarama.Consumer
 }
 
-
 func NewMessage(topic string, data string) *sarama.ProducerMessage {
 	return &sarama.ProducerMessage{Topic: topic, Key: nil, Value: sarama.StringEncoder(data)}
 }
-
-
 
 func NewReader() *Reader {
 	r := new(Reader)
@@ -53,7 +50,7 @@ func (r *Reader) Close() error {
 }
 
 func NewWriter() *Writer {
-	
+
 	w := new(Writer)
 
 	config := sarama.NewConfig()
@@ -114,7 +111,7 @@ func GetTopics() []string {
 		panic(err)
 	}
 
-	request := sarama.MetadataRequest{/*Topics: []string{"abba"}*/}
+	request := sarama.MetadataRequest{ /*Topics: []string{"abba"}*/ }
 	response, err := broker.GetMetadata(&request)
 	if err != nil {
 		_ = broker.Close()
@@ -123,15 +120,16 @@ func GetTopics() []string {
 
 	//topics := make([]string, len(response.Topics))
 	topics := []string{}
-	
-	for _,v := range response.Topics {
+
+	for _, v := range response.Topics {
 		topics = append(topics, v.Name)
 	}
 
 	if err = broker.Close(); err != nil {
 		panic(err)
 	}
-	
+
 	return topics
 }
+
 /////////////
