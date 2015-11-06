@@ -10,52 +10,26 @@ type MessageId int64
 
 var currentId MessageId = 1
 
-type JobType int
+type MessageType int
 
 const (
-	ServiceJob JobType = 1
-	StatusJob  JobType = 2
+	JobRequest    MessageType = 1
+	StatusRequest MessageType = 2
 )
 
-type Job struct {
+type Message struct {
 	id        MessageId
+	mtype     MessageType
 	timestamp time.Time
-	jobType   JobType
 }
 
-type Jobs struct {
-	table map[MessageId]Job
-}
-
-func NewJobs() *Jobs {
-	var jobs Jobs
-	jobs.table = make(map[MessageId]Job)
-	return &jobs
-}
-
-func (jobs *Jobs) Add(job *Job) {
-	if _, ok := jobs.table[job.id]; ok {
-		panic("yow")
-	}
-	jobs.table[job.id] = *job
-}
-
-func (jobs *Jobs) Dump() {
-	for k, v := range jobs.table {
-		log.Printf("key=%v  value=%v\n", k, v)
-	}
-}
-
-func NewJob(jobType JobType) *Job {
-	var job = Job{id: currentId}
+func NewMessage(mtype MessageType) *Message {
+	var m = Message{id: currentId, timestamp: time.Now(), mtype: mtype}
 	currentId++
 
-	job.timestamp = time.Now()
-	job.jobType = jobType
-
-	return &job
+	return &m
 }
 
-func (job Job) String() string {
-	return fmt.Sprintf("{id:%v jobType:%v}", job.id, job.jobType)
+func (m Message) String() string {
+	return fmt.Sprintf("{id:%v mtype:%v}", m.id, m.mtype)
 }

@@ -4,44 +4,49 @@ import (
 	"fmt"
 	"log"
 	"time"
+
+	"github.com/mpgerlek/piazza-simulator/message"
 )
 
-type MessageId int64
+type JobId int64
 
-var currentId MessageId = 1
+var currentId JobId = 1
 
-type JobType int
+type JobStatus int
 
 const (
-	ServiceJob JobType = 1
-	StatusJob  JobType = 2
+	StatusSubmitted JobStatus = 1
+	StatusDispatched JobStatus = 2
+	StatusRunning JobStatus = 3
+	StatusCompleted JobStatus = 4
+	StatusFailed JobStatus = 5
 )
 
 type Job struct {
-	id        MessageId
-	timestamp time.Time
-	jobType   JobType
+	id        JobId
+	status    JobStatus
+	messageId MessageId
 }
 
-type Jobs struct {
-	table map[MessageId]Job
+type JobTable struct {
+	table map[JobId]Job
 }
 
-func NewJobs() *Jobs {
-	var jobs Jobs
-	jobs.table = make(map[MessageId]Job)
-	return &jobs
+func NewJobTable() *JobTable {
+	var t JobTable
+	t.table = make(map[JobId]Job)
+	return &t
 }
 
-func (jobs *Jobs) Add(job *Job) {
-	if _, ok := jobs.table[job.id]; ok {
+func (t *JobTable) Add(job *Job) {
+	if _, ok := t.table[job.id]; ok {
 		panic("yow")
 	}
-	jobs.table[job.id] = *job
+	t.table[job.id] = *job
 }
 
-func (jobs *Jobs) Dump() {
-	for k, v := range jobs.table {
+func (t *JobTable) Dump() {
+	for k, v := range t.table {
 		log.Printf("key=%v  value=%v\n", k, v)
 	}
 }
@@ -50,7 +55,6 @@ func NewJob(jobType JobType) *Job {
 	var job = Job{id: currentId}
 	currentId++
 
-	job.timestamp = time.Now()
 	job.jobType = jobType
 
 	return &job
