@@ -11,3 +11,5 @@ kafka-server-start.sh config/server.properties
 # kafka-console-consumer.sh --zookeeper localhost:2181 --topic test --from-beginning
 
 #curl -X POST -d @data.json http://localhost:8080/foo/bar --header "Content-Type:application/json"
+
+pz registry

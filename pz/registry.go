@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
 	"io"
 	"io/ioutil"
 	"log"
@@ -12,46 +11,10 @@ import (
 	//"bytes"
 	//"errors"
 
-	//"github.com/mpgerlek/piazza-simulator/piazza"
+	"github.com/mpgerlek/piazza-simulator/piazza"
 )
 
-
-type serviceEntry struct {
-	Name        string  `json:"name"`
-	Description string  `json:"description"`
-	Ids          string 	`json:"id"`
-}
-
-func (e serviceEntry) String() string {
-	return fmt.Sprintf("[name:%s, description:%s, id:%s]", e.Name, e.Description, e.Ids)
-}
-
-type serviceTable struct {
-	Table     map[string]*serviceEntry `json:table`
-	CurrentId int	                   `json:current_id`
-}
-
-var table *serviceTable
-
-
-func NewServiceTable() (t *serviceTable) {
-	var table serviceTable
-	table.Table = make(map[string]*serviceEntry)
-	return &table
-}
-
-func (t *serviceTable) add(entry *serviceEntry) error {
-	entry.Ids = strconv.Itoa(t.CurrentId)
-	t.CurrentId++
-
-	t.Table[entry.Ids] = entry
-	return nil
-}
-
-func (t *serviceTable) get(id string) (entry *serviceEntry, ok bool) {
-	entry, ok = t.Table[id]
-	return entry, ok
-}
+var table *piazza.ServiceTable
 
 func HandleServicePost(w http.ResponseWriter, r *http.Request) {
 	body, err := ioutil.ReadAll(r.Body)
@@ -60,21 +23,20 @@ func HandleServicePost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var entry serviceEntry
-	err = json.Unmarshal(body, &entry)
+	entry, err := piazza.NewServiceEntryFromBytes(body)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	err2 := table.add(&entry)
+	err2 := table.Add(entry)
 	if err2 != nil {
 		http.Error(w, err2.Error(), http.StatusBadRequest)
 		return
 	}
 
 	var bytes []byte
-	bytes, err = json.Marshal(entry)
+	bytes, err = entry.ToBytes()
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -82,7 +44,7 @@ func HandleServicePost(w http.ResponseWriter, r *http.Request) {
 
 	w.Write(bytes)
 
-	log.Printf("added entry [%s, %s]", entry.Ids, entry.Name)
+	log.Printf("added entry [%s, %s], now cnt:%d", entry.Id, entry.Name, table.Count())
 }
 
 func HandleService(w http.ResponseWriter, r *http.Request) {
@@ -97,12 +59,13 @@ func HandleService(w http.ResponseWriter, r *http.Request) {
 
 func HandleServiceGet(w http.ResponseWriter, r *http.Request) {
 	var buf []byte
-	buf, err := json.Marshal(table.Table)
+	buf, err := table.ToBytes()
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-
+	log.Print("sending back")
+	log.Print(buf)
 	w.Write(buf)
 }
 
@@ -138,9 +101,9 @@ func HandleServiceItemGet(w http.ResponseWriter, r *http.Request) {
 		log.Printf("internal atoi failure, %q", ms[1])
 	}
 	id := ms[1]
-	var entry *serviceEntry
+	var entry *piazza.ServiceEntry
 
-	if entry, ok = table.get(id); !ok {
+	if entry, ok = table.Get(id); !ok {
 		http.Error(w, "internal match failure", http.StatusMethodNotAllowed)
 		log.Printf("internal item match failure, path:%q", ms)
 	}
@@ -153,13 +116,13 @@ func HandleServiceItemGet(w http.ResponseWriter, r *http.Request) {
 
 func Registry(portNumber int) {
 
-	table = NewServiceTable()
+	table = piazza.NewServiceTable()
 
 	log.Printf("registry started on port %d", portNumber)
 	// TODO: /service/00
 	// TODO: /service/-1
 	// TODO: DELETE
-	
+
 	http.HandleFunc("/service", HandleService)
 	http.HandleFunc("/service/", HandleServiceItem)
 
