@@ -1,14 +1,14 @@
-package jobs
+package piazza
 
 import (
 	"fmt"
-	"log"
+	//"log"
 	"time"
 )
 
 type MessageId int64
 
-var currentId MessageId = 1
+var currentMessageId MessageId = 1
 
 type MessageType int
 
@@ -24,8 +24,8 @@ type Message struct {
 }
 
 func NewMessage(mtype MessageType) *Message {
-	var m = Message{id: currentId, timestamp: time.Now(), mtype: mtype}
-	currentId++
+	var m = Message{id: currentMessageId, timestamp: time.Now(), mtype: mtype}
+	currentMessageId++
 
 	return &m
 }

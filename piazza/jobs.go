@@ -1,31 +1,32 @@
-package jobs
+package piazza
 
 import (
 	"fmt"
 	"log"
-	"time"
-
-	"github.com/mpgerlek/piazza-simulator/message"
+	//"time"
 )
 
 type JobId int64
 
-var currentId JobId = 1
+var currentJobId JobId = 1
 
 type JobStatus int
 
+type JobType int
+
 const (
-	StatusSubmitted JobStatus = 1
+	StatusSubmitted  JobStatus = 1
 	StatusDispatched JobStatus = 2
-	StatusRunning JobStatus = 3
-	StatusCompleted JobStatus = 4
-	StatusFailed JobStatus = 5
+	StatusRunning    JobStatus = 3
+	StatusCompleted  JobStatus = 4
+	StatusFailed     JobStatus = 5
 )
 
 type Job struct {
 	id        JobId
 	status    JobStatus
 	messageId MessageId
+	jtype     JobType
 }
 
 type JobTable struct {
@@ -52,14 +53,14 @@ func (t *JobTable) Dump() {
 }
 
 func NewJob(jobType JobType) *Job {
-	var job = Job{id: currentId}
-	currentId++
+	var job = Job{id: currentJobId}
+	currentJobId++
 
-	job.jobType = jobType
+	job.jtype = jobType
 
 	return &job
 }
 
 func (job Job) String() string {
-	return fmt.Sprintf("{id:%v jobType:%v}", job.id, job.jobType)
+	return fmt.Sprintf("{id:%v jobType:%v}", job.id, job.jtype)
 }

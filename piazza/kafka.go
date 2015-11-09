@@ -1,5 +1,5 @@
 // Package stringutil contains utility functions for working with strings.
-package kafka
+package piazza
 
 import (
 	"github.com/Shopify/sarama"
@@ -16,7 +16,7 @@ type Reader struct {
 	consumer sarama.Consumer
 }
 
-func NewMessage(topic string, data string) *sarama.ProducerMessage {
+func NewKafkaMessage(topic string, data string) *sarama.ProducerMessage {
 	return &sarama.ProducerMessage{Topic: topic, Key: nil, Value: sarama.StringEncoder(data)}
 }
 
