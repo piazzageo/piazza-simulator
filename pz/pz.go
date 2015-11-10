@@ -21,8 +21,8 @@ func main() {
 		Use:   "registry",
 		Short: "Start the registry service",
 		Long:  "Start the registry service",
-		Run: func(cmd *cobra.Command, args []string) {
-			Registry(hostname)
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return Registry(hostname)
 		},
 	}
 
@@ -30,8 +30,8 @@ func main() {
 		Use:   "gateway",
 		Short: "Start the gateway service",
 		Long:  "Start the gateway service",
-		Run: func(cmd *cobra.Command, args []string) {
-			Gateway(hostname)
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return Gateway(hostname)
 		},
 	}
 
@@ -39,8 +39,8 @@ func main() {
 		Use:   "dispatcher",
 		Short: "Start the dispatcher service",
 		Long:  "Start the dispatcher service",
-		Run: func(cmd *cobra.Command, args []string) {
-			Dispatcher(hostname)
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return Dispatcher(hostname)
 		},
 	}
 
@@ -49,8 +49,8 @@ func main() {
 		Use:   "sleeper",
 		Short: "Start the sleeper service",
 		Long:  "Start the sleeper service",
-		Run: func(cmd *cobra.Command, args []string) {
-			Sleeper(hostname, sleepDuration)
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return Sleeper(hostname, sleepDuration)
 		},
 	}
 	cmdSleeper.PersistentFlags().DurationVarP(&sleepDuration, "duration", "d", 5*time.Second, "duration to sleep")

@@ -6,17 +6,16 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
-	"regexp"
 	"strconv"
 	//"bytes"
 	//"errors"
-
+	"github.com/gorilla/mux"
 	"github.com/mpgerlek/piazza-simulator/piazza"
 )
 
 var table *piazza.ServiceTable
 
-func HandleServicePost(w http.ResponseWriter, r *http.Request) {
+func handleRegistryServicePost(w http.ResponseWriter, r *http.Request) {
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
@@ -47,17 +46,17 @@ func HandleServicePost(w http.ResponseWriter, r *http.Request) {
 	log.Printf("added entry [%s, %s], now cnt:%d", entry.Id, entry.Name, table.Count())
 }
 
-func HandleService(w http.ResponseWriter, r *http.Request) {
+func handleRegistryService(w http.ResponseWriter, r *http.Request) {
 	if r.Method == "POST" {
-		HandleServicePost(w, r)
+		handleRegistryServicePost(w, r)
 	} else if r.Method == "GET" {
-		HandleServiceGet(w, r)
+		handleRegistryServiceGet(w, r)
 	} else {
 		http.Error(w, "1 only GET and POST allowed", http.StatusMethodNotAllowed)
 	}
 }
 
-func HandleServiceGet(w http.ResponseWriter, r *http.Request) {
+func handleRegistryServiceGet(w http.ResponseWriter, r *http.Request) {
 	var buf []byte
 	buf, err := table.ToBytes()
 	if err != nil {
@@ -67,43 +66,36 @@ func HandleServiceGet(w http.ResponseWriter, r *http.Request) {
 	w.Write(buf)
 }
 
-func HandleServiceItem(w http.ResponseWriter, r *http.Request) {
+func handleRegistryServiceItem(w http.ResponseWriter, r *http.Request) {
 	if r.Method == "GET" {
-		HandleServiceItemGet(w, r)
+		handleRegistryServiceItemGet(w, r)
 	} else {
 		http.Error(w, "2 only GET allowed", http.StatusMethodNotAllowed)
 	}
 }
 
-func HandleServiceItemGet(w http.ResponseWriter, r *http.Request) {
+func handleRegistryServiceItemGet(w http.ResponseWriter, r *http.Request) {
 	var err error
 	var ok bool
 
 	path := r.URL.Path
 	if path == "/service/" {
 		r.URL.Path = "/service"
-		HandleServiceGet(w, r)
+		handleRegistryServiceGet(w, r)
 		return
 	}
 
-	re := regexp.MustCompile("^/service/([0-9]+)$")
-	ms := re.FindStringSubmatch(path)
-	log.Printf("url matches: %q\n", ms)
-	if len(ms) != 2 {
-		http.Error(w, "internal match failure", http.StatusMethodNotAllowed)
-		log.Printf("internal item match failure, path:%q", ms)
+	vars := mux.Vars(r)
+	id := vars["id"]
+
+	if _, err = strconv.ParseInt(id, 10, 64); err != nil {
+		http.Error(w, "internal atoi failure", http.StatusMethodNotAllowed)
 	}
 
-	if _, err = strconv.ParseInt(ms[1], 10, 64); err != nil {
-		http.Error(w, "internal atoi failure", http.StatusMethodNotAllowed)
-		log.Printf("internal atoi failure, %q", ms[1])
-	}
-	id := ms[1]
 	var entry *piazza.ServiceEntry
 
 	if entry, ok = table.Get(id); !ok {
 		http.Error(w, "internal match failure", http.StatusMethodNotAllowed)
-		log.Printf("internal item match failure, path:%q", ms)
 	}
 
 	w.Header().Set("Content-Type", "application/json")
@@ -112,17 +104,26 @@ func HandleServiceItemGet(w http.ResponseWriter, r *http.Request) {
 	io.WriteString(w, string(b)+"\n")
 }
 
-func Registry(host string) {
+func Registry(registryHost string) error {
 
 	table = piazza.NewServiceTable()
 
-	log.Printf("registry started on %s", host)
+	log.Printf("registry started on %s", registryHost)
 	// TODO: /service/00
 	// TODO: /service/-1
 	// TODO: DELETE
 
-	http.HandleFunc("/service", HandleService)
-	http.HandleFunc("/service/", HandleServiceItem)
+	r := mux.NewRouter()
+	r.HandleFunc("/service", handleRegistryService)
+	r.HandleFunc("/service/{id}", handleRegistryServiceItem)
 
-	log.Fatal(http.ListenAndServe(host, nil))
+	server := &http.Server{Addr: registryHost, Handler: r}
+	err := server.ListenAndServe()
+	if err != nil {
+		log.Fatal(err)
+		return err
+	}
+
+	// not reached
+	return nil
 }

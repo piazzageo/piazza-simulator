@@ -3,12 +3,12 @@ package piazza
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"strconv"
-	"errors"
-	"log"
 )
 
 //---------------------------------------------------------------------
