@@ -1,25 +1,37 @@
 package main
 
 import (
-	//"log"
 	"github.com/spf13/cobra"
 	"time"
-	//"strings"
-
-	//"github.com/mpgerlek/piazza-simulator/piazza"
 )
 
 func main() {
 
 	var Verbose bool
-	var registryPort int
+	var hostname string
+
+	var cmdPz = &cobra.Command{
+		Use: "pz",
+	}
+
+	cmdPz.PersistentFlags().BoolVarP(&Verbose, "verbose", "v", false, "verbose output")
+	cmdPz.PersistentFlags().StringVarP(&hostname, "registry-host", "r", "http://localhost:8080", "registry host name")
 
 	var cmdRegistry = &cobra.Command{
 		Use:   "registry",
 		Short: "Start the registry service",
 		Long:  "Start the registry service",
 		Run: func(cmd *cobra.Command, args []string) {
-			Registry(registryPort)
+			Registry(hostname)
+		},
+	}
+
+	var cmdGateway = &cobra.Command{
+		Use:   "gateway",
+		Short: "Start the gateway service",
+		Long:  "Start the gateway service",
+		Run: func(cmd *cobra.Command, args []string) {
+			Gateway(hostname)
 		},
 	}
 
@@ -28,7 +40,7 @@ func main() {
 		Short: "Start the dispatcher service",
 		Long:  "Start the dispatcher service",
 		Run: func(cmd *cobra.Command, args []string) {
-			Dispatcher(registryPort)
+			Dispatcher(hostname)
 		},
 	}
 
@@ -38,17 +50,11 @@ func main() {
 		Short: "Start the sleeper service",
 		Long:  "Start the sleeper service",
 		Run: func(cmd *cobra.Command, args []string) {
-			Sleeper(registryPort, sleepDuration)
+			Sleeper(hostname, sleepDuration)
 		},
 	}
 	cmdSleeper.PersistentFlags().DurationVarP(&sleepDuration, "duration", "d", 5*time.Second, "duration to sleep")
 
-	var cmdPz = &cobra.Command{Use: "pz"}
-
-	cmdPz.PersistentFlags().BoolVarP(&Verbose, "verbose", "v", false, "verbose output")
-
-	cmdRegistry.PersistentFlags().IntVarP(&registryPort, "port", "p", 8080, "port number")
-
-	cmdPz.AddCommand(cmdRegistry, cmdDispatch, cmdSleeper)
+	cmdPz.AddCommand(cmdRegistry, cmdDispatch, cmdSleeper, cmdGateway)
 	cmdPz.Execute()
 }

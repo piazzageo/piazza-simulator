@@ -64,8 +64,6 @@ func HandleServiceGet(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	log.Print("sending back")
-	log.Print(buf)
 	w.Write(buf)
 }
 
@@ -114,11 +112,11 @@ func HandleServiceItemGet(w http.ResponseWriter, r *http.Request) {
 	io.WriteString(w, string(b)+"\n")
 }
 
-func Registry(portNumber int) {
+func Registry(host string) {
 
 	table = piazza.NewServiceTable()
 
-	log.Printf("registry started on port %d", portNumber)
+	log.Printf("registry started on %s", host)
 	// TODO: /service/00
 	// TODO: /service/-1
 	// TODO: DELETE
@@ -126,5 +124,5 @@ func Registry(portNumber int) {
 	http.HandleFunc("/service", HandleService)
 	http.HandleFunc("/service/", HandleServiceItem)
 
-	log.Fatal(http.ListenAndServe("localhost:"+strconv.Itoa(portNumber), nil))
+	log.Fatal(http.ListenAndServe(host, nil))
 }
