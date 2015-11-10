@@ -3,8 +3,9 @@ package piazza
 
 import (
 	"github.com/Shopify/sarama"
-	"log"
 )
+
+
 
 const OffsetNewest int64 = sarama.OffsetNewest
 
@@ -20,10 +21,10 @@ func NewKafkaMessage(topic string, data string) *sarama.ProducerMessage {
 	return &sarama.ProducerMessage{Topic: topic, Key: nil, Value: sarama.StringEncoder(data)}
 }
 
-func NewReader() *Reader {
+func NewReader(kafkaHost string) *Reader {
 	r := new(Reader)
 
-	consumer, err := sarama.NewConsumer([]string{"localhost:9092"}, nil)
+	consumer, err := sarama.NewConsumer([]string{kafkaHost}, nil)
 	if err != nil {
 		panic(err)
 	}
@@ -49,19 +50,17 @@ func (r *Reader) Close() error {
 	return r.consumer.Close()
 }
 
-func NewWriter() *Writer {
+func NewWriter(kafkaHost string) *Writer {
 
 	w := new(Writer)
 
 	config := sarama.NewConfig()
 	//config.Producer.Return.Successes = true
 
-	log.Println("PRE")
-	producer, err := sarama.NewAsyncProducer([]string{"localhost:9092"}, config)
+	producer, err := sarama.NewAsyncProducer([]string{kafkaHost}, config)
 	if err != nil {
 		panic(err)
 	}
-	log.Println("POST")
 
 	w.producer = producer
 	return w
@@ -85,8 +84,8 @@ func (w *Writer) Errors() <-chan *sarama.ProducerError {
 
 // this happens aynchronously, so calling GetTopics() immediately afterwards
 // will likely not show you your new topic
-func AddTopic(topic string) {
-	broker := sarama.NewBroker("localhost:9092")
+func AddTopic(kafkaHost string, topic string) {
+	broker := sarama.NewBroker(kafkaHost)
 	err := broker.Open(nil)
 	if err != nil {
 		panic(err)
@@ -104,8 +103,8 @@ func AddTopic(topic string) {
 	}
 }
 
-func GetTopics() []string {
-	broker := sarama.NewBroker("localhost:9092")
+func GetTopics(kafkaHost string) []string {
+	broker := sarama.NewBroker(kafkaHost)
 	err := broker.Open(nil)
 	if err != nil {
 		panic(err)
@@ -131,5 +130,3 @@ func GetTopics() []string {
 
 	return topics
 }
-
-/////////////
