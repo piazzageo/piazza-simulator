@@ -1,25 +1,49 @@
 package main
 
-import (
-	//"bytes"
-	//"encoding/json"
-	//"errors"
-	//"flag"
-	//"fmt"
-	//"github.com/mpgerlek/piazza-simulator/piazza"
-	//"io/ioutil"
-	//"net/http"
-	//"os"
+import
+(
+	"bytes"
+	"fmt"
+	"io/ioutil"
 	"testing"
-	//"time"
-	//"log"
+	"net/http"
+	"encoding/json"
 )
 
 func TestGateway(t *testing.T) {
 
-	var registryHost = startRegistry()
+	registryHost := startRegistry(t)
+	serviceHost := startGateway(t, registryHost)
 
-	Gateway(getRandomLocalhost())
+	var payload = `{"user": "mpg", "service": "sleeper", "params": { "a": 1, "b": 2 }}`
 
-	stopRegistry(registryHost)
+	var myHost = fmt.Sprintf("http://%s/service", serviceHost)
+	resp, err := http.Post(myHost, "application/json", bytes.NewBufferString(payload))
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		t.Fatal("bonk")
+	}
+
+	buf, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if buf == nil {
+		t.Fatal(err)
+	}
+
+	var x map[string]interface{}
+	err = json.Unmarshal(buf, &x)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	t.Log(x)
+
+	stopService(t, serviceHost)
+	stopRegistry(t, registryHost)
 }

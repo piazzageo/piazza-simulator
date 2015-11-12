@@ -17,9 +17,9 @@ import (
 
 func TestDispatcher(t *testing.T) {
 
-	var registryHost = startRegistry()
+	registryHost := startRegistry(t)
+	serviceHost := startDispatcher(t, registryHost)
 
-	Dispatcher(registryHost)
-
-	stopRegistry(registryHost)
+	stopService(t, serviceHost)
+	stopRegistry(t, registryHost)
 }

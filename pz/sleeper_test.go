@@ -13,14 +13,14 @@ import (
 	"testing"
 	//"time"
 	//"log"
+	//"time"
 	"time"
 )
 
 func TestSleeper(t *testing.T) {
+	registryHost := startRegistry(t)
+	serviceHost := startSleeper(t, registryHost, 1*time.Second)
 
-	var registryHost = startRegistry()
-
-	Sleeper(getRandomLocalhost(), time.Second * 1)
-
-	stopRegistry(registryHost)
+	stopService(t, serviceHost)
+	stopRegistry(t, registryHost)
 }

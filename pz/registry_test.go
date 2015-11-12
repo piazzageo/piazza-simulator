@@ -58,12 +58,11 @@ func fetchEntry(t *testing.T, registryHost string, id int) (*piazza.ServiceEntry
 }
 
 func TestRegistry(t *testing.T) {
-
-	var registryHost = startRegistry()
-
 	var resp *http.Response
 	var err error
 	var buf []byte
+
+	registryHost := startRegistry(t)
 
 	var testEntryJson1 = `{"name": "svc1", "description": "service one"}`
 	var testEntryJson2 = `{"name": "svc2", "description": "service two"}`
@@ -169,17 +168,18 @@ func TestRegistry(t *testing.T) {
 		}
 	}
 
-	stopRegistry(registryHost)
+	stopRegistry(t, registryHost)
 }
 
 func TestRegistration(t *testing.T) {
 
-	var registryHost = startRegistry()
+	var err error
+
+	registryHost := startRegistry(t)
 
 	// table starts out empty
 	{
 		var table *piazza.ServiceTable
-		var err error
 		table, err = fetchTable(t, registryHost)
 		if err != nil {
 			t.Error(err)
@@ -190,7 +190,7 @@ func TestRegistration(t *testing.T) {
 		}
 	}
 
-	var id, err = piazza.RegisterService(registryHost, "myservice", "my fun service")
+	id, err := piazza.RegisterService(registryHost, "myservice", "my fun service")
 	if err != nil {
 		t.Error(err)
 	}
@@ -207,5 +207,5 @@ func TestRegistration(t *testing.T) {
 		t.Fatal("got name \"%s\", expected \"myservice\"")
 	}
 
-	stopRegistry(registryHost)
+	stopRegistry(t, registryHost)
 }

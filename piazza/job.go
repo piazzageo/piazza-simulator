@@ -15,11 +15,12 @@ type JobStatus int
 type JobType int
 
 const (
-	StatusSubmitted  JobStatus = 1
-	StatusDispatched JobStatus = 2
-	StatusRunning    JobStatus = 3
-	StatusCompleted  JobStatus = 4
-	StatusFailed     JobStatus = 5
+	StatusInvalid JobStatus = iota
+	StatusSubmitted
+	StatusDispatched
+	StatusRunning
+	StatusCompleted
+	StatusFailed
 )
 
 type Job struct {

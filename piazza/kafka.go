@@ -5,8 +5,6 @@ import (
 	"github.com/Shopify/sarama"
 )
 
-
-
 const OffsetNewest int64 = sarama.OffsetNewest
 
 type Writer struct {

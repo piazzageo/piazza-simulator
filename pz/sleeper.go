@@ -18,7 +18,7 @@ func handleSleeperService(w http.ResponseWriter, r *http.Request) {
 	body = body
 }
 
-func Sleeper(registryHost string, length time.Duration) error {
+func Sleeper(serviceHost string, registryHost string, length time.Duration) error {
 	log.Printf("sleeping started at registry host %v, for %v\n", registryHost, length)
 
 	id, err := piazza.RegisterService(registryHost, "sleeper", "my fun sleeper")
@@ -32,7 +32,7 @@ func Sleeper(registryHost string, length time.Duration) error {
 	r.HandleFunc("/service", handleSleeperService).
 		Methods("POST")
 
-	server := &http.Server{Addr: registryHost, Handler: r}
+	server := &http.Server{Addr: serviceHost, Handler: r}
 	err = server.ListenAndServe()
 	if err != nil {
 		log.Fatal(err)
