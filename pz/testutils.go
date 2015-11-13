@@ -35,9 +35,9 @@ func startDispatcher(t *testing.T, registryHost string) (string) {
 	return host
 }
 
-func startSleeper(t *testing.T, registryHost string, duration time.Duration) (string) {
+func startEcho(t *testing.T, registryHost string) (string) {
 	var host = getRandomHost()
-	go Sleeper(host, registryHost, duration)
+	go Echo(host, registryHost)
 	time.Sleep(1 * time.Second)
 	return host
 }

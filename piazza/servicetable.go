@@ -14,39 +14,65 @@ import (
 //---------------------------------------------------------------------
 
 type ServiceTable struct {
-	Table     map[string]*ServiceEntry `json:table`
-	CurrentId int                      `json:current_id`
-}
-
-type ServiceEntry struct {
-	Name        string `json:"name"`
-	Description string `json:"description"`
-	Id          string `json:"id"`
+	table map[ServiceId]*Service
 }
 
 //---------------------------------------------------------------------
 
 func NewServiceTable() *ServiceTable {
 	var t ServiceTable
-	t.Table = make(map[string]*ServiceEntry)
+	t.table = make(map[ServiceId]*Service)
 	return &t
 }
 
-func (t *ServiceTable) Add(entry *ServiceEntry) error {
-	entry.Id = strconv.Itoa(t.CurrentId)
-	t.CurrentId++
-
-	t.Table[entry.Id] = entry
+func (t *ServiceTable) Add(entry *Service) error {
+	t.table[entry.Id] = entry
 	return nil
 }
 
-func (t *ServiceTable) Get(id string) (entry *ServiceEntry, ok bool) {
-	entry, ok = t.Table[id]
-	return entry, ok
+func (t *ServiceTable) LookupByTypeString(key string) (e *Service, ok bool) {
+
+	stype := ServiceTypeFromString(key)
+	if stype == InvalidService {
+		return nil, false
+	}
+	return t.LookupByType(stype)
+}
+
+func (t *ServiceTable) LookupByType(stype ServiceType) (e *Service, ok bool) {
+
+	for _, e = range t.table {
+		if e.Type == stype {
+			return e, true
+		}
+	}
+	return e, false
+}
+
+func (t *ServiceTable) LookupById(id ServiceId) (e *Service, ok bool) {
+	e, ok = t.table[id]
+	return e, ok
 }
 
 func (t *ServiceTable) String() string {
-	return fmt.Sprintf("[...table (len:%d)...]", len(t.Table))
+	return fmt.Sprintf("[tablelen:%d]", len(t.table))
+}
+
+func (t *ServiceTable) Count() int {
+	i := len(t.table)
+	return i
+}
+
+func (a *ServiceTable) Compare(b *ServiceTable) bool {
+	if a.Count() != b.Count() {
+		return false
+	}
+	for k, _ := range a.table {
+		if a.table[k].Type != b.table[k].Type {
+			return false
+		}
+	}
+	return true
 }
 
 func (t *ServiceTable) ToBytes() ([]byte, error) {
@@ -55,74 +81,14 @@ func (t *ServiceTable) ToBytes() ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-
-	return buf, nil
-}
-
-func (t *ServiceTable) Count() int {
-	i := len(t.Table)
-	return i
-}
-
-func NewServiceTableFromBytes(buf []byte) (*ServiceTable, error) {
-	var t = NewServiceTable()
-	err := json.Unmarshal(buf, &t)
-	if err != nil {
-		return nil, err
-	}
-	return t, nil
-}
-
-func (a *ServiceTable) Compare(b *ServiceTable) bool {
-	if a.Count() != b.Count() {
-		return false
-	}
-	for k, _ := range a.Table {
-		if a.Table[k].Compare(b.Table[k], true) == false {
-			return false
-		}
-	}
-	return true
-}
-
-//---------------------------------------------------------------------
-
-func (e *ServiceEntry) String() string {
-	return fmt.Sprintf("[name:%s, description:%s, id:%s]", e.Name, e.Description, e.Id)
-}
-
-func NewServiceEntryFromBytes(buf []byte) (*ServiceEntry, error) {
-	var e ServiceEntry
-
-	err := json.Unmarshal(buf, &e)
-	if err != nil {
-		return nil, err
-	}
-	return &e, nil
-}
-
-func (a *ServiceEntry) Compare(b *ServiceEntry, checkIds bool) bool {
-	if checkIds && a.Id != b.Id {
-		return false
-	}
-	return a.Name == b.Name && a.Description == b.Description
-}
-
-func (e *ServiceEntry) ToBytes() ([]byte, error) {
-	var buf []byte
-	buf, err := json.Marshal(e)
-	if err != nil {
-		return nil, err
-	}
-
 	return buf, nil
 }
 
 //---------------------------------------------------------------------
 
 // used by services to communicate with registry
-func RegisterService(registryHost string, name string, description string) (int, error) {
-	entry := ServiceEntry{Name: name, Description: description}
+func RegisterService(registryHost string, serviceType ServiceType, comment string) (int, error) {
+	entry := Service{Type: serviceType, Comment: comment}
 
 	buf, err := entry.ToBytes()
 	if err != nil {

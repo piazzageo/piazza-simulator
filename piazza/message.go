@@ -1,10 +1,13 @@
 package piazza
 
 import (
-	"fmt"
+	//"fmt"
 	//"log"
+	"encoding/json"
 	"time"
 )
+
+type any interface{}
 
 //---------------------------------------------------------
 
@@ -48,10 +51,10 @@ const (
 	DeleteServiceResponseMessage
 )
 
-type Status int
+type StatusCode int
 
 const (
-	InvalidStatus Status = iota
+	InvalidStatus StatusCode = iota
 	SuccessStatus
 	ErrorStatus
 	FailureStatus
@@ -59,31 +62,55 @@ const (
 
 type Message struct {
 	// onl set by Gateway (or by Dispatcher if the Message bypasses the Gateway)
-	Id MessageId `json:message_id`
+	Id MessageId `json:"id"`
 
-	Type      MessageType `json:type`
-	Timestamp time.Time   `json:timestamp`
-	User      User        `json:user`
+	Type      MessageType `json:"type"`
+	Timestamp time.Time   `json:"timestamp"`
+	User      User        `json:"user"`
 
 	// only used for Response messages
-	Status Status `json:status`
+	Status StatusCode `json:status`
 
 	// only used for Response messages (optional)
 	Error error `json:error`
 
 	// exactly one of the following must be present
-	CreateJobPayload             `json:create_job_payload`
-	CreateJobResponsePayload     `json:create_job_response_payload`
-	ReadJobPayload               `json:read_job_payload`
-	ReadJobResponsePayload       `json:read_job_response_payload`
-	DeleteJobPayload             `json:delete_job_payload`
-	DeleteJobResponsePayload     `json:delete_job_response_payload`
-	CreateServicePayload         `json:create_service_payload`
-	CreateServiceResponsePayload `json:create_service_response_payload`
-	ReadServicePayload           `json:read_service_payload`
-	ReadServiceResponsePayload   `json:read_service_response_payload`
-	DeleteServicePayload         `json:delete_service_payload`
-	DeleteServiceResponsePayload `json:delete_service_response_payload`
+	CreateJobPayload             `json:"create_job_payload"`
+	CreateJobResponsePayload     `json:"create_job_response_payload"`
+	ReadJobPayload               `json:"read_job_payload"`
+	ReadJobResponsePayload       `json:"read_job_response_payload"`
+	DeleteJobPayload             `json:"delete_job_payload"`
+	DeleteJobResponsePayload     `json:"delete_job_response_payload"`
+	CreateServicePayload         `json:"create_service_payload"`
+	CreateServiceResponsePayload `json:"create_service_response_payload"`
+	ReadServicePayload           `json:"read_service_payload"`
+	ReadServiceResponsePayload   `json:"read_service_response_payload"`
+	DeleteServicePayload         `json:"delete_service_payload"`
+	DeleteServiceResponsePayload `json:"delete_service_response_payload"`
+}
+
+func NewMessage() *Message {
+	m := new(Message)
+	return m
+}
+
+func NewMessageFromBytes(buf []byte) (*Message, error) {
+	m := new(Message)
+	err := json.Unmarshal(buf, m)
+	return m, err
+}
+
+func (m *Message) ToBytes() ([]byte, error) {
+	buf, err := json.Marshal(m)
+	return buf, err
+}
+
+func (m *Message) ToJson() (string, error) {
+	buf, err := m.ToBytes()
+	if err != nil {
+		return "", err
+	}
+	return string(buf), nil
 }
 
 //---------------------------------------------------------
@@ -91,32 +118,32 @@ type Message struct {
 ////////////////////////////
 
 type CreateJobPayload struct {
-	ServiceName string            `json:service_name`
-	Parameters  map[string]string `json:parameters`
+	ServiceName string         `json:"service_name"`
+	Parameters  map[string]any `json:"parameters"`
 
 	// set by user for his own reasons (optional)
-	Comments string `json:comments`
+	Comments string `json:"comments"`
 }
 
 type CreateJobResponsePayload struct {
-	JobId JobId `json:job_id`
+	JobId JobId `json:"job_id"`
 }
 
 type ReadJobPayload struct {
-	JobId JobId `json:job_id`
+	JobId JobId `json:"job_id"`
 }
 
 type ReadJobResponsePayload struct {
-	Status          StatusCode        `json:status`
-	PercentComplete float             `json:percent_complete`
-	TimeRemaining   time.Duration     `json:time_remaining`
-	ServiceName     string            `json:service_name`
-	Parameters      map[string]string `json:parameters`
-	Comments        string            `json:comments`
+	Status          StatusCode     `json:"status"`
+	PercentComplete float32        `json:"percent_complete"`
+	TimeRemaining   time.Duration  `json:"time_remaining"`
+	ServiceName     string         `json:"service_name"`
+	Parameters      map[string]any `json:"parameters"`
+	Comments        string         `json:"comments"`
 }
 
 type DeleteJobPayload struct {
-	JobId JobId `json:job_id`
+	JobId JobId `json:"job_id"`
 }
 
 type DeleteJobResponsePayload struct {
@@ -125,23 +152,23 @@ type DeleteJobResponsePayload struct {
 //---------------------------------------------------------
 
 type CreateServicePayload struct {
-	Type ServiceType `json:service_type`
+	Type ServiceType `json:"service_type"`
 }
 
 type CreateServiceResponsePayload struct {
-	Service Service `json:service`
+	Service Service `json:"service"`
 }
 
 type ReadServicePayload struct {
-	Id ServiceId `json:service_id`
+	Id ServiceId `json:"service_id"`
 }
 
 type ReadServiceResponsePayload struct {
-	running bool `json:is_running`
+	running bool `json:"is_running"`
 }
 
 type DeleteServicePayload struct {
-	Id ServiceId `json:service_id`
+	Id ServiceId `json:"service_id"`
 }
 
 type DeleteServiceResponsePayload struct {

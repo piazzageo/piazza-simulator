@@ -2,7 +2,6 @@ package main
 
 import (
 	"github.com/spf13/cobra"
-	"time"
 )
 
 func main() {
@@ -47,16 +46,14 @@ func main() {
 	cmdDispatch.Flags().StringVar(&registryHost, "registry", "localhost:12300", "registry host name")
 	cmdDispatch.Flags().StringVar(&serviceHost, "host", "localhost:12302", "service host name")
 
-	var sleepDuration time.Duration
 	var cmdSleeper = &cobra.Command{
 		Use:   "sleeper",
 		Short: "Start the sleeper service",
 		Long:  "Start the sleeper service",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return Sleeper(serviceHost, registryHost, sleepDuration)
+			return Echo(serviceHost, registryHost)
 		},
 	}
-	cmdSleeper.Flags().DurationVar(&sleepDuration, "seconds", 5*time.Second, "duration to sleep (seconds)")
 	cmdSleeper.Flags().StringVar(&registryHost, "registry", "localhost:12300", "registry host name")
 	cmdSleeper.Flags().StringVar(&serviceHost, "host", "localhost:12303", "service host name")
 

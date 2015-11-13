@@ -1,14 +1,12 @@
 package main
 
 import (
-	"encoding/json"
-	"io"
 	"io/ioutil"
 	"log"
 	"net/http"
 	"strconv"
-	//"bytes"
-	//"errors"
+	"fmt"
+	"errors"
 	"github.com/gorilla/mux"
 	"github.com/mpgerlek/piazza-simulator/piazza"
 )
@@ -22,7 +20,7 @@ func handleRegistryServicePost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	entry, err := piazza.NewServiceEntryFromBytes(body)
+	entry, err := piazza.NewServiceFromBytes(body)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
@@ -43,7 +41,7 @@ func handleRegistryServicePost(w http.ResponseWriter, r *http.Request) {
 
 	w.Write(bytes)
 
-	log.Printf("added entry [%s, %s], now cnt:%d", entry.Id, entry.Name, table.Count())
+	log.Printf("added entry [%s, %s], now cnt:%d", entry.Id, entry.Type, table.Count())
 }
 
 func handleRegistryService(w http.ResponseWriter, r *http.Request) {
@@ -66,42 +64,39 @@ func handleRegistryServiceGet(w http.ResponseWriter, r *http.Request) {
 	w.Write(buf)
 }
 
-func handleRegistryServiceItem(w http.ResponseWriter, r *http.Request) {
-	if r.Method == "GET" {
-		handleRegistryServiceItemGet(w, r)
-	} else {
-		http.Error(w, "2 only GET allowed", http.StatusMethodNotAllowed)
-	}
-}
-
-func handleRegistryServiceItemGet(w http.ResponseWriter, r *http.Request) {
+func handleRegistry_GetServiceItem(w http.ResponseWriter, r *http.Request) {
 	var err error
 	var ok bool
 
-	path := r.URL.Path
-	if path == "/service/" {
-		r.URL.Path = "/service"
-		handleRegistryServiceGet(w, r)
-		return
-	}
+	key := mux.Vars(r)["key"]
 
-	vars := mux.Vars(r)
-	id := vars["id"]
+	var entry *piazza.Service
 
-	if _, err = strconv.ParseInt(id, 10, 64); err != nil {
-		http.Error(w, "internal atoi failure", http.StatusMethodNotAllowed)
-	}
-
-	var entry *piazza.ServiceEntry
-
-	if entry, ok = table.Get(id); !ok {
-		http.Error(w, "internal match failure", http.StatusMethodNotAllowed)
+	if id, err := strconv.ParseInt(key, 10, 64); err == nil {
+		if entry, ok = table.LookupById(piazza.ServiceId(id)); !ok {
+			http.Error(w, "id not found", http.StatusBadRequest)
+			return
+		}
+	} else {
+		stype := piazza.ServiceTypeFromString(key)
+		if stype == piazza.InvalidService {
+			http.Error(w, "service type not found", http.StatusBadRequest)
+			return
+		}
+		if entry, ok = table.LookupByType(stype); !ok {
+			http.Error(w, "service type not found", http.StatusBadRequest)
+			return
+		}
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	//var b []byte
-	b, err := json.Marshal(entry)
-	io.WriteString(w, string(b)+"\n")
+	buf, err := entry.ToBytes()
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	w.Write(buf)
 }
 
 func Registry(registryHost string) error {
@@ -115,7 +110,7 @@ func Registry(registryHost string) error {
 
 	r := mux.NewRouter()
 	r.HandleFunc("/service", handleRegistryService)
-	r.HandleFunc("/service/{id}", handleRegistryServiceItem)
+	r.HandleFunc("/service/{key}", handleRegistry_GetServiceItem).Methods("GET")
 
 	server := &http.Server{Addr: registryHost, Handler: r}
 	err := server.ListenAndServe()
@@ -126,4 +121,14 @@ func Registry(registryHost string) error {
 
 	// not reached
 	return nil
+}
+
+
+func RegistryLookup(registryHost string, stype piazza.ServiceType) (value string, err error) {
+	entry, ok := table.LookupByType(stype)
+	if !ok {
+		return "", errors.New(fmt.Sprintf("%v not found in registry", stype))
+	}
+
+	return entry.Host, nil
 }

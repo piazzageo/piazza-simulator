@@ -1,64 +1,97 @@
 package main
 
 import (
-	"encoding/json"
+	"bytes"
 	"github.com/gorilla/mux"
 	"github.com/mpgerlek/piazza-simulator/piazza"
 	"io/ioutil"
 	"log"
 	"net/http"
-
 )
 
+func readUserRequest(r *http.Request) (*piazza.Message, error) {
+	log.Printf("reading user request")
 
-func readUserRequest(r *http.Request) (*userRequest, error) {
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		log.Print(err, string(body))
 		return nil, err
 	}
 
-	var request = new(userRequest)
-	err = json.Unmarshal(body, &request)
+	m, err := piazza.NewMessageFromBytes(body)
 	if err != nil {
 		return nil, err
 	}
 
-	return request, nil
+	log.Printf("returning request response")
+	return m, nil
 }
 
-func forwardUserRequest(dispatcherHost string, request *userRequest) {
+func forwardUserRequest(dispatcherHost string, m *piazza.Message) (*piazza.Message, error) {
+	log.Printf("forwarding user request")
 
-	var buf []byte
-	json.Unmarshal(buf, request)
+	buf, err := m.ToBytes()
+	var buff = bytes.NewBuffer(buf)
+	if err != nil {
+		return nil, err
+	}
 
-	resp, err := http.Post(dispatcherHost, "application/json", buf)
+	resp, err := http.Post(dispatcherHost, "application/json", buff)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
 
-	w.Write([]byte(`{"status":"ok"}`))
+	// resp has a message of type CreateJobResponsePayload, with the id filled in
+	buff = new(bytes.Buffer)
+	buff.ReadFrom(resp.Body)
+
+	m2, err := piazza.NewMessageFromBytes(buff.Bytes())
+	if err != nil {
+		return nil, err
+	}
+	log.Printf("returning request response")
+
+	return m2, nil
 }
 
 func Gateway(serviceHost string, registryHost string) error {
 
 	log.Printf("gateway started at registry host %v\n", registryHost)
 
-	id, err := piazza.RegisterService(registryHost, "gateway", "my fun gateway")
+	id, err := piazza.RegisterService(registryHost, piazza.GatewayService, "my fun gateway")
 	if err != nil {
 		return err
 	}
 
 	log.Printf("gateway id is %d", id)
 
-	dispatcherUrl, err = piazza.RegistryLookupURL(registryHost, "dispatcher")
+	dispatcherHost, err := RegistryLookup(registryHost, piazza.DispatcherService)
 	if err != nil {
 		return err
 	}
 
-	var f = func(w http.ResponseWriter, r *http.Request) {
+	var handleRequest = func(w http.ResponseWriter, r *http.Request) {
+		m, err := readUserRequest(r)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+		}
 
+		m2, err := forwardUserRequest(dispatcherHost, m)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+		}
+
+		// we now have the response to return to the outside caller
+		buf, err := m2.ToBytes()
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+		}
+		w.Write(buf)
 	}
 
 	r := mux.NewRouter()
-	r.HandleFunc("/service", f).Methods("POST")
+	r.HandleFunc("/service", handleRequest).Methods("POST")
 
 	server := &http.Server{Addr: serviceHost, Handler: r}
 	err = server.ListenAndServe()
