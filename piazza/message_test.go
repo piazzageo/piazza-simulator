@@ -14,8 +14,8 @@ func TestMessage(t *testing.T) {
 	m.User = User{Id: 123, UserType: NormalUser, Name: "Bob"}
 	m.Status = SuccessStatus
 
-	params := map[string]any{"A": "alpha", "B": 222}
-	m.CreateJobPayload = CreateJobPayload{ServiceName: "echo", Parameters: params, Comments: "Hi."}
+	params := map[string]Any{"A": "alpha", "B": 222}
+	m.CreateJobPayload = CreateJobPayload{ServiceName: "echo", Parameters: params, Comment: "Hi."}
 
 	jsonActual, err := m.ToJson()
 	if err != nil {

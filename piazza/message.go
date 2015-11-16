@@ -7,14 +7,9 @@ import (
 	"time"
 )
 
-type any interface{}
+type Any interface{}
 
 //---------------------------------------------------------
-
-// id of 0 is always invalid
-type MessageId int64
-
-var nextMessageId MessageId = 1
 
 type MessageType int
 
@@ -62,31 +57,29 @@ const (
 
 type Message struct {
 	// onl set by Gateway (or by Dispatcher if the Message bypasses the Gateway)
-	Id MessageId `json:"id"`
+	Id PiazzaId `json:"id"`
 
 	Type      MessageType `json:"type"`
 	Timestamp time.Time   `json:"timestamp"`
-	User      User        `json:"user"`
+	User      *User       `json:"user,omitempty"`
 
 	// only used for Response messages
 	Status StatusCode `json:status`
-
-	// only used for Response messages (optional)
-	Error error `json:error`
+	Error  *error     `json:error,omitEmpty`
 
 	// exactly one of the following must be present
-	CreateJobPayload             `json:"create_job_payload"`
-	CreateJobResponsePayload     `json:"create_job_response_payload"`
-	ReadJobPayload               `json:"read_job_payload"`
-	ReadJobResponsePayload       `json:"read_job_response_payload"`
-	DeleteJobPayload             `json:"delete_job_payload"`
-	DeleteJobResponsePayload     `json:"delete_job_response_payload"`
-	CreateServicePayload         `json:"create_service_payload"`
-	CreateServiceResponsePayload `json:"create_service_response_payload"`
-	ReadServicePayload           `json:"read_service_payload"`
-	ReadServiceResponsePayload   `json:"read_service_response_payload"`
-	DeleteServicePayload         `json:"delete_service_payload"`
-	DeleteServiceResponsePayload `json:"delete_service_response_payload"`
+	CreateJobPayload             *CreateJobPayload             `json:"create_job_payload,omitempty"`
+	CreateJobResponsePayload     *CreateJobResponsePayload     `json:"create_job_response_payload,omitempty"`
+	ReadJobPayload               *ReadJobPayload               `json:"read_job_payload,omitempty"`
+	ReadJobResponsePayload       *ReadJobResponsePayload       `json:"read_job_response_payload,omitempty"`
+	DeleteJobPayload             *DeleteJobPayload             `json:"delete_job_payload,omitempty"`
+	DeleteJobResponsePayload     *DeleteJobResponsePayload     `json:"delete_job_response_payload,omitempty"`
+	CreateServicePayload         *CreateServicePayload         `json:"create_service_payload,omitempty"`
+	CreateServiceResponsePayload *CreateServiceResponsePayload `json:"create_service_response_payload,omitempty"`
+	ReadServicePayload           *ReadServicePayload           `json:"read_service_payload,omitempty"`
+	ReadServiceResponsePayload   *ReadServiceResponsePayload   `json:"read_service_response_payload,omitempty"`
+	DeleteServicePayload         *DeleteServicePayload         `json:"delete_service_payload,omitempty"`
+	DeleteServiceResponsePayload *DeleteServiceResponsePayload `json:"delete_service_response_payload,omitempty"`
 }
 
 func NewMessage() *Message {
@@ -118,19 +111,20 @@ func (m *Message) ToJson() (string, error) {
 ////////////////////////////
 
 type CreateJobPayload struct {
-	ServiceName string         `json:"service_name"`
-	Parameters  map[string]any `json:"parameters"`
+	ServiceType ServiceType    `json:"stype"`
+	Parameters  map[string]Any `json:"parameters"`
 
 	// set by user for his own reasons (optional)
-	Comments string `json:"comments"`
+	Comment string `json:"comments"`
 }
 
 type CreateJobResponsePayload struct {
-	JobId JobId `json:"job_id"`
+	JobId     PiazzaId  `json:"id"`
+	JobStatus JobStatus `json:"status"`
 }
 
 type ReadJobPayload struct {
-	JobId JobId `json:"job_id"`
+	JobId PiazzaId `json:"job_id"`
 }
 
 type ReadJobResponsePayload struct {
@@ -138,12 +132,12 @@ type ReadJobResponsePayload struct {
 	PercentComplete float32        `json:"percent_complete"`
 	TimeRemaining   time.Duration  `json:"time_remaining"`
 	ServiceName     string         `json:"service_name"`
-	Parameters      map[string]any `json:"parameters"`
+	Parameters      map[string]Any `json:"parameters"`
 	Comments        string         `json:"comments"`
 }
 
 type DeleteJobPayload struct {
-	JobId JobId `json:"job_id"`
+	JobId PiazzaId `json:"job_id"`
 }
 
 type DeleteJobResponsePayload struct {
@@ -160,7 +154,7 @@ type CreateServiceResponsePayload struct {
 }
 
 type ReadServicePayload struct {
-	Id ServiceId `json:"service_id"`
+	Id PiazzaId `json:"service_id"`
 }
 
 type ReadServiceResponsePayload struct {
@@ -168,7 +162,7 @@ type ReadServiceResponsePayload struct {
 }
 
 type DeleteServicePayload struct {
-	Id ServiceId `json:"service_id"`
+	Id PiazzaId `json:"service_id"`
 }
 
 type DeleteServiceResponsePayload struct {

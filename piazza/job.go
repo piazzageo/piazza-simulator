@@ -6,37 +6,33 @@ import (
 	//"time"
 )
 
-type JobId int64
-
-var currentJobId JobId = 1
-
 type JobStatus int
 
 type JobType int
 
 const (
-	StatusInvalid JobStatus = iota
-	StatusSubmitted
-	StatusDispatched
-	StatusRunning
-	StatusCompleted
-	StatusFailed
+	JobStatusInvalid JobStatus = iota
+	JobStatusSubmitted
+	JobStatusDispatched
+	JobStatusRunning
+	JobStatusCompleted
+	JObStatusFailed
 )
 
 type Job struct {
-	id        JobId
+	id     PiazzaId
 	status    JobStatus
-	messageId MessageId
+	messageId PiazzaId
 	jtype     JobType
 }
 
 type JobTable struct {
-	table map[JobId]Job
+	table map[PiazzaId]Job
 }
 
 func NewJobTable() *JobTable {
 	var t JobTable
-	t.table = make(map[JobId]Job)
+	t.table = make(map[PiazzaId]Job)
 	return &t
 }
 
@@ -54,8 +50,7 @@ func (t *JobTable) Dump() {
 }
 
 func NewJob(jobType JobType) *Job {
-	var job = Job{id: currentJobId}
-	currentJobId++
+	var job = Job{id: NewId()}
 
 	job.jtype = jobType
 

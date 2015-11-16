@@ -16,23 +16,68 @@ const (
 )
 
 var serviceTypeNames = map[ServiceType]string{
-	RegistryService: "RegistryService",
-	GatewayService: "GatewayService",
+	RegistryService:   "RegistryService",
+	GatewayService:    "GatewayService",
 	DispatcherService: "DispatcherService",
-	EchoService: "EchoService",
+	EchoService:       "EchoService",
 }
-
-type ServiceId int64
-
-var nextServiceId ServiceId = 1
 
 type Service struct {
-	Id      ServiceId   `json:"id"`
+	Id      PiazzaId    `json:"id"`
 	Type    ServiceType `json:type`
 	Host    string      `json:"host"`
-	Comment string      `json:"comment"`
+	Comment string      `json:"comment,omitempty"`
 }
 
+//---------------------------------------------------------
+
+type ServiceList struct {
+	Data map[PiazzaId]Service `json:"data"`
+}
+
+func (list *ServiceList) init() {
+	if list.Data == nil {
+		list.Data = make(map[PiazzaId]Service)
+	}
+}
+
+func (list *ServiceList) Add(service Service) {
+	list.init()
+	list.Data[service.Id] = service
+}
+
+func (list *ServiceList) Get(id PiazzaId) (Service, bool) {
+	list.init()
+	service, ok := list.Data[id]
+	return service, ok
+}
+
+func (list *ServiceList) GetOne() (Service, bool) {
+	list.init()
+	for _, service := range list.Data {
+		return service, true
+	}
+	return Service{}, false
+}
+
+func (list *ServiceList) Iterator() <-chan Service {
+	list.init()
+	ch := make(chan Service)
+	go func() {
+		for _, val := range list.Data {
+			ch <- val
+		}
+		close(ch) // Remember to close or the loop never ends!
+	}()
+	return ch
+}
+
+func (list *ServiceList) Len() int {
+	list.init()
+	return len(list.Data)
+}
+
+//---------------------------------------------------------
 
 // returns InvalidService if failure
 func ServiceTypeFromString(s string) ServiceType {
@@ -45,7 +90,7 @@ func ServiceTypeFromString(s string) ServiceType {
 }
 
 // returns InvalidService if failure
-func ServiceTypeToString(stype ServiceType) string {
+func (stype ServiceType) String() string {
 	s, ok := serviceTypeNames[stype]
 	if !ok {
 		return "InvalidService"
@@ -53,15 +98,23 @@ func ServiceTypeToString(stype ServiceType) string {
 	return s
 }
 
-func (e *Service) String() string {
-	return fmt.Sprintf("[id:%d, type:%v, host:%s, comment:%s]", e.Id, e.Type, e.Host, e.Comment)
+//---------------------------------------------------------
+
+func (e Service) String() string {
+	s := fmt.Sprintf("[id:%v, type:%v, host:%s", e.Id, e.Type, e.Host)
+
+	if e.Comment != "" {
+		s += fmt.Sprintf(", comment:\"%s\"", e.Comment)
+	}
+
+	s += "]"
+
+	return s
 }
 
-func NewService(stype ServiceType, host string, comment string) (*Service) {
-	id := nextServiceId
-	nextServiceId++
+func NewService(stype ServiceType, host string, comment string) *Service {
 
-	e := &Service{Id: id, Type: stype, Host: host, Comment: comment}
+	e := &Service{Id: NewId(), Type: stype, Host: host, Comment: comment}
 
 	return e
 }
@@ -72,6 +125,11 @@ func NewServiceFromBytes(buf []byte) (*Service, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	if e.Id == "" {
+		e.Id = NewId()
+	}
+
 	return &e, nil
 }
 

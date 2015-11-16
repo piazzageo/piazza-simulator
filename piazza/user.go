@@ -4,9 +4,6 @@ import (
 
 )
 
-type UserId int64
-
-var nextUserId MessageId = 1
 
 type UserType int
 
@@ -17,7 +14,7 @@ const (
 )
 
 type User struct {
-	Id   UserId
+	Id   PiazzaId
 	UserType UserType
 	Name string
 }
