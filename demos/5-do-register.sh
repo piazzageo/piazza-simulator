@@ -37,10 +37,15 @@ read -d '' regdisc << EOF
   "name": "pz-discover",
   "data": {
     "type": "core-service",
-    "address": "localhost:3000"
+    "host": "localhost:3000"
   }
 }
 EOF
+
+curl -XDELETE http://localhost:3000/api/v1/resources/zookeeper
+curl -XDELETE http://localhost:3000/api/v1/resources/kafka
+curl -XDELETE http://localhost:3000/api/v1/resources/elastic-search
+curl -XDELETE http://localhost:3000/api/v1/resources/pz-discover
 
 curl -H "Content-Type: application/json" -X PUT -d "$regzoo" http://localhost:3000/api/v1/resources
 curl -H "Content-Type: application/json" -X PUT -d "$regkafka" http://localhost:3000/api/v1/resources
