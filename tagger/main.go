@@ -42,7 +42,8 @@ import (
 	"github.com/google/go-github/github"
 )
 
-var DEBUG = false
+const DEBUG = false
+const VENICE = "venicegeo"
 
 func getApiKey() (string, error) {
 	home := os.Getenv("HOME")
@@ -82,52 +83,61 @@ func main() {
 	//log.Printf("client: %#v", client)
 
 	// list all repositories for the authenticated user
-	repos, _, err := client.Repositories.ListByOrg("venicegeo", nil)
-	if err != nil {
-		log.Fatalf("oauth failed: %s", err)
-	}
-	//log.Printf("%#v", repos)
-
-	/*repos, err := getRepoNames(apiKey, 0, 100)
-	if err != nil {
-		log.Fatalf("Failed to get repo names: %s", err)
-	}*/
+	repos, err := getRepoNames(client)
 
 	for _, repo := range repos {
-		err = tagRepo(client, repo, tag)
+		err, ref := tagRepo(client, repo, tag)
 		if err != nil {
 			log.Fatalf("Failed to get repo names: %s", err)
 		}
+
+		_ = ref
+
+		os.Exit(9)
 	}
 }
 
-func getRepoNames(apiKey string, pageStart int, pageCount int) ([]string, error) {
-	return nil, nil
+func getRepoNames(client *github.Client) ([]github.Repository, error) {
+	opts0 := github.ListOptions{
+		Page:    0,
+		PerPage: 512,
+	}
+	opts := &github.RepositoryListByOrgOptions{
+		ListOptions: opts0,
+		Type:        "all",
+	}
+
+	repos, _, err := client.Repositories.ListByOrg(VENICE, opts)
+	if err != nil {
+		log.Fatalf("get repos failed: %s", err)
+	}
+
+	//log.Printf("%#v", repos)
+
+	return repos, nil
 }
 
-func GetLatestCommit(owner, repo string, sgc *github.Client) (string, string, error) {
-	commits, res, err := sgc.Repositories.ListCommits(owner, repo, &github.CommitsListOptions{})
+func getLatestCommit(client *github.Client, repo string) (string, string, error) {
 
+	opts := &github.CommitsListOptions{}
+
+	commits, res, err := client.Repositories.ListCommits(VENICE, repo, opts)
 	if err != nil {
-		log.Printf("err: %s res: %s", err, res)
+		log.Fatalf("err: %s res: %s", err, res)
 		return "", "", err
 	}
 
-	log.Printf("last commit: %s %s", *commits[0].SHA, *commits[0].Commit.URL)
+	log.Printf("LAST COMMIT: %s %s", *commits[0].SHA, *commits[0].Commit.URL)
 
 	return *commits[0].SHA, *commits[0].Commit.URL, nil
 }
 
-func tagRepo(client *github.Client, repo github.Repository, tag string) error {
+func createTag(client *github.Client,
+	repo github.Repository,
+	url string,
+	sha string) (*github.Tag, error) {
 
-	log.Printf("%s %s %s", *repo.Name, *repo.FullName, *repo.URL)
-
-	sha, url, err := GetLatestCommit("venicegeo", *repo.Name, client)
-	if err != nil {
-		log.Fatalf("get latest commit failed: %s", err)
-	}
-
-	tag = "testtag03"
+	tag := "testtag03"
 	mssg := "mssg"
 
 	now := time.Now()
@@ -143,21 +153,54 @@ func tagRepo(client *github.Client, repo github.Repository, tag string) error {
 		Tagger:  &github.CommitAuthor{Name: &who, Email: &email, Date: &now},
 	}
 
-	tagobj, resp, err := client.Git.CreateTag("venicegeo", *repo.Name, tagobj)
+	tagobj, resp, err := client.Git.CreateTag(VENICE, *repo.Name, tagobj)
+	if err != nil {
+		return nil, err
+	}
+
+	log.Printf("CREATE TARG RESP: %#v", resp)
+
+	return tagobj, nil
+}
+
+func createReference(client *github.Client,
+	repo github.Repository,
+	tagobj *github.Tag) (*github.Reference, error) {
+
+	refstr := "refs/heads/master"
+
+	ref := &github.Reference{Ref: &refstr, Object: &github.GitObject{SHA: tagobj.SHA}}
+
+	ref2, resp, err := client.Git.CreateRef(VENICE, *repo.Name, ref)
+	if err != nil {
+		return nil, err
+	}
+
+	log.Printf("CREATE REF RESP: %#v", resp)
+
+	return ref2, nil
+}
+
+func tagRepo(client *github.Client, repo github.Repository, tag string) (*github.Reference, error) {
+
+	log.Printf("TAG REPO: %s %s %s", *repo.Name, *repo.FullName, *repo.URL)
+
+	sha, url, err := getLatestCommit(client, *repo.Name)
+	if err != nil {
+		log.Fatalf("get latest commit failed: %s", err)
+	}
+
+	tagobj, err := createTag(client, repo, url, sha)
 	if err != nil {
 		log.Fatalf("create tag failed: %s", err)
 	}
+
 	log.Printf("tagobj: %#v", *tagobj.URL)
-	refstr := "refs/heads/master"
-	ref := github.Reference{Ref: &refstr, Object: &github.GitObject{SHA: tagobj.SHA}}
-	_, resp, err = client.Git.CreateRef("venicegeo", *repo.Name, &ref)
+
+	refobj, err := createReference(client, repo, tagobj)
 	if err != nil {
 		log.Fatalf("create ref failed: %s", err)
 	}
 
-	log.Printf("%#v", resp)
-
-	os.Exit(9)
-
-	return nil
+	return refobj, nil
 }
