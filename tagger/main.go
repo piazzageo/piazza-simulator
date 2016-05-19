@@ -45,29 +45,16 @@ import (
 const DEBUG = false
 const VENICE = "venicegeo"
 
-func getApiKey() (string, error) {
-	home := os.Getenv("HOME")
-	if home == "" {
-		return "", fmt.Errorf("$HOME not found")
-	}
-
-	key, err := ioutil.ReadFile(home + "/.git-token")
-	if err != nil {
-		return "", err
-	}
-
-	s := strings.TrimSpace(string(key))
-	//log.Printf("API Key: %s", s)
-
-	return s, nil
-}
+var NOW = time.Now()
+var WHO = "mpgerlek"
+var EMAIL = "mpg@flaxen.com"
 
 func main() {
 	if len(os.Args) != 2 {
 		log.Fatalf("usage:  $ tagger tag")
 	}
 
-	tag := os.Args[1]
+	tagstring := os.Args[1]
 
 	apiKey, err := getApiKey()
 	if err != nil {
@@ -86,15 +73,34 @@ func main() {
 	repos, err := getRepoNames(client)
 
 	for _, repo := range repos {
-		err, ref := tagRepo(client, repo, tag)
+		//fmt.Printf("PRE: repo %s, tag %s\n", *repo.FullName, tagstring)
+
+		_, err := tagRepo(client, repo, tagstring)
 		if err != nil {
-			log.Fatalf("Failed to get repo names: %s", err)
+			log.Fatalf("%s", err)
 		}
 
-		_ = ref
+		fmt.Printf("POST: repo %s, tagged %s\n", *repo.FullName, tagstring)
 
-		os.Exit(9)
+		//os.Exit(9)
 	}
+}
+
+func getApiKey() (string, error) {
+	home := os.Getenv("HOME")
+	if home == "" {
+		return "", fmt.Errorf("getApiKey: $HOME not found")
+	}
+
+	key, err := ioutil.ReadFile(home + "/.git-token")
+	if err != nil {
+		return "", fmt.Errorf("getApiKey: %s", err)
+	}
+
+	s := strings.TrimSpace(string(key))
+	//log.Printf("API Key: %s", s)
+
+	return s, nil
 }
 
 func getRepoNames(client *github.Client) ([]github.Repository, error) {
@@ -109,7 +115,7 @@ func getRepoNames(client *github.Client) ([]github.Repository, error) {
 
 	repos, _, err := client.Repositories.ListByOrg(VENICE, opts)
 	if err != nil {
-		log.Fatalf("get repos failed: %s", err)
+		return nil, fmt.Errorf("getRepoNames: %s", err)
 	}
 
 	//log.Printf("%#v", repos)
@@ -121,13 +127,15 @@ func getLatestCommit(client *github.Client, repo string) (string, string, error)
 
 	opts := &github.CommitsListOptions{}
 
-	commits, res, err := client.Repositories.ListCommits(VENICE, repo, opts)
+	commits, resp, err := client.Repositories.ListCommits(VENICE, repo, opts)
 	if err != nil {
-		log.Fatalf("err: %s res: %s", err, res)
-		return "", "", err
+		return "", "", fmt.Errorf("getLatestCommit: %s", err)
+	}
+	if resp.StatusCode != 200 {
+		return "", "", fmt.Errorf("getLatestCommit: call returned %d", resp.StatusCode)
 	}
 
-	log.Printf("LAST COMMIT: %s %s", *commits[0].SHA, *commits[0].Commit.URL)
+	//log.Printf("LAST COMMIT: %s %s", *commits[0].SHA, *commits[0].Commit.URL)
 
 	return *commits[0].SHA, *commits[0].Commit.URL, nil
 }
@@ -135,30 +143,32 @@ func getLatestCommit(client *github.Client, repo string) (string, string, error)
 func createTag(client *github.Client,
 	repo github.Repository,
 	url string,
-	sha string) (*github.Tag, error) {
+	sha string,
+	tagstring string) (*github.Tag, error) {
 
-	tag := "testtag03"
-	mssg := "mssg"
-
-	now := time.Now()
-	who := "mpgerlek"
-	email := "mpg@flaxen.com"
+	mssg := "adding tag " + tagstring
 
 	typ := "commit"
 
 	tagobj := &github.Tag{
-		Tag:     &tag,
+		Tag:     &tagstring,
 		Message: &mssg,
-		Object:  &github.GitObject{Type: &typ, SHA: &sha, URL: &url},
-		Tagger:  &github.CommitAuthor{Name: &who, Email: &email, Date: &now},
+		Object:  &github.GitObject{Type: &typ, SHA: &sha},
+		Tagger:  &github.CommitAuthor{Name: &WHO, Email: &EMAIL, Date: &NOW},
 	}
 
 	tagobj, resp, err := client.Git.CreateTag(VENICE, *repo.Name, tagobj)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("createTag: %s", err)
+	}
+	if resp.StatusCode != 201 {
+		return nil, fmt.Errorf("createTag: call returned %d", resp.StatusCode)
 	}
 
-	log.Printf("CREATE TARG RESP: %#v", resp)
+	//log.Printf("CREATE TAG RESP: %#v", resp)
+	//log.Printf("CREATE TAG RESP.status: %#v", resp.Status)
+	//log.Printf("CREATE TAG tagobj: %#v", tagobj)
+	//log.Printf("CREATE TAG tagobj SHA: %s", *tagobj.SHA)
 
 	return tagobj, nil
 }
@@ -167,39 +177,43 @@ func createReference(client *github.Client,
 	repo github.Repository,
 	tagobj *github.Tag) (*github.Reference, error) {
 
-	refstr := "refs/heads/master"
+	refstr := "refs/tags/" + *tagobj.Tag
 
-	ref := &github.Reference{Ref: &refstr, Object: &github.GitObject{SHA: tagobj.SHA}}
+	x := tagobj.SHA
+	ref := &github.Reference{Ref: &refstr, Object: &github.GitObject{SHA: x}}
 
 	ref2, resp, err := client.Git.CreateRef(VENICE, *repo.Name, ref)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("createReference: %s", err)
+	}
+	if resp.StatusCode != 201 {
+		return nil, fmt.Errorf("createReference: call returned %d", resp.StatusCode)
 	}
 
-	log.Printf("CREATE REF RESP: %#v", resp)
+	//log.Printf("CREATE REF RESP: %#v", resp)
 
 	return ref2, nil
 }
 
-func tagRepo(client *github.Client, repo github.Repository, tag string) (*github.Reference, error) {
+func tagRepo(client *github.Client, repo github.Repository, tagstring string) (*github.Reference, error) {
 
-	log.Printf("TAG REPO: %s %s %s", *repo.Name, *repo.FullName, *repo.URL)
+	//log.Printf("TAG REPO: %s %s %s", *repo.Name, *repo.FullName, *repo.URL)
 
 	sha, url, err := getLatestCommit(client, *repo.Name)
 	if err != nil {
-		log.Fatalf("get latest commit failed: %s", err)
+		return nil, err
 	}
 
-	tagobj, err := createTag(client, repo, url, sha)
+	tagobj, err := createTag(client, repo, url, sha, tagstring)
 	if err != nil {
-		log.Fatalf("create tag failed: %s", err)
+		return nil, err
 	}
 
-	log.Printf("tagobj: %#v", *tagobj.URL)
+	//Printf("tagobj: %#v", *tagobj.URL)
 
 	refobj, err := createReference(client, repo, tagobj)
 	if err != nil {
-		log.Fatalf("create ref failed: %s", err)
+		return nil, err
 	}
 
 	return refobj, nil
