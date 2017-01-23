@@ -1,0 +1,5 @@
+github.com/fvbock/endless,      2cdc20a776897c0f406853c048c33e2c1a9f0ebf,   1.0
+github.com/gin-gonic/gin,       e2fa89777e344782ef5d31929f095f4589c35dcc,   1.0
+github.com/Shopify/sarama,      38d579a708d2f87dd4e35342241048e361d1e66a,   1.0
+github.com/stretchr/testify,    f390dcf405f7b83c997eac1b06768bb9f44dec18,   1.0
+gopkg.in/olivere/elastic.v3,    f7ae701daf3abe5dfb99f57b3f47738ec93c9c26,   1.0
