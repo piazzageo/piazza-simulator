@@ -2,16 +2,33 @@ package main
 
 import (
 	"encoding/csv"
+	"log"
 	"os"
 )
 
 type Swap struct {
-	Name    string
-	Sha     string
-	Version string
+	Name string
+	Ver  map[string]string // sha string to version number
 }
 
 type Swaps map[string]Swap
+
+func (swap *Swap) containsSha(sha string) bool {
+	_, ok := swap.Ver[sha]
+	return ok
+}
+
+func (swap *Swap) addVer(newsha string, newver string) {
+	curver, ok := swap.Ver[newsha]
+	if ok {
+		if curver != newver {
+			log.Fatalf("internal error: version mismatch for %s, sha %s", swap.Name, newsha)
+		}
+		return
+	}
+
+	swap.Ver[newsha] = newver
+}
 
 func readSwaps(swapFile string) (*Swaps, error) {
 	file, err := os.Open(swapFile)
@@ -32,12 +49,17 @@ func readSwaps(swapFile string) (*Swaps, error) {
 
 	swaps := Swaps{}
 	for _, elem := range data {
-		swap := Swap{
-			Name:    elem[0],
-			Sha:     elem[1],
-			Version: elem[2],
+		nam := elem[0]
+		_, ok := swaps[nam]
+		if ok {
+			// already have it
+			swaps[nam].Ver[elem[1]] = elem[2]
+		} else {
+			swaps[nam] = Swap{
+				Name: elem[0],
+				Ver:  map[string]string{elem[1]: elem[2]},
+			}
 		}
-		swaps[elem[0]] = swap
 	}
 
 	//	log.Printf("%v", data)

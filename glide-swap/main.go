@@ -52,8 +52,8 @@ func main() {
 			continue
 		}
 
-		if dep.Sha != swap.Sha {
-			fmt.Printf("TASK: %s has wrong vesion\n", dep.Name)
+		if !swap.containsSha(dep.Sha) {
+			fmt.Printf("TASK: swap list does not contain needed vesion of %s\n", dep.Name)
 		}
 	}
 }
@@ -82,4 +82,13 @@ func mergeP(a *Packages, b *Packages) {
 			}
 		}
 	}
+}
+
+func contains(a []string, b string) bool {
+	for _, s := range a {
+		if b == s {
+			return true
+		}
+	}
+	return false
 }
