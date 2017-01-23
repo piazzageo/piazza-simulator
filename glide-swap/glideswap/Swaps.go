@@ -1,4 +1,4 @@
-package main
+package glideswap
 
 import (
 	"encoding/csv"
@@ -13,24 +13,7 @@ type Swap struct {
 
 type Swaps map[string]Swap
 
-func (swap *Swap) containsSha(sha string) bool {
-	_, ok := swap.Ver[sha]
-	return ok
-}
-
-func (swap *Swap) addVer(newsha string, newver string) {
-	curver, ok := swap.Ver[newsha]
-	if ok {
-		if curver != newver {
-			log.Fatalf("internal error: version mismatch for %s, sha %s", swap.Name, newsha)
-		}
-		return
-	}
-
-	swap.Ver[newsha] = newver
-}
-
-func readSwaps(swapFile string) (*Swaps, error) {
+func ReadSwaps(swapFile string) (*Swaps, error) {
 	file, err := os.Open(swapFile)
 	if err != nil {
 		return nil, err
@@ -65,4 +48,21 @@ func readSwaps(swapFile string) (*Swaps, error) {
 	//	log.Printf("%v", data)
 
 	return &swaps, nil
+}
+
+func (swap *Swap) ContainsSha(sha string) bool {
+	_, ok := swap.Ver[sha]
+	return ok
+}
+
+func (swap *Swap) addVer(newsha string, newver string) {
+	curver, ok := swap.Ver[newsha]
+	if ok {
+		if curver != newver {
+			log.Fatalf("internal error: version mismatch for %s, sha %s", swap.Name, newsha)
+		}
+		return
+	}
+
+	swap.Ver[newsha] = newver
 }
