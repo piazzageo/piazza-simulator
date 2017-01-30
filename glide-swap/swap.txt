@@ -1,0 +1,15 @@
+github.com/gin-gonic/gin,       e2fa89777e344782ef5d31929f095f4589c35dcc,   1.0
+github.com/gin-gonic/gin,       e2212d40c62a98b388a5eb48ecbdcf88534688ba,   1.1
+
+github.com/Shopify/sarama,      38d579a708d2f87dd4e35342241048e361d1e66a,   1.0
+github.com/Shopify/sarama,      0fb560e5f7fbcaee2f75e3c34174320709f69944,   1.1
+
+github.com/stretchr/testify,    f390dcf405f7b83c997eac1b06768bb9f44dec18,   1.0
+
+gopkg.in/olivere/elastic.v3,    f7ae701daf3abe5dfb99f57b3f47738ec93c9c26,   1.0
+gopkg.in/olivere/elastic.v3,    96b262cf1d25006d71bd495fd99b590493cff29e,   1.1
+
+github.com/braintree/manners,   82a8879fc5fd0381fa8b2d8033b19bf255252088,   1.0
+
+# no longer used
+github.com/fvbock/endless,      2cdc20a776897c0f406853c048c33e2c1a9f0ebf,   1.0
