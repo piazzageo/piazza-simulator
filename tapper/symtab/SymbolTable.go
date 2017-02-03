@@ -9,35 +9,32 @@ func (s Symbol) String() string {
 }
 
 type SymbolTable struct {
-	Children []*SymbolTable
-	Parent   *SymbolTable
-
 	Symbols map[Symbol]DslType
 }
 
-func NewSymbolTable(parent *SymbolTable) *SymbolTable {
+func NewSymbolTable() *SymbolTable {
 	syms := map[Symbol]DslType{}
 
 	st := &SymbolTable{
-		Children: []*SymbolTable{},
-		Parent:   parent,
-		Symbols:  syms,
+		Symbols: syms,
 	}
+
 	return st
 }
 
+func (st *SymbolTable) Init() {
+	st.add("int", &IntDslType{Form: S32})
+	st.add("float", &FloatDslType{})
+	st.add("bool", &BoolDslType{})
+	st.add("string", &StringDslType{})
+}
+
 func (st *SymbolTable) String() string {
-	s := fmt.Sprintf("Parent:%t, Children:%d", st.Parent != nil, len(st.Children))
+	s := fmt.Sprintf("%d:", len(st.Symbols))
 	for k, v := range st.Symbols {
 		s += fmt.Sprintf(" [%s:%v]", k, v)
 	}
 	return s
-}
-
-func (st *SymbolTable) addScope() *SymbolTable {
-	stNew := NewSymbolTable(st)
-	st.Children = append(st.Children, stNew)
-	return stNew
 }
 
 func (st *SymbolTable) add(s Symbol, t DslType) {
@@ -50,6 +47,11 @@ func (st *SymbolTable) get(s Symbol) DslType {
 		return nil
 	}
 	return v
+}
+
+func (st *SymbolTable) has(s Symbol) bool {
+	_, ok := st.Symbols[s]
+	return ok
 }
 
 func (st *SymbolTable) remove(s Symbol) {
