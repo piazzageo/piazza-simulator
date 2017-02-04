@@ -19,13 +19,13 @@ func Test11(t *testing.T) {
 	st0 := NewSymbolTable()
 	assert.Equal("0:", st0.String())
 
-	st0.add("myint", &IntDslType{Form: S32})
-	assert.Equal("1: [myint:INT(S32)]", st0.String())
+	st0.add("myint", &NumberDslType{Flavor: S32})
+	assert.Equal("1: [myint:NUMBER(S32)]", st0.String())
 
 	assert.True(st0.has("myint"))
 
 	typ := st0.get("myint")
-	assert.Equal("INT(S32)", typ.String())
+	assert.Equal("NUMBER(S32)", typ.String())
 
 	assert.Nil(st0.get("frobnitz"))
 	assert.False(st0.has("frobnitz"))

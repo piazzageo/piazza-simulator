@@ -17,17 +17,17 @@ func Test01(t *testing.T) {
 	assert := assert.New(t)
 
 	t1 := &ArrayDslType{
-		ElemType: &IntDslType{Form: U8},
+		ElemType: &NumberDslType{Flavor: U8},
 		Len:      17,
 	}
 
-	assert.Equal("ARRAY(17, INT(U8))", t1.String())
+	assert.Equal("ARRAY(17, NUMBER(U8))", t1.String())
 
 	t2 := &StructDslType{
-		KVPairs: map[string]DslType{
-			"i": &IntDslType{Form: S32},
+		Fields: map[Symbol]DslType{
+			"i": &NumberDslType{Flavor: S32},
 			"s": &StringDslType{},
-			"f": &FloatDslType{},
+			"f": &NumberDslType{Flavor: F32},
 			"b": &BoolDslType{},
 			"a": &AnyDslType{},
 		},
@@ -35,9 +35,9 @@ func Test01(t *testing.T) {
 
 	t2s := t2.String()
 	assert.Contains(t2s, "STRUCT(")
-	assert.Contains(t2s, "i:INT(S32)")
+	assert.Contains(t2s, "i:NUMBER(S32)")
 	assert.Contains(t2s, "s:STRING")
-	assert.Contains(t2s, "f:FLOAT")
+	assert.Contains(t2s, "f:NUMBER(F32)")
 	assert.Contains(t2s, "b:BOOL")
 	assert.Contains(t2s, "a:ANY")
 	assert.Contains(t2s, ")")
@@ -50,8 +50,8 @@ func Test01(t *testing.T) {
 	assert.Equal("MAP[STRING]BOOL", t3.String())
 
 	t4 := &SliceDslType{
-		ElemType: &IntDslType{Form: U32},
+		ElemType: &NumberDslType{Flavor: U32},
 	}
 
-	assert.Equal("SLICE(INT(U32))", t4.String())
+	assert.Equal("SLICE(NUMBER(U32))", t4.String())
 }

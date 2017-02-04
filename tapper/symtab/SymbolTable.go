@@ -23,10 +23,19 @@ func NewSymbolTable() *SymbolTable {
 }
 
 func (st *SymbolTable) Init() {
-	st.add("int", &IntDslType{Form: S32})
-	st.add("float", &FloatDslType{})
+	st.add("int8", &NumberDslType{Flavor: S8})
+	st.add("int16", &NumberDslType{Flavor: S16})
+	st.add("int32", &NumberDslType{Flavor: S32})
+	st.add("int64", &NumberDslType{Flavor: S64})
+	st.add("uint8", &NumberDslType{Flavor: U8})
+	st.add("uint16", &NumberDslType{Flavor: U16})
+	st.add("uint32", &NumberDslType{Flavor: U32})
+	st.add("uint64", &NumberDslType{Flavor: U64})
+	st.add("float32", &NumberDslType{Flavor: F32})
+	st.add("float64", &NumberDslType{Flavor: F64})
 	st.add("bool", &BoolDslType{})
 	st.add("string", &StringDslType{})
+	st.add("any", &AnyDslType{})
 }
 
 func (st *SymbolTable) String() string {
