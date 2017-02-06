@@ -70,9 +70,9 @@ func convertDeclToStringDecl(d *Decl) *StringDecl {
 	return &stringDecl
 }
 
-func (p *Parser) parseStructDecl(name Symbol, structDecl *StructDecl) DslType {
-	dslType := &StructDslType{
-		Fields: map[Symbol]DslType{},
+func (p *Parser) parseStructDecl(name Symbol, structDecl *StructDecl) Type {
+	dslType := &StructType{
+		Fields: map[Symbol]Type{},
 	}
 
 	for k, v := range *structDecl {
@@ -83,39 +83,39 @@ func (p *Parser) parseStructDecl(name Symbol, structDecl *StructDecl) DslType {
 	return dslType
 }
 
-func (p *Parser) parseStringDecl(name Symbol, stringDecl *StringDecl) DslType {
+func (p *Parser) parseStringDecl(name Symbol, stringDecl *StringDecl) Type {
 
 	in := string(*stringDecl)
 	in = strings.TrimSpace(in)
 
-	var dslType DslType
+	var dslType Type
 
 	arrayMatch, arrayLen := matchArrayPrefix(in)
 
 	switch {
 
 	case p.symbolTable.has(Symbol(in)):
-		dslType = &SymbolDslType{Symbol: Symbol(in)}
+		dslType = &SymbolType{Symbol: Symbol(in)}
 
 	case strings.HasPrefix(in, "[map]"):
 		i := len("[map]")
 		rest := StringDecl(in[i:])
 		valueType := p.parseStringDecl(name, &rest)
-		keyType := &SymbolDslType{Symbol: "string"}
-		dslType = &MapDslType{KeyType: keyType, ValueType: valueType}
+		keyType := &SymbolType{Symbol: "string"}
+		dslType = &MapType{KeyType: keyType, ValueType: valueType}
 
 	case strings.HasPrefix(in, "[]"):
 
 		i := len("[]")
 		rest := StringDecl(in[i:])
 		elemType := p.parseStringDecl(name, &rest)
-		dslType = &SliceDslType{ElemType: elemType}
+		dslType = &SliceType{ElemType: elemType}
 
 	case arrayMatch:
 		i := strings.Index(in, "]")
 		rest := StringDecl(in[i+1:])
 		elemType := p.parseStringDecl(name, &rest)
-		dslType = &ArrayDslType{
+		dslType = &ArrayType{
 			ElemType: elemType,
 			Len:      arrayLen,
 		}

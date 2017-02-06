@@ -19,7 +19,7 @@ func Test11(t *testing.T) {
 	st0 := NewSymbolTable()
 	assert.Equal("0:", st0.String())
 
-	st0.add("myint", &NumberDslType{Flavor: S32})
+	st0.add("myint", &NumberType{Flavor: FlavorS32})
 	assert.Equal("1: [myint:NUMBER(S32)]", st0.String())
 
 	assert.True(st0.has("myint"))
