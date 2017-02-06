@@ -7,7 +7,7 @@ import (
 	"strings"
 )
 
-type Parser struct {
+type TypeParser struct {
 	symbolTable *SymbolTable
 }
 
@@ -23,7 +23,7 @@ func init() {
 	arrayRegexp = regexp.MustCompile(`^\[(\d+)\]`)
 }
 
-func (p *Parser) Parse(in *DeclBlock) {
+func (p *TypeParser) Parse(in *DeclBlock) {
 
 	p.symbolTable = NewSymbolTable()
 	p.symbolTable.Init()
@@ -70,7 +70,7 @@ func convertDeclToStringDecl(d *Decl) *StringDecl {
 	return &stringDecl
 }
 
-func (p *Parser) parseStructDecl(name Symbol, structDecl *StructDecl) Type {
+func (p *TypeParser) parseStructDecl(name Symbol, structDecl *StructDecl) Type {
 	dslType := &StructType{
 		Fields: map[Symbol]Type{},
 	}
@@ -83,7 +83,7 @@ func (p *Parser) parseStructDecl(name Symbol, structDecl *StructDecl) Type {
 	return dslType
 }
 
-func (p *Parser) parseStringDecl(name Symbol, stringDecl *StringDecl) Type {
+func (p *TypeParser) parseStringDecl(name Symbol, stringDecl *StringDecl) Type {
 
 	in := string(*stringDecl)
 	in = strings.TrimSpace(in)

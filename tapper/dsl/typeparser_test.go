@@ -56,6 +56,6 @@ func Test21(t *testing.T) {
 		panic(err)
 	}
 
-	p := &Parser{}
+	p := &TypeParser{}
 	p.Parse(declBlock)
 }
