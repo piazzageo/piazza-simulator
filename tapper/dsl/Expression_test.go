@@ -1,4 +1,4 @@
-package symtab
+package dsl
 
 import (
 	"testing"
@@ -13,7 +13,7 @@ func Test30(t *testing.T) {
 	assert.True(!false)
 }
 
-func Test31(t *testing.T) {
+func xTest31(t *testing.T) {
 	assert := assert.New(t)
 
 	const src = `  as > 10 | b +3 < c`

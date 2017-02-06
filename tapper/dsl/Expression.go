@@ -1,4 +1,4 @@
-package symtab
+package dsl
 
 // shunting yard implementation adapted from https://github.com/mgenware/go-shunting-yard
 
@@ -6,15 +6,15 @@ import (
 	"errors"
 	"fmt"
 	"log"
-	"strings"
-	"text/scanner"
 )
 
 type Expression struct {
 }
 
 func ParseExpr(s string) error {
-	tokens, err := Scan(s)
+	sc := &Scanner{}
+
+	tokens, err := sc.Scan(s)
 	if err != nil {
 		return err
 	}
@@ -72,7 +72,7 @@ func Parse(tokens []Token) ([]*AST, error) {
 
 	var operators []string
 	for _, token := range tokens {
-		if token.TokenId == -2 || token.TokenId == -3 {
+		if token.Id == -2 || token.Id == -3 {
 			operandToken := &AST{Token: token}
 			ret = append(ret, operandToken)
 		} else {
@@ -143,48 +143,3 @@ func Parse(tokens []Token) ([]*AST, error) {
 }
 
 //===========================================================================
-
-type Token struct {
-	Line    int
-	Column  int
-	Text    string
-	TokenId int
-}
-
-func (t *Token) String() string {
-	return fmt.Sprintf("[%d:%d] %d %s", t.Line, t.Column, t.TokenId, t.Text)
-}
-
-func Scan(input string) ([]Token, error) {
-
-	const src = `
-	// This is scanned code.
-	if a > 10 {
-		someParsable = text
-	}`
-
-	tokens := []Token{}
-
-	var s scanner.Scanner
-	s.Init(strings.NewReader(input))
-	var tok rune
-	for {
-		tok = s.Scan()
-		if tok == scanner.EOF {
-			break
-		}
-
-		//value := strings.TrimSpace(s.TokenText())
-		//	fmt.Println("At position", s.Pos(), ":", s.TokenText(), "==", tok)
-
-		token := Token{
-			Line:    s.Pos().Line,
-			Column:  s.Pos().Column,
-			Text:    s.TokenText(),
-			TokenId: int(tok),
-		}
-		tokens = append(tokens, token)
-	}
-
-	return tokens, nil
-}

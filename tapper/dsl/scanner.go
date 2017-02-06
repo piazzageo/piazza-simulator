@@ -1,4 +1,4 @@
-package symtab
+package dsl
 
 // shunting yard implementation adapted from https://github.com/mgenware/go-shunting-yard
 
