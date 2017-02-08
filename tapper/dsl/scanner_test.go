@@ -17,6 +17,25 @@ func Test40(t *testing.T) {
 func Test41(t *testing.T) {
 	assert := assert.New(t)
 
+	ok, siz := matchArrayTypePrefix("[]")
+	assert.False(ok)
+	ok, siz = matchArrayTypePrefix(" []")
+	assert.False(ok)
+	ok, siz = matchArrayTypePrefix("[}")
+	assert.False(ok)
+	ok, siz = matchArrayTypePrefix("[3a]")
+	assert.False(ok)
+	ok, siz = matchArrayTypePrefix("[3]")
+	assert.True(ok)
+	assert.Equal(3, siz)
+	ok, siz = matchArrayTypePrefix("[32]")
+	assert.True(ok)
+	assert.Equal(32, siz)
+}
+
+func Test42(t *testing.T) {
+	assert := assert.New(t)
+
 	s := &Scanner{}
 
 	type data struct {

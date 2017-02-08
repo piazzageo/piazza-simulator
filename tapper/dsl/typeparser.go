@@ -1,96 +1,118 @@
 package dsl
 
 import (
+	"encoding/json"
+	"fmt"
 	"log"
-	"regexp"
-	"strconv"
-	"strings"
 )
 
 type TypeParser struct {
 	symbolTable *SymbolTable
 }
 
-type DeclBlock map[Symbol]Decl
+// A DeclBlock is a JSON object that is a map from symbol names
+// to symbol types. The symbol type can be either a
+// "struct decl"" or a "simple decl".
+//
+// A simple decl looks like these: int, []bool, [map][4]float
+//
+// A struct decl looks like these:
+//     { "a" : "[map]int", "b" : "[map]int" }
+//     { "user": "string" }
+type DeclBlock map[string]interface{}
 
-type Decl interface{}
-type StructDecl map[Symbol]Decl
-type StringDecl string
+// ParseJson takes a declaration block expressed as JSON string and parses it.
+func (p *TypeParser) ParseJson(s string) error {
+	declBlock := &DeclBlock{}
+	err := json.Unmarshal([]byte(s), declBlock)
+	if err != nil {
+		return err
+	}
 
-var arrayRegexp *regexp.Regexp
-
-func init() {
-	arrayRegexp = regexp.MustCompile(`^\[(\d+)\]`)
+	return p.Parse(declBlock)
 }
 
-func (p *TypeParser) Parse(in *DeclBlock) {
+// Parse takes a declaration block expressed as a DeclBlock object and parses it.
+func (p *TypeParser) Parse(block *DeclBlock) error {
+	var err error
 
 	p.symbolTable = NewSymbolTable()
 	p.symbolTable.Init()
 
 	// collect the symbols that are declared,
 	// put them into the symbol table
-	for k, _ := range *in {
-		p.symbolTable.add(k, nil)
+	for name, _ := range *block {
+		p.symbolTable.add(Symbol(name), nil)
 	}
 
-	for k, v := range *in {
-		switch v.(type) {
+	table := map[string][]Token{}
+
+	scanner := &Scanner{}
+
+	var toks []Token
+
+	for name, decl := range *block {
+
+		switch decl.(type) {
 
 		case map[string]interface{}:
-			structDecl := convertDeclToStructDecl(&v)
-			dslType := p.parseStructDecl(k, structDecl)
-			p.symbolTable.add(k, dslType)
-			log.Printf("%s: %s", k, dslType)
+			structDecl := decl.(map[string]interface{})
+			for fieldName, xfieldDecl := range structDecl {
+				fieldDecl := xfieldDecl.(string)
+				toks, err = p.parseStringDecl(fieldName, &fieldDecl)
+				if err != nil {
+					return err
+				}
+				table[fieldName] = toks
+				//p.symbolTable.add(name+"."+fieldName, dslType)
+			}
+			p.symbolTable.add(Symbol(name), nil)
 
 		case string:
-			stringDecl := convertDeclToStringDecl(&v)
-			dslType := p.parseStringDecl(k, stringDecl)
-			p.symbolTable.add(k, dslType)
-			log.Printf("%s: %s", k, dslType)
+			stringDecl := decl.(string)
+			toks, err := scanner.Scan(string(stringDecl))
+			if err != nil {
+				return err
+			}
+			log.Printf(">> %#v", toks)
+			toks, err = p.parseStringDecl(name, &stringDecl)
+			//p.symbolTable.add(name, dslType)
+			if err != nil {
+				return err
+			}
 
 		default:
-			panic(99)
+			return fmt.Errorf("unknown type declation: %v", decl)
 		}
 	}
+	return nil
 }
 
-func convertDeclToStructDecl(d *Decl) *StructDecl {
-	s := StructDecl{}
-	dd := (*d).(map[string]interface{})
-	for k, v := range dd {
-		s[Symbol(k)] = v.(Decl)
+func (p *TypeParser) parseStringDecl(name string, stringDecl *string) ([]Token, error) {
+
+	scanner := Scanner{}
+
+	toks, err := scanner.Scan(*stringDecl)
+	if err != nil {
+		return nil, err
 	}
-	return &s
+	log.Printf(">> %#v", toks)
+	//	toks, err = p.parseStringDecl(name, stringDecl)
+	//	if err != nil {
+	//		return nil, err
+	//	}
+	//	p.symbolTable.add(name, dslType)
+
+	return toks, nil
 }
 
-func convertDeclToStringDecl(d *Decl) *StringDecl {
-	s := (*d).(string)
-	stringDecl := StringDecl(s)
-	return &stringDecl
-}
-
-func (p *TypeParser) parseStructDecl(name Symbol, structDecl *StructDecl) Type {
-	dslType := &StructType{
-		Fields: map[Symbol]Type{},
-	}
-
-	for k, v := range *structDecl {
-		stringDecl := convertDeclToStringDecl(&v)
-		fieldType := p.parseStringDecl(k, stringDecl)
-		dslType.Fields[k] = fieldType
-	}
-	return dslType
-}
-
-func (p *TypeParser) parseStringDecl(name Symbol, stringDecl *StringDecl) Type {
-
+/*
 	in := string(*stringDecl)
 	in = strings.TrimSpace(in)
 
 	var dslType Type
 
-	arrayMatch, arrayLen := matchArrayPrefix(in)
+	arrayMatch, arrayLen := matchArrayTypePrefix(in)
 
 	switch {
 
@@ -99,7 +121,7 @@ func (p *TypeParser) parseStringDecl(name Symbol, stringDecl *StringDecl) Type {
 
 	case strings.HasPrefix(in, "[map]"):
 		i := len("[map]")
-		rest := StringDecl(in[i:])
+		rest := in[i:]
 		valueType := p.parseStringDecl(name, &rest)
 		keyType := &SymbolType{Symbol: "string"}
 		dslType = &MapType{KeyType: keyType, ValueType: valueType}
@@ -107,13 +129,13 @@ func (p *TypeParser) parseStringDecl(name Symbol, stringDecl *StringDecl) Type {
 	case strings.HasPrefix(in, "[]"):
 
 		i := len("[]")
-		rest := StringDecl(in[i:])
+		rest := in[i:]
 		elemType := p.parseStringDecl(name, &rest)
 		dslType = &SliceType{ElemType: elemType}
 
 	case arrayMatch:
 		i := strings.Index(in, "]")
-		rest := StringDecl(in[i+1:])
+		rest := in[i+1:]
 		elemType := p.parseStringDecl(name, &rest)
 		dslType = &ArrayType{
 			ElemType: elemType,
@@ -126,18 +148,4 @@ func (p *TypeParser) parseStringDecl(name Symbol, stringDecl *StringDecl) Type {
 	}
 
 	return dslType
-}
-
-func matchArrayPrefix(s string) (bool, int) {
-	ok := arrayRegexp.Match([]byte(s))
-	if !ok {
-		return false, -1
-	}
-	sub := arrayRegexp.FindSubmatch([]byte(s))
-
-	siz, err := strconv.Atoi(string(sub[1]))
-	if err != nil {
-		panic(err)
-	}
-	return true, siz
-}
+*/

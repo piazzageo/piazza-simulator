@@ -229,11 +229,11 @@ func peepholer(tokens []Token) ([]Token, error) {
 }
 
 func matchArrayTypePrefix(s string) (bool, int) {
-	ok := arrayRegexp.Match([]byte(s))
+	ok := arrayTypeRegexp.Match([]byte(s))
 	if !ok {
 		return false, -1
 	}
-	sub := arrayRegexp.FindSubmatch([]byte(s))
+	sub := arrayTypeRegexp.FindSubmatch([]byte(s))
 
 	siz, err := strconv.Atoi(string(sub[1]))
 	if err != nil {

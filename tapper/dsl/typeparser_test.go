@@ -4,31 +4,10 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-
-	"encoding/json"
 )
 
-func Test20(t *testing.T) {
-	assert := assert.New(t)
-
-	ok, siz := matchArrayPrefix("[]")
-	assert.False(ok)
-	ok, siz = matchArrayPrefix(" []")
-	assert.False(ok)
-	ok, siz = matchArrayPrefix("[}")
-	assert.False(ok)
-	ok, siz = matchArrayPrefix("[3a]")
-	assert.False(ok)
-	ok, siz = matchArrayPrefix("[3]")
-	assert.True(ok)
-	assert.Equal(3, siz)
-	ok, siz = matchArrayPrefix("[32]")
-	assert.True(ok)
-	assert.Equal(32, siz)
-}
-
 func Test21(t *testing.T) {
-	//	assert := assert.New(t)
+	assert := assert.New(t)
 
 	// this is a DeclBlock, containing 3 interfaces (2 StructDecls and 1 StringDecl)
 	s := `
@@ -49,13 +28,7 @@ func Test21(t *testing.T) {
     }
 }`
 
-	declBlock := &DeclBlock{}
-
-	err := json.Unmarshal([]byte(s), declBlock)
-	if err != nil {
-		panic(err)
-	}
-
 	p := &TypeParser{}
-	p.Parse(declBlock)
+	err := p.ParseJson(s)
+	assert.NoError(err)
 }
