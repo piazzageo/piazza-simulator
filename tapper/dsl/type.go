@@ -46,13 +46,13 @@ type TNode interface {
 	String() string
 }
 
-type TNodeSymbol struct {
-	Symbol string
-}
-
-func (t *TNodeSymbol) String() string {
-	return fmt.Sprintf("SYM(%v)", t.Symbol)
-}
+//type TNodeSymbol struct {
+//	Symbol string
+//}
+//
+//func (t *TNodeSymbol) String() string {
+//	return fmt.Sprintf("SYM(%v)", t.Symbol)
+//}
 
 type TNodeMap struct {
 	KeyType   TNode
@@ -61,6 +61,14 @@ type TNodeMap struct {
 
 func (t *TNodeMap) String() string {
 	return fmt.Sprintf("MAP[%v]%v", t.KeyType, t.ValueType)
+}
+
+type TNodeUserType struct {
+	Name string
+}
+
+func (t *TNodeUserType) String() string {
+	return fmt.Sprintf("USERTYPE(%s)", t.Name)
 }
 
 type TNodeStruct struct {

@@ -236,7 +236,7 @@ func matchArrayTypePrefix(s string) (bool, int) {
 	sub := arrayTypeRegexp.FindSubmatch([]byte(s))
 
 	siz, err := strconv.Atoi(string(sub[1]))
-	if err != nil {
+	if err != nil || siz < 1 {
 		panic(err)
 	}
 	return true, siz

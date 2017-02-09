@@ -15,11 +15,15 @@ func Test10(t *testing.T) {
 
 func Test11(t *testing.T) {
 	assert := assert.New(t)
+	var err error
 
 	st0 := NewTypeTable()
 	assert.Equal("size: 0\n", st0.String())
 
-	st0.set("myint", &TNodeNumber{Flavor: FlavorS32})
+	err = st0.add("myint")
+	assert.NoError(err)
+	err = st0.set("myint", &TNodeNumber{Flavor: FlavorS32})
+	assert.NoError(err)
 	assert.Equal("size: 1\n  myint:[NUMBER(S32)]\n", st0.String())
 
 	assert.True(st0.has("myint"))

@@ -27,20 +27,39 @@ func NewTypeTable() *TypeTable {
 	return st
 }
 
-func (st *TypeTable) Init() {
-	st.set("int8", &TNodeNumber{Flavor: FlavorS8})
-	st.set("int16", &TNodeNumber{Flavor: FlavorS16})
-	st.set("int32", &TNodeNumber{Flavor: FlavorS32})
-	st.set("int64", &TNodeNumber{Flavor: FlavorS64})
-	st.set("uint8", &TNodeNumber{Flavor: FlavorU8})
-	st.set("uint16", &TNodeNumber{Flavor: FlavorU16})
-	st.set("uint32", &TNodeNumber{Flavor: FlavorU32})
-	st.set("uint64", &TNodeNumber{Flavor: FlavorU64})
-	st.set("float32", &TNodeNumber{Flavor: FlavorF32})
-	st.set("float64", &TNodeNumber{Flavor: FlavorF64})
-	st.set("bool", &TNodeBool{})
-	st.set("string", &TNodeString{})
-	st.set("any", &TNodeAny{})
+var builtinTypes map[string]TNode
+
+func (st *TypeTable) Init() error {
+	var err error
+
+	builtinTypes = map[string]TNode{
+		"int8":    &TNodeNumber{Flavor: FlavorS8},
+		"int16":   &TNodeNumber{Flavor: FlavorS16},
+		"int32":   &TNodeNumber{Flavor: FlavorS32},
+		"int64":   &TNodeNumber{Flavor: FlavorS64},
+		"uint8":   &TNodeNumber{Flavor: FlavorU8},
+		"uint16":  &TNodeNumber{Flavor: FlavorU16},
+		"uint32":  &TNodeNumber{Flavor: FlavorU32},
+		"uint64":  &TNodeNumber{Flavor: FlavorU64},
+		"float32": &TNodeNumber{Flavor: FlavorF32},
+		"float64": &TNodeNumber{Flavor: FlavorF64},
+		"bool":    &TNodeBool{},
+		"string":  &TNodeString{},
+		"any":     &TNodeAny{},
+	}
+
+	for k, v := range builtinTypes {
+		err = st.add(k)
+		if err != nil {
+			return err
+		}
+		err = st.set(k, v)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
 }
 
 func (st *TypeTable) String() string {
@@ -51,22 +70,26 @@ func (st *TypeTable) String() string {
 	return s
 }
 
+func (st *TypeTable) isBuiltin(name string) bool {
+	_, ok := builtinTypes[name]
+	return ok
+}
+
+func (st *TypeTable) add(name string) error {
+	if st.has(name) {
+		return fmt.Errorf("type table entry already exists: %s", name)
+	}
+	st.Types[name] = &TypeTableEntry{
+		Name: name,
+	}
+	return nil
+}
+
 func (st *TypeTable) set(name string, node TNode) error {
-	v, ok := st.Types[name]
-	if !ok {
-		st.Types[name] = &TypeTableEntry{
-			Name: name,
-			Node: node,
-		}
-		return nil
+	if !st.has(name) {
+		return fmt.Errorf("type table entry does not exist: %s", name)
 	}
-
-	if v.Node != nil {
-		return fmt.Errorf("type table entry already has node set: %s", name)
-	}
-
 	st.Types[name].Node = node
-
 	return nil
 }
 
