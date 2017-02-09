@@ -24,22 +24,14 @@ func Test01(t *testing.T) {
 	assert.Equal("ARRAY(17, NUMBER(U8))", t1.String())
 
 	t2 := &TNodeStruct{
-		Fields: map[string]TNode{
-			"i": &TNodeNumber{Flavor: FlavorS32},
-			"s": &TNodeString{},
-			"f": &TNodeNumber{Flavor: FlavorF32},
-			"b": &TNodeBool{},
-			"a": &TNodeAny{},
-		},
+		Fields: map[string]bool{"aa": true, "bb": true, "cc": true},
 	}
 
 	t2s := t2.String()
 	assert.Contains(t2s, "STRUCT(")
-	assert.Contains(t2s, "i:NUMBER(S32)")
-	assert.Contains(t2s, "s:STRING")
-	assert.Contains(t2s, "f:NUMBER(F32)")
-	assert.Contains(t2s, "b:BOOL")
-	assert.Contains(t2s, "a:ANY")
+	assert.Contains(t2s, "aa")
+	assert.Contains(t2s, "bb")
+	assert.Contains(t2s, "cc")
 	assert.Contains(t2s, ")")
 
 	t3 := &TNodeMap{

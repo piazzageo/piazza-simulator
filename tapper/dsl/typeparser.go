@@ -82,12 +82,15 @@ func (p *TypeParser) declareSymbols(block *DeclBlock) error {
 			if err != nil {
 				return err
 			}
+			fs := map[string]bool{}
 			for fieldName, _ := range decl.(map[string]interface{}) {
 				err = p.typeTable.add(name + "." + fieldName)
 				if err != nil {
 					return err
 				}
+				fs[fieldName]=true
 			}
+			err = p.typeTable.set(name, &TNodeStruct{Fields: fs})
 		default:
 			return fmt.Errorf("bad decl type: %T", decl)
 		}

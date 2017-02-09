@@ -72,16 +72,16 @@ func (t *TNodeUserType) String() string {
 }
 
 type TNodeStruct struct {
-	Fields map[string]TNode
+	Fields map[string]bool
 }
 
 func (t *TNodeStruct) String() string {
 	s := ""
-	for k, v := range t.Fields {
+	for k, _ := range t.Fields {
 		if s != "" {
 			s += ", "
 		}
-		s += fmt.Sprintf("%s:%v", k, v)
+		s += fmt.Sprintf("%v", k)
 	}
 	return fmt.Sprintf("STRUCT(%s)", s)
 }
