@@ -1,7 +1,6 @@
 package dsl
 
 import (
-	"log"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -63,9 +62,9 @@ func Test42(t *testing.T) {
 		assert.Len(tokens, len(testcase.tokens))
 		for i, _ := range testcase.tokens {
 			assert.Equal(testcase.tokens[i], tokens[i].Text)
-			log.Printf("%s", testcase.tokens[i])
+			//log.Printf("%s", testcase.tokens[i])
 		}
-		log.Printf("---")
+		//log.Printf("---")
 
 	}
 

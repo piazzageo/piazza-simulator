@@ -5,7 +5,6 @@ package dsl
 import (
 	"errors"
 	"fmt"
-	"log"
 )
 
 type Expression struct {
@@ -19,18 +18,21 @@ func ParseExpr(s string) error {
 		return err
 	}
 
-	for _, v := range tokens {
-		log.Printf("%s\n", v.String())
-	}
+	//for _, v := range tokens {
+	//log.Printf("%s\n", v.String())
+	//}
 
 	asts, err := Parse(tokens)
 	if err != nil {
 		return err
 	}
-
-	for _, ast := range asts {
-		log.Printf("%s\n", ast.String())
+	if asts == nil {
+		panic(2)
 	}
+
+	//for _, ast := range asts {
+	//log.Printf("%s\n", ast.String())
+	//}
 
 	return nil
 }

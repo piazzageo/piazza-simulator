@@ -16,20 +16,20 @@ func Test00(t *testing.T) {
 func Test01(t *testing.T) {
 	assert := assert.New(t)
 
-	t1 := &ArrayType{
-		ElemType: &NumberType{Flavor: FlavorU8},
+	t1 := &TNodeArray{
+		ElemType: &TNodeNumber{Flavor: FlavorU8},
 		Len:      17,
 	}
 
 	assert.Equal("ARRAY(17, NUMBER(U8))", t1.String())
 
-	t2 := &StructType{
-		Fields: map[Symbol]Type{
-			"i": &NumberType{Flavor: FlavorS32},
-			"s": &StringType{},
-			"f": &NumberType{Flavor: FlavorF32},
-			"b": &BoolType{},
-			"a": &AnyType{},
+	t2 := &TNodeStruct{
+		Fields: map[string]TNode{
+			"i": &TNodeNumber{Flavor: FlavorS32},
+			"s": &TNodeString{},
+			"f": &TNodeNumber{Flavor: FlavorF32},
+			"b": &TNodeBool{},
+			"a": &TNodeAny{},
 		},
 	}
 
@@ -42,15 +42,15 @@ func Test01(t *testing.T) {
 	assert.Contains(t2s, "a:ANY")
 	assert.Contains(t2s, ")")
 
-	t3 := &MapType{
-		KeyType:   &StringType{},
-		ValueType: &BoolType{},
+	t3 := &TNodeMap{
+		KeyType:   &TNodeString{},
+		ValueType: &TNodeBool{},
 	}
 
 	assert.Equal("MAP[STRING]BOOL", t3.String())
 
-	t4 := &SliceType{
-		ElemType: &NumberType{Flavor: FlavorU32},
+	t4 := &TNodeSlice{
+		ElemType: &TNodeNumber{Flavor: FlavorU32},
 	}
 
 	assert.Equal("SLICE(NUMBER(U32))", t4.String())

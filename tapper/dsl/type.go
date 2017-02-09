@@ -42,32 +42,32 @@ func (f Flavor) String() string {
 
 //---------------------------------------------------------------------
 
-type Type interface {
+type TNode interface {
 	String() string
 }
 
-type SymbolType struct {
-	Symbol Symbol
+type TNodeSymbol struct {
+	Symbol string
 }
 
-func (t *SymbolType) String() string {
+func (t *TNodeSymbol) String() string {
 	return fmt.Sprintf("SYM(%v)", t.Symbol)
 }
 
-type MapType struct {
-	KeyType   Type
-	ValueType Type
+type TNodeMap struct {
+	KeyType   TNode
+	ValueType TNode
 }
 
-func (t *MapType) String() string {
+func (t *TNodeMap) String() string {
 	return fmt.Sprintf("MAP[%v]%v", t.KeyType, t.ValueType)
 }
 
-type StructType struct {
-	Fields map[Symbol]Type
+type TNodeStruct struct {
+	Fields map[string]TNode
 }
 
-func (t *StructType) String() string {
+func (t *TNodeStruct) String() string {
 	s := ""
 	for k, v := range t.Fields {
 		if s != "" {
@@ -78,48 +78,48 @@ func (t *StructType) String() string {
 	return fmt.Sprintf("STRUCT(%s)", s)
 }
 
-type ArrayType struct {
-	ElemType Type
+type TNodeArray struct {
+	ElemType TNode
 	Len      int
 }
 
-func (t *ArrayType) String() string {
+func (t *TNodeArray) String() string {
 	return fmt.Sprintf("ARRAY(%d, %v)", t.Len, t.ElemType)
 }
 
-type SliceType struct {
-	ElemType Type
+type TNodeSlice struct {
+	ElemType TNode
 }
 
-func (t *SliceType) String() string {
+func (t *TNodeSlice) String() string {
 	return fmt.Sprintf("SLICE(%v)", t.ElemType)
 }
 
-type NumberType struct {
+type TNodeNumber struct {
 	Flavor Flavor
 }
 
-func (t *NumberType) String() string {
+func (t *TNodeNumber) String() string {
 	return fmt.Sprintf("NUMBER(%v)", t.Flavor)
 }
 
-type BoolType struct {
+type TNodeBool struct {
 }
 
-func (t *BoolType) String() string {
+func (t *TNodeBool) String() string {
 	return "BOOL"
 }
 
-type StringType struct {
+type TNodeString struct {
 }
 
-func (t *StringType) String() string {
+func (t *TNodeString) String() string {
 	return "STRING"
 }
 
-type AnyType struct {
+type TNodeAny struct {
 }
 
-func (t *AnyType) String() string {
+func (t *TNodeAny) String() string {
 	return "ANY"
 }

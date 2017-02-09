@@ -2,67 +2,80 @@ package dsl
 
 import "fmt"
 
-type Symbol string
-
-func (s Symbol) String() string {
-	return string(s)
+type TypeTableEntry struct {
+	Name   string
+	Tokens []Token
+	Node   TNode
 }
 
-type SymbolTable struct {
-	Symbols map[Symbol]Type
+func (e *TypeTableEntry) String() string {
+	s := fmt.Sprintf("%s:", e.Name)
+	for _, v := range e.Tokens {
+		s += fmt.Sprintf(" <%v>", v)
+	}
+	s += fmt.Sprintf("[%v]", e.Node)
+	return s
 }
 
-func NewSymbolTable() *SymbolTable {
-	syms := map[Symbol]Type{}
+type TypeTable struct {
+	Types map[string]*TypeTableEntry
+}
 
-	st := &SymbolTable{
-		Symbols: syms,
+func NewTypeTable() *TypeTable {
+	entries := map[string]*TypeTableEntry{}
+
+	st := &TypeTable{
+		Types: entries,
 	}
 
 	return st
 }
 
-func (st *SymbolTable) Init() {
-	st.add("int8", &NumberType{Flavor: FlavorS8})
-	st.add("int16", &NumberType{Flavor: FlavorS16})
-	st.add("int32", &NumberType{Flavor: FlavorS32})
-	st.add("int64", &NumberType{Flavor: FlavorS64})
-	st.add("uint8", &NumberType{Flavor: FlavorU8})
-	st.add("uint16", &NumberType{Flavor: FlavorU16})
-	st.add("uint32", &NumberType{Flavor: FlavorU32})
-	st.add("uint64", &NumberType{Flavor: FlavorU64})
-	st.add("float32", &NumberType{Flavor: FlavorF32})
-	st.add("float64", &NumberType{Flavor: FlavorF64})
-	st.add("bool", &BoolType{})
-	st.add("string", &StringType{})
-	st.add("any", &AnyType{})
+func (st *TypeTable) Init() {
+	st.insertFull("int8", nil, &TNodeNumber{Flavor: FlavorS8})
+	st.insertFull("int16", nil, &TNodeNumber{Flavor: FlavorS16})
+	st.insertFull("int32", nil, &TNodeNumber{Flavor: FlavorS32})
+	st.insertFull("int64", nil, &TNodeNumber{Flavor: FlavorS64})
+	st.insertFull("uint8", nil, &TNodeNumber{Flavor: FlavorU8})
+	st.insertFull("uint16", nil, &TNodeNumber{Flavor: FlavorU16})
+	st.insertFull("uint32", nil, &TNodeNumber{Flavor: FlavorU32})
+	st.insertFull("uint64", nil, &TNodeNumber{Flavor: FlavorU64})
+	st.insertFull("float32", nil, &TNodeNumber{Flavor: FlavorF32})
+	st.insertFull("float64", nil, &TNodeNumber{Flavor: FlavorF64})
+	st.insertFull("bool", nil, &TNodeBool{})
+	st.insertFull("string", nil, &TNodeString{})
+	st.insertFull("any", nil, &TNodeAny{})
 }
 
-func (st *SymbolTable) String() string {
-	s := fmt.Sprintf("%d:", len(st.Symbols))
-	for k, v := range st.Symbols {
-		s += fmt.Sprintf(" [%s:%v]", k, v)
+func (st *TypeTable) String() string {
+	s := fmt.Sprintf("%d:", len(st.Types))
+	for _, v := range st.Types {
+		s += fmt.Sprintf(" %v", v)
 	}
 	return s
 }
 
-func (st *SymbolTable) add(s Symbol, t Type) {
-	st.Symbols[s] = t
+func (st *TypeTable) insert(s string) {
+	st.insertFull(s, nil, nil)
 }
 
-func (st *SymbolTable) get(s Symbol) Type {
-	v, ok := st.Symbols[s]
+func (st *TypeTable) insertFull(s string, tok []Token, node TNode) {
+	st.Types[s] = &TypeTableEntry{
+		Name:   s,
+		Node:   node,
+		Tokens: tok,
+	}
+}
+
+func (st *TypeTable) get(s string) *TypeTableEntry {
+	v, ok := st.Types[s]
 	if !ok {
 		return nil
 	}
 	return v
 }
 
-func (st *SymbolTable) has(s Symbol) bool {
-	_, ok := st.Symbols[s]
+func (st *TypeTable) has(s string) bool {
+	_, ok := st.Types[s]
 	return ok
-}
-
-func (st *SymbolTable) remove(s Symbol) {
-	delete(st.Symbols, s)
 }
