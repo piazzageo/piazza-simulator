@@ -3,16 +3,12 @@ package dsl
 import "fmt"
 
 type TypeTableEntry struct {
-	Name   string
-	Tokens []Token
-	Node   TNode
+	Name string
+	Node TNode
 }
 
 func (e *TypeTableEntry) String() string {
 	s := fmt.Sprintf("%s:", e.Name)
-	for _, v := range e.Tokens {
-		s += fmt.Sprintf(" <%v>", v)
-	}
 	s += fmt.Sprintf("[%v]", e.Node)
 	return s
 }
@@ -32,39 +28,46 @@ func NewTypeTable() *TypeTable {
 }
 
 func (st *TypeTable) Init() {
-	st.insertFull("int8", nil, &TNodeNumber{Flavor: FlavorS8})
-	st.insertFull("int16", nil, &TNodeNumber{Flavor: FlavorS16})
-	st.insertFull("int32", nil, &TNodeNumber{Flavor: FlavorS32})
-	st.insertFull("int64", nil, &TNodeNumber{Flavor: FlavorS64})
-	st.insertFull("uint8", nil, &TNodeNumber{Flavor: FlavorU8})
-	st.insertFull("uint16", nil, &TNodeNumber{Flavor: FlavorU16})
-	st.insertFull("uint32", nil, &TNodeNumber{Flavor: FlavorU32})
-	st.insertFull("uint64", nil, &TNodeNumber{Flavor: FlavorU64})
-	st.insertFull("float32", nil, &TNodeNumber{Flavor: FlavorF32})
-	st.insertFull("float64", nil, &TNodeNumber{Flavor: FlavorF64})
-	st.insertFull("bool", nil, &TNodeBool{})
-	st.insertFull("string", nil, &TNodeString{})
-	st.insertFull("any", nil, &TNodeAny{})
+	st.set("int8", &TNodeNumber{Flavor: FlavorS8})
+	st.set("int16", &TNodeNumber{Flavor: FlavorS16})
+	st.set("int32", &TNodeNumber{Flavor: FlavorS32})
+	st.set("int64", &TNodeNumber{Flavor: FlavorS64})
+	st.set("uint8", &TNodeNumber{Flavor: FlavorU8})
+	st.set("uint16", &TNodeNumber{Flavor: FlavorU16})
+	st.set("uint32", &TNodeNumber{Flavor: FlavorU32})
+	st.set("uint64", &TNodeNumber{Flavor: FlavorU64})
+	st.set("float32", &TNodeNumber{Flavor: FlavorF32})
+	st.set("float64", &TNodeNumber{Flavor: FlavorF64})
+	st.set("bool", &TNodeBool{})
+	st.set("string", &TNodeString{})
+	st.set("any", &TNodeAny{})
 }
 
 func (st *TypeTable) String() string {
-	s := fmt.Sprintf("%d:", len(st.Types))
-	for _, v := range st.Types {
-		s += fmt.Sprintf(" %v", v)
+	s := fmt.Sprintf("size: %d\n", len(st.Types))
+	for _, tte := range st.Types {
+		s += fmt.Sprintf("  %v\n", tte)
 	}
 	return s
 }
 
-func (st *TypeTable) insert(s string) {
-	st.insertFull(s, nil, nil)
-}
-
-func (st *TypeTable) insertFull(s string, tok []Token, node TNode) {
-	st.Types[s] = &TypeTableEntry{
-		Name:   s,
-		Node:   node,
-		Tokens: tok,
+func (st *TypeTable) set(name string, node TNode) error {
+	v, ok := st.Types[name]
+	if !ok {
+		st.Types[name] = &TypeTableEntry{
+			Name: name,
+			Node: node,
+		}
+		return nil
 	}
+
+	if v.Node != nil {
+		return fmt.Errorf("type table entry already has node set: %s", name)
+	}
+
+	st.Types[name].Node = node
+
+	return nil
 }
 
 func (st *TypeTable) get(s string) *TypeTableEntry {

@@ -17,10 +17,10 @@ func Test11(t *testing.T) {
 	assert := assert.New(t)
 
 	st0 := NewTypeTable()
-	assert.Equal("0:", st0.String())
+	assert.Equal("size: 0\n", st0.String())
 
-	st0.insertFull("myint", nil, &TNodeNumber{Flavor: FlavorS32})
-	assert.Equal("1: myint:[NUMBER(S32)]", st0.String())
+	st0.set("myint", &TNodeNumber{Flavor: FlavorS32})
+	assert.Equal("size: 1\n  myint:[NUMBER(S32)]\n", st0.String())
 
 	assert.True(st0.has("myint"))
 
