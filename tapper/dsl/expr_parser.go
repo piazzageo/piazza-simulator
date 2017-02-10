@@ -49,7 +49,7 @@ func (ep *ExprParser) buildTree() (Node, error) {
 		if err != nil {
 			return nil, err
 		}
-		out = &NodeMultiply{left: left, right: right}
+		out = NewNodeMultiply(left, right)
 
 	case TokenAdd:
 		left, err = ep.buildTree()
@@ -60,10 +60,10 @@ func (ep *ExprParser) buildTree() (Node, error) {
 		if err != nil {
 			return nil, err
 		}
-		out = &NodeAdd{left: left, right: right}
+		out = NewNodeAdd(left, right)
 
 	case TokenSymbol:
-		out = &NodeSymbol{name: tok.Text}
+		out = NewNodeSymbol(tok.Text)
 
 	default:
 		return nil, fmt.Errorf("Unknown token building ast: %d (\"%s\")", tok.Id, tok.Text)

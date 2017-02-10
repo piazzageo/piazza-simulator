@@ -11,15 +11,27 @@ import (
 func Test20(t *testing.T) {
 	assert := assert.New(t)
 
-	const src = `  a*(b + c )`
+	data := map[string][]*Token{
+		"  a*(b + c )": []*Token{
+			&Token{Line: 1, Column: 4, Id: TokenSymbol, Text: "a"},
+			&Token{Line: 1, Column: 7, Id: TokenSymbol, Text: "b"},
+			&Token{Line: 1, Column: 11, Id: TokenSymbol, Text: "c"},
+			&Token{Line: 1, Column: 9, Id: TokenAdd, Text: "+"},
+			&Token{Line: 1, Column: 5, Id: TokenMultiply, Text: "*"},
+		},
+	}
 
-	ep := &ExprTokenizer{}
+	for k, v := range data {
 
-	toks, err := ep.Tokenize(src)
-	assert.NoError(err)
-	assert.NotNil(toks)
+		ep := &ExprTokenizer{}
+		toks, err := ep.Tokenize(k)
+		assert.NoError(err)
+		assert.NotNil(toks)
 
-	//for _, v := range toks {
-	//log.Printf("%s\n", v.String())
-	//}
+		assert.Len(toks, len(v))
+		for i := 0; i < len(toks); i++ {
+			//log.Printf("%s\n", toks[i].String())
+			assert.EqualValues(v[i], toks[i])
+		}
+	}
 }

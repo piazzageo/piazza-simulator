@@ -16,14 +16,38 @@ func Test10(t *testing.T) {
 func Test11(t *testing.T) {
 	assert := assert.New(t)
 
-	const src = `  a*(b + c )`
-	et := &ExprTokenizer{}
-	toks, err := et.Tokenize(src)
-	assert.NoError(err)
-	assert.NotNil(toks)
+	type testcase struct {
+		toks []*Token
+		node Node
+	}
+	data := []testcase{
+		testcase{
+			toks: []*Token{ //"  a*(b + c )":
+				&Token{Line: 1, Column: 4, Id: TokenSymbol, Text: "a"},
+				&Token{Line: 1, Column: 7, Id: TokenSymbol, Text: "b"},
+				&Token{Line: 1, Column: 11, Id: TokenSymbol, Text: "c"},
+				&Token{Line: 1, Column: 9, Id: TokenAdd, Text: "+"},
+				&Token{Line: 1, Column: 5, Id: TokenMultiply, Text: "*"},
+			},
+			node: nil,
+		},
+	}
 
-	ep := &ExprParser{}
-	node, err := ep.Parse(toks)
-	assert.NoError(err)
-	assert.NotNil(node)
+	equals := func(a Node, b Node) bool {
+		return a == b
+	}
+
+	for i, tc := range data {
+
+		ep := &ExprParser{}
+		node, err := ep.Parse(tc.toks)
+		assert.NoError(err)
+		assert.NotNil(node)
+
+		for i := 0; i < len(toks); i++ {
+			//log.Printf("%s\n", toks[i].String())
+			assert.EqualValues(v[i], toks[i])
+		}
+	}
+
 }

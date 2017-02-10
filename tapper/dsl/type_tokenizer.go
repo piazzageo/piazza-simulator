@@ -90,7 +90,7 @@ func (p *TypeTokenizer) declareSymbols(block *DeclBlock) error {
 				}
 				fs[fieldName] = true
 			}
-			err = p.typeTable.set(name, &NodeStructType{Fields: fs})
+			err = p.typeTable.set(name, NewNodeStructType(fs))
 		default:
 			return fmt.Errorf("bad decl type: %T", decl)
 		}

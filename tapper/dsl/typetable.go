@@ -33,19 +33,19 @@ func (st *TypeTable) Init() error {
 	var err error
 
 	builtinTypes = map[string]Node{
-		"int8":    &NodeNumberType{Flavor: FlavorS8},
-		"int16":   &NodeNumberType{Flavor: FlavorS16},
-		"int32":   &NodeNumberType{Flavor: FlavorS32},
-		"int64":   &NodeNumberType{Flavor: FlavorS64},
-		"uint8":   &NodeNumberType{Flavor: FlavorU8},
-		"uint16":  &NodeNumberType{Flavor: FlavorU16},
-		"uint32":  &NodeNumberType{Flavor: FlavorU32},
-		"uint64":  &NodeNumberType{Flavor: FlavorU64},
-		"float32": &NodeNumberType{Flavor: FlavorF32},
-		"float64": &NodeNumberType{Flavor: FlavorF64},
-		"bool":    &NodeBoolType{},
-		"string":  &NodeStringType{},
-		"any":     &NodeAnyType{},
+		"int8":    NewNodeNumberType(FlavorS8),
+		"int16":   NewNodeNumberType(FlavorS16),
+		"int32":   NewNodeNumberType(FlavorS32),
+		"int64":   NewNodeNumberType(FlavorS64),
+		"uint8":   NewNodeNumberType(FlavorU8),
+		"uint16":  NewNodeNumberType(FlavorU16),
+		"uint32":  NewNodeNumberType(FlavorU32),
+		"uint64":  NewNodeNumberType(FlavorU64),
+		"float32": NewNodeNumberType(FlavorF32),
+		"float64": NewNodeNumberType(FlavorF64),
+		"bool":    NewNodeBoolType(),
+		"string":  NewNodeStringType(),
+		"any":     NewNodeAnyType(),
 	}
 
 	for k, v := range builtinTypes {
