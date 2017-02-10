@@ -5,13 +5,13 @@ import "fmt"
 type TypeParser struct {
 }
 
-func (p *TypeParser) Parse(toks []Token, typeTable *TypeTable) (TNode, error) {
+func (p *TypeParser) Parse(toks []Token, typeTable *TypeTable) (Node, error) {
 
 	t0 := toks[0]
 	t1ok := len(toks) > 1
 	//t2ok := len(toks) > 2
 
-	var out TNode
+	var out Node
 
 	switch t0.Id {
 
@@ -22,7 +22,7 @@ func (p *TypeParser) Parse(toks []Token, typeTable *TypeTable) (TNode, error) {
 		if typeTable.isBuiltin(t0.Text) {
 			out = typeTable.get(t0.Text).Node
 		} else {
-			out = &TNodeUserType{Name: t0.Text}
+			out = &NodeUserType{Name: t0.Text}
 		}
 
 	case TokenTypeSlice:
@@ -33,7 +33,7 @@ func (p *TypeParser) Parse(toks []Token, typeTable *TypeTable) (TNode, error) {
 		if err != nil {
 			return nil, err
 		}
-		out = &TNodeSlice{ElemType: next}
+		out = &NodeSliceType{ElemType: next}
 
 	case TokenTypeMap:
 		if !t1ok {
@@ -43,7 +43,7 @@ func (p *TypeParser) Parse(toks []Token, typeTable *TypeTable) (TNode, error) {
 		if err != nil {
 			return nil, err
 		}
-		out = &TNodeMap{KeyType: &TNodeString{}, ValueType: next}
+		out = &NodeMapType{KeyType: &NodeStringType{}, ValueType: next}
 
 	case TokenTypeArray:
 		if !t1ok {
@@ -53,7 +53,7 @@ func (p *TypeParser) Parse(toks []Token, typeTable *TypeTable) (TNode, error) {
 		if err != nil {
 			return nil, err
 		}
-		out = &TNodeArray{ElemType: next, Len: t0.Value.(int)}
+		out = &NodeArrayType{ElemType: next, Len: t0.Value.(int)}
 
 	default:
 		return nil, fmt.Errorf("unhandled token: " + t0.String())

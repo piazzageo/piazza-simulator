@@ -5,7 +5,6 @@ package dsl
 import (
 	"errors"
 	"fmt"
-	"log"
 )
 
 type ExprTokenizer struct {
@@ -31,9 +30,9 @@ func (ep *ExprTokenizer) Tokenize(s string) ([]*Token, error) {
 		return nil, err
 	}
 
-	for _, tok := range toks {
-		log.Printf("%v\n", tok)
-	}
+	//for _, tok := range toks {
+	//log.Printf("%v\n", tok)
+	//}
 
 	return toks, nil
 }

@@ -4,7 +4,7 @@ import "fmt"
 
 type TypeTableEntry struct {
 	Name string
-	Node TNode
+	Node Node
 }
 
 func (e *TypeTableEntry) String() string {
@@ -27,25 +27,25 @@ func NewTypeTable() *TypeTable {
 	return st
 }
 
-var builtinTypes map[string]TNode
+var builtinTypes map[string]Node
 
 func (st *TypeTable) Init() error {
 	var err error
 
-	builtinTypes = map[string]TNode{
-		"int8":    &TNodeNumber{Flavor: FlavorS8},
-		"int16":   &TNodeNumber{Flavor: FlavorS16},
-		"int32":   &TNodeNumber{Flavor: FlavorS32},
-		"int64":   &TNodeNumber{Flavor: FlavorS64},
-		"uint8":   &TNodeNumber{Flavor: FlavorU8},
-		"uint16":  &TNodeNumber{Flavor: FlavorU16},
-		"uint32":  &TNodeNumber{Flavor: FlavorU32},
-		"uint64":  &TNodeNumber{Flavor: FlavorU64},
-		"float32": &TNodeNumber{Flavor: FlavorF32},
-		"float64": &TNodeNumber{Flavor: FlavorF64},
-		"bool":    &TNodeBool{},
-		"string":  &TNodeString{},
-		"any":     &TNodeAny{},
+	builtinTypes = map[string]Node{
+		"int8":    &NodeNumberType{Flavor: FlavorS8},
+		"int16":   &NodeNumberType{Flavor: FlavorS16},
+		"int32":   &NodeNumberType{Flavor: FlavorS32},
+		"int64":   &NodeNumberType{Flavor: FlavorS64},
+		"uint8":   &NodeNumberType{Flavor: FlavorU8},
+		"uint16":  &NodeNumberType{Flavor: FlavorU16},
+		"uint32":  &NodeNumberType{Flavor: FlavorU32},
+		"uint64":  &NodeNumberType{Flavor: FlavorU64},
+		"float32": &NodeNumberType{Flavor: FlavorF32},
+		"float64": &NodeNumberType{Flavor: FlavorF64},
+		"bool":    &NodeBoolType{},
+		"string":  &NodeStringType{},
+		"any":     &NodeAnyType{},
 	}
 
 	for k, v := range builtinTypes {
@@ -85,7 +85,7 @@ func (st *TypeTable) add(name string) error {
 	return nil
 }
 
-func (st *TypeTable) set(name string, node TNode) error {
+func (st *TypeTable) set(name string, node Node) error {
 	if !st.has(name) {
 		return fmt.Errorf("type table entry does not exist: %s", name)
 	}

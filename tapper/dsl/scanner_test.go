@@ -10,11 +10,6 @@ import (
 
 func Test40(t *testing.T) {
 	assert := assert.New(t)
-	assert.True(!false)
-}
-
-func Test41(t *testing.T) {
-	assert := assert.New(t)
 
 	ok, siz := matchArrayTypePrefix("[]")
 	assert.False(ok)

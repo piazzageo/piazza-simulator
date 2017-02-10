@@ -6,24 +6,19 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-//--------------------------
+//---------------------------------------------------------------------------
 
-func Test00(t *testing.T) {
-	assert := assert.New(t)
-	assert.True(!false)
-}
-
-func Test01(t *testing.T) {
+func Test30(t *testing.T) {
 	assert := assert.New(t)
 
-	t1 := &TNodeArray{
-		ElemType: &TNodeNumber{Flavor: FlavorU8},
+	t1 := NodeArrayType{
+		ElemType: &NodeNumberType{Flavor: FlavorU8},
 		Len:      17,
 	}
 
 	assert.Equal("ARRAY(17, NUMBER(U8))", t1.String())
 
-	t2 := &TNodeStruct{
+	t2 := &NodeStructType{
 		Fields: map[string]bool{"aa": true, "bb": true, "cc": true},
 	}
 
@@ -34,15 +29,15 @@ func Test01(t *testing.T) {
 	assert.Contains(t2s, "cc")
 	assert.Contains(t2s, ")")
 
-	t3 := &TNodeMap{
-		KeyType:   &TNodeString{},
-		ValueType: &TNodeBool{},
+	t3 := &NodeMapType{
+		KeyType:   &NodeStringType{},
+		ValueType: &NodeBoolType{},
 	}
 
 	assert.Equal("MAP[STRING]BOOL", t3.String())
 
-	t4 := &TNodeSlice{
-		ElemType: &TNodeNumber{Flavor: FlavorU32},
+	t4 := &NodeSliceType{
+		ElemType: &NodeNumberType{Flavor: FlavorU32},
 	}
 
 	assert.Equal("SLICE(NUMBER(U32))", t4.String())

@@ -8,12 +8,12 @@ import (
 
 //--------------------------
 
-func Test50(t *testing.T) {
+func Test10(t *testing.T) {
 	assert := assert.New(t)
 	assert.True(!false)
 }
 
-func Test51(t *testing.T) {
+func Test11(t *testing.T) {
 	assert := assert.New(t)
 
 	const src = `  a*(b + c )`
@@ -26,8 +26,4 @@ func Test51(t *testing.T) {
 	node, err := ep.Parse(toks)
 	assert.NoError(err)
 	assert.NotNil(node)
-
-	//for _, v := range toks {
-	//log.Printf("%s\n", v.String())
-	//}
 }

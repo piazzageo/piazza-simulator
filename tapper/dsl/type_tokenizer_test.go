@@ -6,7 +6,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func Test21(t *testing.T) {
+func Test60(t *testing.T) {
 	assert := assert.New(t)
 
 	// this is a DeclBlock, containing both struct decls and string decls
@@ -53,50 +53,50 @@ func Test21(t *testing.T) {
 	assert.NoError(err)
 	assert.NotNil(typeTable)
 
-	data := map[string]TNode{
+	data := map[string]Node{
 		// the built-in types
-		"uint8":   &TNodeNumber{Flavor: FlavorU8},
-		"uint16":  &TNodeNumber{Flavor: FlavorU16},
-		"uint32":  &TNodeNumber{Flavor: FlavorU32},
-		"uint64":  &TNodeNumber{Flavor: FlavorU64},
-		"int8":    &TNodeNumber{Flavor: FlavorS8},
-		"int16":   &TNodeNumber{Flavor: FlavorS16},
-		"int32":   &TNodeNumber{Flavor: FlavorS32},
-		"int64":   &TNodeNumber{Flavor: FlavorS64},
-		"float32": &TNodeNumber{Flavor: FlavorF32},
-		"float64": &TNodeNumber{Flavor: FlavorF64},
-		"bool":    &TNodeBool{},
-		"string":  &TNodeString{},
-		"any":     &TNodeAny{},
+		"uint8":   &NodeNumberType{Flavor: FlavorU8},
+		"uint16":  &NodeNumberType{Flavor: FlavorU16},
+		"uint32":  &NodeNumberType{Flavor: FlavorU32},
+		"uint64":  &NodeNumberType{Flavor: FlavorU64},
+		"int8":    &NodeNumberType{Flavor: FlavorS8},
+		"int16":   &NodeNumberType{Flavor: FlavorS16},
+		"int32":   &NodeNumberType{Flavor: FlavorS32},
+		"int64":   &NodeNumberType{Flavor: FlavorS64},
+		"float32": &NodeNumberType{Flavor: FlavorF32},
+		"float64": &NodeNumberType{Flavor: FlavorF64},
+		"bool":    &NodeBoolType{},
+		"string":  &NodeStringType{},
+		"any":     &NodeAnyType{},
 
 		// the types from our decl block above
-		"MyIntU8":          &TNodeNumber{Flavor: FlavorU8},
-		"MyIntU16":         &TNodeNumber{Flavor: FlavorU16},
-		"MyIntU32":         &TNodeNumber{Flavor: FlavorU32},
-		"MyIntU64":         &TNodeNumber{Flavor: FlavorU64},
-		"MyInt8":           &TNodeNumber{Flavor: FlavorS8},
-		"MyInt16":          &TNodeNumber{Flavor: FlavorS16},
-		"MyInt32":          &TNodeNumber{Flavor: FlavorS32},
-		"MyInt64":          &TNodeNumber{Flavor: FlavorS64},
-		"MyFloat32":        &TNodeNumber{Flavor: FlavorF32},
-		"MyFloat64":        &TNodeNumber{Flavor: FlavorF64},
-		"MyBool":           &TNodeBool{},
-		"MyString":         &TNodeString{},
-		"MyAny":            &TNodeAny{},
-		"MyMapInt32":       &TNodeMap{KeyType: &TNodeString{}, ValueType: &TNodeNumber{Flavor: FlavorS32}},
-		"MyMapPoint":       &TNodeMap{KeyType: &TNodeString{}, ValueType: &TNodeUserType{Name: "Point"}},
-		"MySliceIntU8":     &TNodeSlice{ElemType: &TNodeNumber{Flavor: FlavorU8}},
-		"MySlicePoint":     &TNodeSlice{ElemType: &TNodeUserType{Name: "Point"}},
-		"MyArray10Float32": &TNodeArray{Len: 10, ElemType: &TNodeNumber{Flavor: FlavorF32}},
-		"MyArray4Point":    &TNodeArray{Len: 4, ElemType: &TNodeUserType{Name: "Point"}},
-		"Point":            &TNodeStruct{Fields: map[string]bool{"x32": true, "y64": true}},
-		"Point.x32":        &TNodeNumber{Flavor: FlavorF32},
-		"Point.y64":        &TNodeNumber{Flavor: FlavorF64},
-		"MyStruct":         &TNodeStruct{Fields: map[string]bool{"alpha": true, "beta": true, "gamma": true, "delta": true}},
-		"MyStruct.alpha":   &TNodeString{},
-		"MyStruct.beta":    &TNodeUserType{Name: "Point"},
-		"MyStruct.gamma":   &TNodeUserType{Name: "MyStruct"},
-		"MyStruct.delta":   &TNodeAny{},
+		"MyIntU8":          &NodeNumberType{Flavor: FlavorU8},
+		"MyIntU16":         &NodeNumberType{Flavor: FlavorU16},
+		"MyIntU32":         &NodeNumberType{Flavor: FlavorU32},
+		"MyIntU64":         &NodeNumberType{Flavor: FlavorU64},
+		"MyInt8":           &NodeNumberType{Flavor: FlavorS8},
+		"MyInt16":          &NodeNumberType{Flavor: FlavorS16},
+		"MyInt32":          &NodeNumberType{Flavor: FlavorS32},
+		"MyInt64":          &NodeNumberType{Flavor: FlavorS64},
+		"MyFloat32":        &NodeNumberType{Flavor: FlavorF32},
+		"MyFloat64":        &NodeNumberType{Flavor: FlavorF64},
+		"MyBool":           &NodeBoolType{},
+		"MyString":         &NodeStringType{},
+		"MyAny":            &NodeAnyType{},
+		"MyMapInt32":       &NodeMapType{KeyType: &NodeStringType{}, ValueType: &NodeNumberType{Flavor: FlavorS32}},
+		"MyMapPoint":       &NodeMapType{KeyType: &NodeStringType{}, ValueType: &NodeUserType{Name: "Point"}},
+		"MySliceIntU8":     &NodeSliceType{ElemType: &NodeNumberType{Flavor: FlavorU8}},
+		"MySlicePoint":     &NodeSliceType{ElemType: &NodeUserType{Name: "Point"}},
+		"MyArray10Float32": &NodeArrayType{Len: 10, ElemType: &NodeNumberType{Flavor: FlavorF32}},
+		"MyArray4Point":    &NodeArrayType{Len: 4, ElemType: &NodeUserType{Name: "Point"}},
+		"Point":            &NodeStructType{Fields: map[string]bool{"x32": true, "y64": true}},
+		"Point.x32":        &NodeNumberType{Flavor: FlavorF32},
+		"Point.y64":        &NodeNumberType{Flavor: FlavorF64},
+		"MyStruct":         &NodeStructType{Fields: map[string]bool{"alpha": true, "beta": true, "gamma": true, "delta": true}},
+		"MyStruct.alpha":   &NodeStringType{},
+		"MyStruct.beta":    &NodeUserType{Name: "Point"},
+		"MyStruct.gamma":   &NodeUserType{Name: "MyStruct"},
+		"MyStruct.delta":   &NodeAnyType{},
 	}
 
 	assert.Len(typeTable.Types, len(data))

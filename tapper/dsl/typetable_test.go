@@ -8,12 +8,7 @@ import (
 
 //--------------------------
 
-func Test10(t *testing.T) {
-	assert := assert.New(t)
-	assert.True(!false)
-}
-
-func Test11(t *testing.T) {
+func Test70(t *testing.T) {
 	assert := assert.New(t)
 	var err error
 
@@ -22,7 +17,7 @@ func Test11(t *testing.T) {
 
 	err = st0.add("myint")
 	assert.NoError(err)
-	err = st0.set("myint", &TNodeNumber{Flavor: FlavorS32})
+	err = st0.set("myint", &NodeNumberType{Flavor: FlavorS32})
 	assert.NoError(err)
 	assert.Equal("size: 1\n  myint:[NUMBER(S32)]\n", st0.String())
 

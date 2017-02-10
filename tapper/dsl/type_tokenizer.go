@@ -90,7 +90,7 @@ func (p *TypeTokenizer) declareSymbols(block *DeclBlock) error {
 				}
 				fs[fieldName] = true
 			}
-			err = p.typeTable.set(name, &TNodeStruct{Fields: fs})
+			err = p.typeTable.set(name, &NodeStructType{Fields: fs})
 		default:
 			return fmt.Errorf("bad decl type: %T", decl)
 		}
@@ -101,7 +101,7 @@ func (p *TypeTokenizer) declareSymbols(block *DeclBlock) error {
 
 func (p *TypeTokenizer) parseBlock(block *DeclBlock) error {
 	var err error
-	var tnode TNode
+	var tnode Node
 
 	for name, decl := range *block {
 
@@ -135,7 +135,7 @@ func (p *TypeTokenizer) parseBlock(block *DeclBlock) error {
 	return nil
 }
 
-func (p *TypeTokenizer) parseDecl(name string, decl string) (TNode, error) {
+func (p *TypeTokenizer) parseDecl(name string, decl string) (Node, error) {
 
 	scanner := Scanner{}
 

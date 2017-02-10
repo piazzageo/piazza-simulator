@@ -8,12 +8,7 @@ import (
 
 //--------------------------
 
-func Test30(t *testing.T) {
-	assert := assert.New(t)
-	assert.True(!false)
-}
-
-func Test31(t *testing.T) {
+func Test20(t *testing.T) {
 	assert := assert.New(t)
 
 	const src = `  a*(b + c )`

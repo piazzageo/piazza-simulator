@@ -1,9 +1,6 @@
 package dsl
 
-import (
-	"fmt"
-	"log"
-)
+import "fmt"
 
 type ExprParser struct {
 	tokens []*Token
@@ -21,7 +18,7 @@ func (ep *ExprParser) Parse(toks []*Token) (Node, error) {
 		return nil, err
 	}
 
-	log.Printf("%v\n", ast)
+	//log.Printf("%v\n", ast)
 
 	return ast, nil
 }
