@@ -23,19 +23,27 @@ type TokenId int
 
 const (
 	TokenInvalid TokenId = iota
+	TokenEquals
+	TokenNotEquals
 	TokenGreaterThan
+	TokenGreaterOrEqualThan
 	TokenLessThan
+	TokenLessOrEqualThan
 	TokenAdd
 	TokenSubtract
 	TokenMultiply
 	TokenDivide
+	TokenExponent
+	TokenMod
 	TokenBitwiseOr
 	TokenBitwiseAnd
 	TokenLogicalAnd
 	TokenLogicalOr
+	TokenLeftParen
+	TokenRightParen
 	TokenLeftBracket
 	TokenRightBracket
-	TokenSymbol
+	TokenSymbol // 16
 	TokenNumber
 	TokenTypeSlice
 	TokenTypeArray
@@ -51,9 +59,9 @@ type Token struct {
 }
 
 func (t *Token) String() string {
-	s := fmt.Sprintf("[%d:%d] %d  \"%s\"", t.Line, t.Column, t.Id, t.Text)
+	s := fmt.Sprintf("[%d:%d] id=%d text=\"%s\"", t.Line, t.Column, t.Id, t.Text)
 	if t.Value != nil {
-		s += fmt.Sprintf("  <%v>", t.Value)
+		s += fmt.Sprintf(" value=<%v>", t.Value)
 	}
 	return s
 }
@@ -64,6 +72,12 @@ func convertId(r rune) TokenId {
 		return TokenSymbol
 	case -3:
 		return TokenNumber
+	case 40:
+		return TokenLeftParen
+	case 41:
+		return TokenRightParen
+	case 42:
+		return TokenMultiply
 	case 43:
 		return TokenAdd
 	case 60:

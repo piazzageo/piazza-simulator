@@ -13,10 +13,10 @@ func Test30(t *testing.T) {
 	assert.True(!false)
 }
 
-func xTest31(t *testing.T) {
+func Test31(t *testing.T) {
 	assert := assert.New(t)
 
-	const src = `  as > 10 | b +3 < c`
+	const src = `  a*(b + c )`
 
 	err := ParseExpr(src)
 	assert.NoError(err)

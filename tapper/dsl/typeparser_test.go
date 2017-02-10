@@ -49,8 +49,9 @@ func Test21(t *testing.T) {
 
 	p, err := NewTypeParser()
 	assert.NoError(err)
-	err = p.ParseJson(s)
+	typeTable, err := p.ParseJson(s)
 	assert.NoError(err)
+	assert.NotNil(typeTable)
 
 	data := map[string]TNode{
 		// the built-in types
@@ -98,12 +99,12 @@ func Test21(t *testing.T) {
 		"MyStruct.delta":   &TNodeAny{},
 	}
 
-	assert.Len(p.typeTable.Types, len(data))
+	assert.Len(typeTable.Types, len(data))
 
 	dels := []string{}
 	for name, tnode := range data {
 		//log.Printf("========= %s ================", name)
-		v, ok := p.typeTable.Types[name]
+		v, ok := typeTable.Types[name]
 		assert.True(ok)
 		assert.Equal(name, v.Name)
 		assert.EqualValues(tnode, v.Node)
@@ -111,7 +112,7 @@ func Test21(t *testing.T) {
 	}
 
 	for _, v := range dels {
-		delete(p.typeTable.Types, v)
+		delete(typeTable.Types, v)
 	}
-	assert.Len(p.typeTable.Types, 0)
+	assert.Len(typeTable.Types, 0)
 }

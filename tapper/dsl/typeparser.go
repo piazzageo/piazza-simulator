@@ -38,31 +38,31 @@ func NewTypeParser() (*TypeParser, error) {
 type DeclBlock map[string]interface{}
 
 // ParseJson takes a declaration block expressed as JSON string and parses it.
-func (p *TypeParser) ParseJson(s string) error {
+func (p *TypeParser) ParseJson(s string) (*TypeTable, error) {
 	declBlock := &DeclBlock{}
 	err := json.Unmarshal([]byte(s), declBlock)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	return p.Parse(declBlock)
 }
 
 // Parse takes a declaration block expressed as a DeclBlock object and parses it.
-func (p *TypeParser) Parse(block *DeclBlock) error {
+func (p *TypeParser) Parse(block *DeclBlock) (*TypeTable, error) {
 	var err error
 
 	err = p.declareSymbols(block)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	err = p.parseBlock(block)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	return nil
+	return p.typeTable, nil
 }
 
 // collect the symbols that are declared,
@@ -88,7 +88,7 @@ func (p *TypeParser) declareSymbols(block *DeclBlock) error {
 				if err != nil {
 					return err
 				}
-				fs[fieldName]=true
+				fs[fieldName] = true
 			}
 			err = p.typeTable.set(name, &TNodeStruct{Fields: fs})
 		default:

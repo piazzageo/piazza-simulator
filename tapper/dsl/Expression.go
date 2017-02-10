@@ -5,10 +5,13 @@ package dsl
 import (
 	"errors"
 	"fmt"
+	"log"
 )
 
 type Expression struct {
 }
+
+// TODO: <<, >>
 
 func ParseExpr(s string) error {
 	sc := &Scanner{}
@@ -19,80 +22,109 @@ func ParseExpr(s string) error {
 	}
 
 	//for _, v := range tokens {
-	//log.Printf("%s\n", v.String())
+	//	log.Printf("%s\n", v.String())
 	//}
 
-	asts, err := Parse(tokens)
+	toks, err := Parse(tokens)
 	if err != nil {
 		return err
 	}
-	if asts == nil {
-		panic(2)
+
+	for _, tok := range toks {
+		log.Printf("%v\n", ast)
 	}
 
-	//for _, ast := range asts {
-	//log.Printf("%s\n", ast.String())
-	//}
+	ast, err := buildTree(toks)
+	if err != nil {
+		return err
+	}
 
+	ast.Column = 0
 	return nil
+}
+
+func pop(toks []*Token) (*Token, []*Token) {
+	n := len(toks)
+	x := toks[n-1]
+	toks2 := toks[:n-1]
+	return x, toks2
+}
+
+func buildTree(toks []*Token) (*Token, []*Token, error) {
+
+	log.Printf("%v", toks)
+
+	tok, toks := pop(toks)
+
+	switch tok.Id {
+	case TokenMultiply:
+
+	default:
+		return nil, nil, fmt.Errorf("Unknown token building ast: %d (\"%s\")", tok.Id, tok.Text)
+
+	}
+
+	return nil, nil, nil
 }
 
 //===========================================================================
 
-// precedence of operators
-var priorities map[string]int
+// precedence of operators, with Token.Id as key
+var priorities map[TokenId]int
 
 // associativities of operators
 var associativities map[string]bool
 
 func init() {
-	priorities = make(map[string]int, 0)
+	priorities = make(map[TokenId]int, 0)
 	associativities = make(map[string]bool, 0)
 
-	priorities["+"] = 0
-	priorities["-"] = 0
-	priorities["*"] = -1
-	priorities["/"] = -1
-	priorities["^"] = -2
-	priorities["<"] = -3 // CHECK
-	priorities[">"] = -3 // CHECK
-	priorities["|"] = -4 // CHECK
+	priorities[TokenSymbol] = 99
+	priorities[TokenNumber] = 99
+	priorities[TokenMultiply] = 5
+	priorities[TokenDivide] = 5
+	priorities[TokenMod] = 5
+	priorities[TokenBitwiseAnd] = 5
+	priorities[TokenAdd] = 4
+	priorities[TokenSubtract] = 4
+	priorities[TokenBitwiseOr] = 4
+	priorities[TokenExponent] = 4
+	priorities[TokenEquals] = 3
+	priorities[TokenNotEquals] = 3
+	priorities[TokenLessThan] = 3
+	priorities[TokenLessOrEqualThan] = 3
+	priorities[TokenGreaterThan] = 3
+	priorities[TokenGreaterOrEqualThan] = 3
+	priorities[TokenLogicalAnd] = 2
+	priorities[TokenLogicalOr] = 1
 
 	// if not set, associativity will be false(left-associative)
 }
 
-type AST struct {
-	Token interface{}
-}
+func Parse(tokens []Token) ([]*Token, error) {
+	var ret []*Token
 
-func (ast *AST) String() string {
-	return fmt.Sprintf("%v", ast.Token)
-}
-
-func Parse(tokens []Token) ([]*AST, error) {
-	var ret []*AST
-
-	var operators []string
+	var operators []Token
 	for _, token := range tokens {
 		if token.Id == -2 || token.Id == -3 {
-			operandToken := &AST{Token: token}
+			operandToken := &token
 			ret = append(ret, operandToken)
 		} else {
 			// check parentheses
-			if token.Text == "(" {
-				operators = append(operators, token.Text)
-			} else if token.Text == ")" {
+			if token.Id == TokenLeftParen {
+				operators = append(operators, token)
+			} else if token.Id == TokenRightParen {
 				foundLeftParenthesis := false
 				// pop until "(" is fouund
 				for len(operators) > 0 {
 					oper := operators[len(operators)-1]
 					operators = operators[:len(operators)-1]
 
-					if oper == "(" {
+					if oper.Id == TokenLeftParen {
 						foundLeftParenthesis = true
 						break
 					} else {
-						ret = append(ret, &AST{Token: oper})
+						ret = append(ret, &oper)
 					}
 				}
 				if !foundLeftParenthesis {
@@ -100,31 +132,31 @@ func Parse(tokens []Token) ([]*AST, error) {
 				}
 			} else {
 				// operator priority and associativity
-				priority, ok := priorities[token.Text]
+				priority, ok := priorities[token.Id]
 				if !ok {
-					return nil, fmt.Errorf("Unknown operator: %v", token)
+					return nil, fmt.Errorf("Unknown operator: %v", &token)
 				}
 				rightAssociative := associativities[token.Text]
 
 				for len(operators) > 0 {
 					top := operators[len(operators)-1]
 
-					if top == "(" {
+					if top.Id == TokenLeftParen {
 						break
 					}
 
-					prevPriority := priorities[top]
+					prevPriority := priorities[top.Id]
 
 					if (rightAssociative && priority < prevPriority) || (!rightAssociative && priority <= prevPriority) {
 						// pop current operator
 						operators = operators[:len(operators)-1]
-						ret = append(ret, &AST{Token: top})
+						ret = append(ret, &top)
 					} else {
 						break
 					}
 				} // end of for len(operators) > 0
 
-				operators = append(operators, token.Text)
+				operators = append(operators, token)
 			} // end of if token == "("
 		} // end of if isOperand(token)
 	} // end of for _, token := range tokens
@@ -135,10 +167,10 @@ func Parse(tokens []Token) ([]*AST, error) {
 		operator := operators[len(operators)-1]
 		operators = operators[:len(operators)-1]
 
-		if operator == "(" {
+		if operator.Id == TokenLeftParen {
 			return nil, errors.New("Mismatched parentheses found")
 		}
-		ret = append(ret, &AST{Token: operator})
+		ret = append(ret, &operator)
 	}
 
 	return ret, nil
