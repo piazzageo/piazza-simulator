@@ -18,9 +18,11 @@ func Test31(t *testing.T) {
 
 	const src = `  a*(b + c )`
 
-	err := ParseExpr(src)
+	ep := &ExprTokenizer{}
+
+	toks, err := ep.Tokenize(src)
 	assert.NoError(err)
-	//assert.NotNil(toks)
+	assert.NotNil(toks)
 
 	//for _, v := range toks {
 	//log.Printf("%s\n", v.String())

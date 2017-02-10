@@ -6,7 +6,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func Test21(t *testing.T) {
+func Test61(t *testing.T) {
 	assert := assert.New(t)
 
 	// this is a DeclBlock, containing both struct decls and string decls
@@ -47,7 +47,7 @@ func Test21(t *testing.T) {
     }
 }`
 
-	p, err := NewTypeParser()
+	p, err := NewTypeTokenizer()
 	assert.NoError(err)
 	typeTable, err := p.ParseJson(s)
 	assert.NoError(err)

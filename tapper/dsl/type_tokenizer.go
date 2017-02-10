@@ -5,18 +5,18 @@ import (
 	"fmt"
 )
 
-type TypeParser struct {
+type TypeTokenizer struct {
 	typeTable *TypeTable
 }
 
-func NewTypeParser() (*TypeParser, error) {
+func NewTypeTokenizer() (*TypeTokenizer, error) {
 	typeTable := NewTypeTable()
 	err := typeTable.Init()
 	if err != nil {
 		return nil, err
 	}
 
-	tp := &TypeParser{
+	tp := &TypeTokenizer{
 		typeTable: typeTable,
 	}
 
@@ -38,7 +38,7 @@ func NewTypeParser() (*TypeParser, error) {
 type DeclBlock map[string]interface{}
 
 // ParseJson takes a declaration block expressed as JSON string and parses it.
-func (p *TypeParser) ParseJson(s string) (*TypeTable, error) {
+func (p *TypeTokenizer) ParseJson(s string) (*TypeTable, error) {
 	declBlock := &DeclBlock{}
 	err := json.Unmarshal([]byte(s), declBlock)
 	if err != nil {
@@ -49,7 +49,7 @@ func (p *TypeParser) ParseJson(s string) (*TypeTable, error) {
 }
 
 // Parse takes a declaration block expressed as a DeclBlock object and parses it.
-func (p *TypeParser) Parse(block *DeclBlock) (*TypeTable, error) {
+func (p *TypeTokenizer) Parse(block *DeclBlock) (*TypeTable, error) {
 	var err error
 
 	err = p.declareSymbols(block)
@@ -67,7 +67,7 @@ func (p *TypeParser) Parse(block *DeclBlock) (*TypeTable, error) {
 
 // collect the symbols that are declared,
 // put them into the symbol table
-func (p *TypeParser) declareSymbols(block *DeclBlock) error {
+func (p *TypeTokenizer) declareSymbols(block *DeclBlock) error {
 	var err error
 
 	for name, decl := range *block {
@@ -99,7 +99,7 @@ func (p *TypeParser) declareSymbols(block *DeclBlock) error {
 	return nil
 }
 
-func (p *TypeParser) parseBlock(block *DeclBlock) error {
+func (p *TypeTokenizer) parseBlock(block *DeclBlock) error {
 	var err error
 	var tnode TNode
 
@@ -135,78 +135,22 @@ func (p *TypeParser) parseBlock(block *DeclBlock) error {
 	return nil
 }
 
-// given a string like "[map][]float", return the TNode tree for it
-func (p *TypeParser) parseDecl(name string, stringDecl string) (TNode, error) {
+func (p *TypeTokenizer) parseDecl(name string, decl string) (TNode, error) {
 
 	scanner := Scanner{}
 
-	toks, err := scanner.Scan(stringDecl)
+	toks, err := scanner.Scan(decl)
 	if err != nil {
 		return nil, err
 	}
 
-	tnode, err := p.parseDeclToken(toks)
+	tp := &TypeParser{}
+
+	tnode, err := tp.Parse(toks, p.typeTable)
 	if err != nil {
 		return nil, err
 	}
 
 	//log.Printf("$$ %s $$ %s $$ %v", name, stringDecl, tnode)
 	return tnode, nil
-}
-
-func (p *TypeParser) parseDeclToken(toks []Token) (TNode, error) {
-
-	t0 := toks[0]
-	t1ok := len(toks) > 1
-	//t2ok := len(toks) > 2
-
-	var out TNode
-
-	switch t0.Id {
-
-	case TokenSymbol:
-		if t1ok {
-			return nil, fmt.Errorf("extra token after %v\n\t%v", t0, toks[1])
-		}
-		if p.typeTable.isBuiltin(t0.Text) {
-			out = p.typeTable.get(t0.Text).Node
-		} else {
-			out = &TNodeUserType{Name: t0.Text}
-		}
-
-	case TokenTypeSlice:
-		if !t1ok {
-			return nil, fmt.Errorf("no token after %v", t0)
-		}
-		next, err := p.parseDeclToken(toks[1:])
-		if err != nil {
-			return nil, err
-		}
-		out = &TNodeSlice{ElemType: next}
-
-	case TokenTypeMap:
-		if !t1ok {
-			return nil, fmt.Errorf("no token after %v", t0)
-		}
-		next, err := p.parseDeclToken(toks[1:])
-		if err != nil {
-			return nil, err
-		}
-		out = &TNodeMap{KeyType: &TNodeString{}, ValueType: next}
-
-	case TokenTypeArray:
-		if !t1ok {
-			return nil, fmt.Errorf("no token after %v", t0)
-		}
-		next, err := p.parseDeclToken(toks[1:])
-		if err != nil {
-			return nil, err
-		}
-		out = &TNodeArray{ElemType: next, Len: t0.Value.(int)}
-
-	default:
-		return nil, fmt.Errorf("unhandled token: " + t0.String())
-	}
-
-	return out, nil
 }

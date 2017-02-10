@@ -8,63 +8,34 @@ import (
 	"log"
 )
 
-type Expression struct {
+type ExprTokenizer struct {
 }
 
 // TODO: <<, >>
 
-func ParseExpr(s string) error {
+// Tokenize returns the tokens for an expr, in RPN ("3,4,+")
+func (ep *ExprTokenizer) Tokenize(s string) ([]*Token, error) {
 	sc := &Scanner{}
 
 	tokens, err := sc.Scan(s)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	//for _, v := range tokens {
 	//	log.Printf("%s\n", v.String())
 	//}
 
-	toks, err := Parse(tokens)
+	toks, err := ep.makeRPN(tokens)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	for _, tok := range toks {
-		log.Printf("%v\n", ast)
+		log.Printf("%v\n", tok)
 	}
 
-	ast, err := buildTree(toks)
-	if err != nil {
-		return err
-	}
-
-	ast.Column = 0
-	return nil
-}
-
-func pop(toks []*Token) (*Token, []*Token) {
-	n := len(toks)
-	x := toks[n-1]
-	toks2 := toks[:n-1]
-	return x, toks2
-}
-
-func buildTree(toks []*Token) (*Token, []*Token, error) {
-
-	log.Printf("%v", toks)
-
-	tok, toks := pop(toks)
-
-	switch tok.Id {
-	case TokenMultiply:
-
-	default:
-		return nil, nil, fmt.Errorf("Unknown token building ast: %d (\"%s\")", tok.Id, tok.Text)
-
-	}
-
-	return nil, nil, nil
+	return toks, nil
 }
 
 //===========================================================================
@@ -101,7 +72,7 @@ func init() {
 	// if not set, associativity will be false(left-associative)
 }
 
-func Parse(tokens []Token) ([]*Token, error) {
+func (ep *ExprTokenizer) makeRPN(tokens []Token) ([]*Token, error) {
 	var ret []*Token
 
 	var operators []Token
