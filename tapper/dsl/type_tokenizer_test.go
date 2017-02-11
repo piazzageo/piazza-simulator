@@ -6,7 +6,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func Test60(t *testing.T) {
+func TestTypeTokenizer(t *testing.T) {
 	assert := assert.New(t)
 
 	// this is a DeclBlock, containing both struct decls and string decls
@@ -47,72 +47,74 @@ func Test60(t *testing.T) {
     }
 }`
 
-	p, err := NewTypeTokenizer()
+	tt, err := NewTypeTokenizer()
 	assert.NoError(err)
-	typeTable, err := p.ParseJson(s)
+	typeTable, err := tt.ParseJson(s)
 	assert.NoError(err)
 	assert.NotNil(typeTable)
 
-	data := map[string]Node{
-		// the built-in types
-		"uint8":   NewNodeNumberType(FlavorU8),
-		"uint16":  NewNodeNumberType(FlavorU16),
-		"uint32":  NewNodeNumberType(FlavorU32),
-		"uint64":  NewNodeNumberType(FlavorU64),
-		"int8":    NewNodeNumberType(FlavorS8),
-		"int16":   NewNodeNumberType(FlavorS16),
-		"int32":   NewNodeNumberType(FlavorS32),
-		"int64":   NewNodeNumberType(FlavorS64),
-		"float32": NewNodeNumberType(FlavorF32),
-		"float64": NewNodeNumberType(FlavorF64),
-		"bool":    NewNodeBoolType(),
-		"string":  NewNodeStringType(),
-		"any":     NewNodeAnyType(),
+	data := map[string][]Token{
+		// the built-in types don't have token trees, so skip those
 
-		// the types from our decl block above
-		"MyIntU8":          NewNodeNumberType(FlavorU8),
-		"MyIntU16":         NewNodeNumberType(FlavorU16),
-		"MyIntU32":         NewNodeNumberType(FlavorU32),
-		"MyIntU64":         NewNodeNumberType(FlavorU64),
-		"MyInt8":           NewNodeNumberType(FlavorS8),
-		"MyInt16":          NewNodeNumberType(FlavorS16),
-		"MyInt32":          NewNodeNumberType(FlavorS32),
-		"MyInt64":          NewNodeNumberType(FlavorS64),
-		"MyFloat32":        NewNodeNumberType(FlavorF32),
-		"MyFloat64":        NewNodeNumberType(FlavorF64),
-		"MyBool":           NewNodeBoolType(),
-		"MyString":         NewNodeStringType(),
-		"MyAny":            NewNodeAnyType(),
-		"MyMapInt32":       NewNodeMapType(NewNodeStringType(), NewNodeNumberType(FlavorS32)),
-		"MyMapPoint":       NewNodeMapType(NewNodeStringType(), NewNodeUserType("Point")),
-		"MySliceIntU8":     NewNodeSliceType(NewNodeNumberType(FlavorU8)),
-		"MySlicePoint":     NewNodeSliceType(NewNodeUserType("Point")),
-		"MyArray10Float32": NewNodeArrayType(NewNodeNumberType(FlavorF32), 10),
-		"MyArray4Point":    NewNodeArrayType(NewNodeUserType("Point"), 4),
-		"Point":            NewNodeStructType(map[string]bool{"x32": true, "y64": true}),
-		"Point.x32":        NewNodeNumberType(FlavorF32),
-		"Point.y64":        NewNodeNumberType(FlavorF64),
-		"MyStruct":         NewNodeStructType(map[string]bool{"alpha": true, "beta": true, "gamma": true, "delta": true}),
-		"MyStruct.alpha":   NewNodeStringType(),
-		"MyStruct.beta":    NewNodeUserType("Point"),
-		"MyStruct.gamma":   NewNodeUserType("MyStruct"),
-		"MyStruct.delta":   NewNodeAnyType(),
+		// these are the types from our decl block above
+
+		"MyIntU8":   []Token{Token{Line: 1, Column: 6, Id: 21, Text: "uint8"}},
+		"MyIntU16":  []Token{Token{Line: 1, Column: 7, Id: 21, Text: "uint16"}},
+		"MyIntU32":  []Token{Token{Line: 1, Column: 7, Id: 21, Text: "uint32"}},
+		"MyIntU64":  []Token{Token{Line: 1, Column: 7, Id: 21, Text: "uint64"}},
+		"MyInt8":    []Token{Token{Line: 1, Column: 5, Id: 21, Text: "int8"}},
+		"MyInt16":   []Token{Token{Line: 1, Column: 6, Id: 21, Text: "int16"}},
+		"MyInt32":   []Token{Token{Line: 1, Column: 6, Id: 21, Text: "int32"}},
+		"MyInt64":   []Token{Token{Line: 1, Column: 6, Id: 21, Text: "int64"}},
+		"MyFloat32": []Token{Token{Line: 1, Column: 8, Id: 21, Text: "float32"}},
+		"MyFloat64": []Token{Token{Line: 1, Column: 8, Id: 21, Text: "float64"}},
+		"MyBool":    []Token{Token{Line: 1, Column: 5, Id: 21, Text: "bool"}},
+		"MyString":  []Token{Token{Line: 1, Column: 7, Id: 21, Text: "string"}},
+		"MyAny":     []Token{Token{Line: 1, Column: 4, Id: 21, Text: "any"}},
+		"MyMapInt32": []Token{
+			Token{Line: 1, Column: 2, Id: 25, Text: "[map]"},
+			Token{Line: 1, Column: 11, Id: 21, Text: "int32"},
+		},
+		"MyMapPoint": []Token{
+			Token{Line: 1, Column: 2, Id: 25, Text: "[map]"},
+			Token{Line: 1, Column: 11, Id: 21, Text: "Point"},
+		},
+		"MySliceIntU8": []Token{
+			Token{Line: 1, Column: 2, Id: 23, Text: "[]"},
+			Token{Line: 1, Column: 8, Id: 21, Text: "uint8"},
+		},
+		"MySlicePoint": []Token{
+			Token{Line: 1, Column: 2, Id: 23, Text: "[]"},
+			Token{Line: 1, Column: 8, Id: 21, Text: "Point"},
+		},
+		"MyArray10Float32": []Token{
+			Token{Line: 1, Column: 2, Id: 24, Text: "[10]", Value: 10},
+			Token{Line: 1, Column: 12, Id: 21, Text: "float32"},
+		},
+		"MyArray4Point": []Token{
+			Token{Line: 1, Column: 2, Id: 24, Text: "[4]", Value: 4},
+			Token{Line: 1, Column: 9, Id: 21, Text: "Point"},
+		},
+		"Point":          nil,
+		"Point.x32":      []Token{Token{Line: 1, Column: 8, Id: 21, Text: "float32"}},
+		"Point.y64":      []Token{Token{Line: 1, Column: 8, Id: 21, Text: "float64"}},
+		"MyStruct":       nil,
+		"MyStruct.alpha": []Token{Token{Line: 1, Column: 7, Id: 21, Text: "string"}},
+		"MyStruct.beta":  []Token{Token{Line: 1, Column: 6, Id: 21, Text: "Point"}},
+		"MyStruct.gamma": []Token{Token{Line: 1, Column: 9, Id: 21, Text: "MyStruct"}},
+		"MyStruct.delta": []Token{Token{Line: 1, Column: 4, Id: 21, Text: "any"}},
 	}
 
-	assert.Len(typeTable.Types, len(data))
+	//	assert.Len(typeTable.Types, len(data))
 
-	dels := []string{}
-	for name, tnode := range data {
-		//log.Printf("========= %s ================", name)
-		v, ok := typeTable.Types[name]
+	for name, token := range data {
+		if typeTable.isBuiltin(name) {
+			continue
+		}
+
+		tte, ok := typeTable.Types[name]
 		assert.True(ok)
-		assert.Equal(name, v.Name)
-		assert.EqualValues(tnode, v.Node)
-		dels = append(dels, name)
+		assert.Equal(name, tte.Name)
+		assert.EqualValues(token, tte.Token)
 	}
-
-	for _, v := range dels {
-		delete(typeTable.Types, v)
-	}
-	assert.Len(typeTable.Types, 0)
 }

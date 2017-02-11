@@ -25,14 +25,14 @@ func TestTypeTable(t *testing.T) {
 	assert.Error(err)
 
 	// set token
-	err = tt.setToken("myint", []*Token{&Token{Text: "myint", Id: TokenSymbol}})
+	err = tt.setToken("myint", []Token{Token{Text: "myint", Id: TokenSymbol}})
 	assert.NoError(err)
-	assert.Equal([]*Token{&Token{Text: "myint", Id: TokenSymbol}}, tt.getToken("myint"))
+	assert.Equal([]Token{Token{Text: "myint", Id: TokenSymbol}}, tt.getToken("myint"))
 
 	// fail to set token
-	err = tt.setToken("myint", []*Token{&Token{Text: "myint", Id: TokenSymbol}})
+	err = tt.setToken("myint", []Token{Token{Text: "myint", Id: TokenSymbol}})
 	assert.Error(err)
-	err = tt.setToken("foofoofoo", []*Token{&Token{Text: "myint", Id: TokenSymbol}})
+	err = tt.setToken("foofoofoo", []Token{Token{Text: "myint", Id: TokenSymbol}})
 	assert.Error(err)
 
 	// set node

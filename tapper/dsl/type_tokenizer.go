@@ -144,7 +144,7 @@ func (p *TypeTokenizer) parseDecl(name string, decl string) (Node, error) {
 		return nil, err
 	}
 
-	//	err = p.typeTable.setToken(name, toks)
+	err = p.typeTable.setToken(name, toks)
 	if err != nil {
 		return nil, err
 	}

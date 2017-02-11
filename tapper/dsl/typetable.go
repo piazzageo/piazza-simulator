@@ -4,7 +4,7 @@ import "fmt"
 
 type TypeTableEntry struct {
 	Name  string
-	Token []*Token
+	Token []Token
 	Node  Node
 }
 
@@ -105,7 +105,7 @@ func (st *TypeTable) setNode(name string, node Node) error {
 	return nil
 }
 
-func (st *TypeTable) setToken(name string, token []*Token) error {
+func (st *TypeTable) setToken(name string, token []Token) error {
 	if !st.has(name) {
 		return fmt.Errorf("type table entry does not exist: %s", name)
 	}
@@ -124,7 +124,7 @@ func (st *TypeTable) getNode(s string) Node {
 	return v.Node
 }
 
-func (st *TypeTable) getToken(s string) []*Token {
+func (st *TypeTable) getToken(s string) []Token {
 	v, ok := st.Types[s]
 	if !ok {
 		return nil
