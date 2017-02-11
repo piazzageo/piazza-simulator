@@ -12,13 +12,14 @@ func TestTypeTable(t *testing.T) {
 	assert := assert.New(t)
 	var err error
 
-	tt := NewTypeTable()
-	assert.Equal(0, tt.size())
+	tt, err := NewTypeTable()
+	assert.NoError(err)
+	assert.Equal(13, tt.size())
 
 	// add a symbol
 	err = tt.add("myint")
 	assert.NoError(err)
-	assert.Equal(1, tt.size())
+	assert.Equal(14, tt.size())
 
 	// fail to add a symbol
 	err = tt.add("myint")

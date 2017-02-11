@@ -10,8 +10,7 @@ type TypeTokenizer struct {
 }
 
 func NewTypeTokenizer() (*TypeTokenizer, error) {
-	typeTable := NewTypeTable()
-	err := typeTable.Init()
+	typeTable, err := NewTypeTable()
 	if err != nil {
 		return nil, err
 	}

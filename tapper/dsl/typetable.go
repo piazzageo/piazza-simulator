@@ -12,21 +12,25 @@ type TypeTable struct {
 	Types map[string]*TypeTableEntry
 }
 
-func NewTypeTable() *TypeTable {
+func NewTypeTable() (*TypeTable, error) {
 	entries := map[string]*TypeTableEntry{}
 
 	tt := &TypeTable{
 		Types: entries,
 	}
 
-	return tt
+	err := tt.setBuiltins()
+	if err != nil {
+		return nil, err
+	}
+	return tt, nil
 }
 
 //---------------------------------------------------------------------------
 
 var builtinTypes map[string]Node
 
-func (st *TypeTable) Init() error {
+func (st *TypeTable) setBuiltins() error {
 	var err error
 
 	builtinTypes = map[string]Node{
