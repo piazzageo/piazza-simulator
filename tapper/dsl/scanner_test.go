@@ -8,7 +8,7 @@ import (
 
 //--------------------------
 
-func Test40(t *testing.T) {
+func TestScannerPrefixMatch(t *testing.T) {
 	assert := assert.New(t)
 
 	ok, siz := matchArrayTypePrefix("[]")
@@ -27,7 +27,7 @@ func Test40(t *testing.T) {
 	assert.Equal(32, siz)
 }
 
-func Test42(t *testing.T) {
+func TestScanner(t *testing.T) {
 	assert := assert.New(t)
 
 	s := &Scanner{}
@@ -49,7 +49,6 @@ func Test42(t *testing.T) {
 	}
 
 	for _, testcase := range table {
-
 		tokens, err := s.Scan(testcase.source)
 		assert.NoError(err)
 		assert.NotNil(tokens)
@@ -57,10 +56,6 @@ func Test42(t *testing.T) {
 		assert.Len(tokens, len(testcase.tokens))
 		for i, _ := range testcase.tokens {
 			assert.Equal(testcase.tokens[i], tokens[i].Text)
-			//log.Printf("%s", testcase.tokens[i])
 		}
-		//log.Printf("---")
-
 	}
-
 }

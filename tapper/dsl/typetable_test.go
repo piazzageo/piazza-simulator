@@ -8,24 +8,45 @@ import (
 
 //--------------------------
 
-func Test70(t *testing.T) {
+func TestTypeTable(t *testing.T) {
 	assert := assert.New(t)
 	var err error
 
-	st0 := NewTypeTable()
-	assert.Equal("size: 0\n", st0.String())
+	tt := NewTypeTable()
+	assert.Equal(0, tt.size())
 
-	err = st0.add("myint")
+	// add a symbol
+	err = tt.add("myint")
 	assert.NoError(err)
-	err = st0.set("myint", &NodeNumberType{Flavor: FlavorS32})
+	assert.Equal(1, tt.size())
+
+	// fail to add a symbol
+	err = tt.add("myint")
+	assert.Error(err)
+
+	// set token
+	err = tt.setToken("myint", []*Token{&Token{Text: "myint", Id: TokenSymbol}})
 	assert.NoError(err)
-	assert.Equal("size: 1\n  myint:[NUMBER(S32)]\n", st0.String())
+	assert.Equal([]*Token{&Token{Text: "myint", Id: TokenSymbol}}, tt.getToken("myint"))
 
-	assert.True(st0.has("myint"))
+	// fail to set token
+	err = tt.setToken("myint", []*Token{&Token{Text: "myint", Id: TokenSymbol}})
+	assert.Error(err)
+	err = tt.setToken("foofoofoo", []*Token{&Token{Text: "myint", Id: TokenSymbol}})
+	assert.Error(err)
 
-	typ := st0.get("myint")
-	assert.Equal("myint:[NUMBER(S32)]", typ.String())
+	// set node
+	err = tt.setNode("myint", NewNodeNumberType(FlavorS32))
+	assert.NoError(err)
+	assert.Equal(NewNodeNumberType(FlavorS32), tt.getNode("myint"))
 
-	assert.Nil(st0.get("frobnitz"))
-	assert.False(st0.has("frobnitz"))
+	// fail to set node
+	err = tt.setNode("myint", NewNodeNumberType(FlavorS32))
+	assert.Error(err)
+	err = tt.setNode("barbarbar", NewNodeNumberType(FlavorS32))
+	assert.Error(err)
+
+	// test has()
+	assert.True(tt.has("myint"))
+	assert.False(tt.has("foofoofoo"))
 }

@@ -20,7 +20,7 @@ func (p *TypeParser) Parse(toks []Token, typeTable *TypeTable) (Node, error) {
 			return nil, fmt.Errorf("extra token after %v\n\t%v", t0, toks[1])
 		}
 		if typeTable.isBuiltin(t0.Text) {
-			out = typeTable.get(t0.Text).Node
+			out = typeTable.getNode(t0.Text)
 		} else {
 			out = NewNodeUserType(t0.Text)
 		}

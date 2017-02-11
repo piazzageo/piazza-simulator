@@ -8,12 +8,7 @@ import (
 
 //--------------------------
 
-func Test10(t *testing.T) {
-	assert := assert.New(t)
-	assert.True(!false)
-}
-
-func Test11(t *testing.T) {
+func TestExprParser(t *testing.T) {
 	assert := assert.New(t)
 
 	type testcase struct {
@@ -29,25 +24,20 @@ func Test11(t *testing.T) {
 				&Token{Line: 1, Column: 9, Id: TokenAdd, Text: "+"},
 				&Token{Line: 1, Column: 5, Id: TokenMultiply, Text: "*"},
 			},
-			node: nil,
+			node: NewNodeMultiply(
+				NewNodeAdd(NewNodeSymbol("c"), NewNodeSymbol("b")),
+				NewNodeSymbol("a")),
 		},
 	}
 
-	equals := func(a Node, b Node) bool {
-		return a == b
-	}
-
-	for i, tc := range data {
-
+	for _, tc := range data {
 		ep := &ExprParser{}
 		node, err := ep.Parse(tc.toks)
 		assert.NoError(err)
 		assert.NotNil(node)
 
-		for i := 0; i < len(toks); i++ {
-			//log.Printf("%s\n", toks[i].String())
-			assert.EqualValues(v[i], toks[i])
-		}
+		//log.Printf("%v", tc.node)
+		//log.Printf("%v", node)
+		assert.Equal(tc.node, node)
 	}
-
 }

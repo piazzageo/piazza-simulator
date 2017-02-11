@@ -8,7 +8,7 @@ import (
 
 //--------------------------
 
-func Test20(t *testing.T) {
+func TestExprTokenizer(t *testing.T) {
 	assert := assert.New(t)
 
 	data := map[string][]*Token{
