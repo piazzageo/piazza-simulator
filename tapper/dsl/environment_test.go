@@ -11,9 +11,9 @@ import (
 func TestEnvironment(t *testing.T) {
 	assert := assert.New(t)
 
+	// setup
 	tt, err := NewTypeTable()
 	assert.NoError(err)
-
 	err = tt.add("i")
 	assert.NoError(err)
 	err = tt.setNode("i", NewNodeIntType())
@@ -25,9 +25,6 @@ func TestEnvironment(t *testing.T) {
 
 	env := NewEnvironment(tt)
 
-	env.setInt("i", 12)
-	assert.Equal(12, env.getInt("i"))
-
-	env.setFloat("f", 2.3)
-	assert.InEpsilon(2.3, env.getFloat("f"), 0.000001)
+	env.set("i", 12)
+	assert.Equal(12, env.get("i"))
 }

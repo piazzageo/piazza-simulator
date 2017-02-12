@@ -69,7 +69,7 @@ func (d *Dsl) ParseExpression(expr string) (Id, error) {
 
 func (d *Dsl) Evaluate(exprId Id, typeId Id, env *Environment) (interface{}, error) {
 	eval := &Eval{}
-	result, err := eval.Evaluate(d.Exprs[exprId], d.TypeTables[typeId], env)
+	result, err := eval.Evaluate(d.Exprs[exprId], env)
 	if err != nil {
 		return nil, err
 	}

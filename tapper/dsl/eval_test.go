@@ -8,8 +8,13 @@ import (
 
 type evalTestItem struct {
 	node   Node
-	env    *Environment
+	vars   map[string]varItem
 	result interface{}
+}
+
+type varItem struct {
+	value    interface{}
+	datatype Node
 }
 
 var evalTestData = []evalTestItem{
@@ -17,8 +22,10 @@ var evalTestData = []evalTestItem{
 		node: NewNodeMultiply(
 			NewNodeAdd(NewNodeSymbol("c"), NewNodeSymbol("b")),
 			NewNodeSymbol("a")),
-		env: &Environment{
-			data: map[string]interface{}{"a": 2, "b": 3, "c": 4},
+		vars: map[string]varItem{
+			"a": varItem{value: 2, datatype: NewNodeIntType()},
+			"b": varItem{value: 3, datatype: NewNodeIntType()},
+			"c": varItem{value: 4, datatype: NewNodeIntType()},
 		},
 		result: 14,
 	},
@@ -27,23 +34,26 @@ var evalTestData = []evalTestItem{
 func TestEval(t *testing.T) {
 	assert := assert.New(t)
 
-	var err error
+	for _, item := range evalTestData {
 
-	typeTable, err := NewTypeTable()
-	assert.NoError(err)
-
-	for _, s := range []string{"a", "b", "c"} {
-		err = typeTable.add(s)
+		typeTable, err := NewTypeTable()
 		assert.NoError(err)
-		typeTable.setNode(s, NewNodeIntType())
-		assert.NoError(err)
-	}
 
-	/*for _, item := range evalTestData {
+		env := NewEnvironment(typeTable)
+
+		for k, v := range item.vars {
+			err = typeTable.add(k)
+			assert.NoError(err)
+			typeTable.setNode(k, v.datatype)
+			assert.NoError(err)
+
+			env.set(k, v.value)
+		}
+
 		eval := &Eval{}
-		result, err := eval.Evaluate(item.node, typeTable, item.env)
+		_, err = eval.Evaluate(item.node, env)
 		assert.NoError(err)
-		assert.NotNil(result)
-		assert.EqualValues(item.result, result)
-	}*/
+		//assert.NotNil(result)
+		//assert.EqualValues(item.result, result)
+	}
 }
