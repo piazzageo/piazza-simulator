@@ -28,25 +28,26 @@ func NewTypeTable() (*TypeTable, error) {
 
 //---------------------------------------------------------------------------
 
+type BaseType int
+
+const (
+	IntType BaseType = iota
+	FloatType
+	BoolType
+	StringType
+)
+
 var builtinTypes map[string]Node
 
 func (st *TypeTable) setBuiltins() error {
 	var err error
 
 	builtinTypes = map[string]Node{
-		"int8":    NewNodeNumberType(FlavorS8),
-		"int16":   NewNodeNumberType(FlavorS16),
-		"int32":   NewNodeNumberType(FlavorS32),
-		"int64":   NewNodeNumberType(FlavorS64),
-		"uint8":   NewNodeNumberType(FlavorU8),
-		"uint16":  NewNodeNumberType(FlavorU16),
-		"uint32":  NewNodeNumberType(FlavorU32),
-		"uint64":  NewNodeNumberType(FlavorU64),
-		"float32": NewNodeNumberType(FlavorF32),
-		"float64": NewNodeNumberType(FlavorF64),
-		"bool":    NewNodeBoolType(),
-		"string":  NewNodeStringType(),
-		"any":     NewNodeAnyType(),
+		"int":    NewNodeIntType(),
+		"float":  NewNodeFloatType(),
+		"bool":   NewNodeBoolType(),
+		"string": NewNodeStringType(),
+		"any":    NewNodeAnyType(),
 	}
 
 	for k, v := range builtinTypes {

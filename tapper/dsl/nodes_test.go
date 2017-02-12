@@ -11,9 +11,9 @@ import (
 func TestNodes(t *testing.T) {
 	assert := assert.New(t)
 
-	t1 := NewNodeArrayType(NewNodeNumberType(FlavorU8), 17)
+	t1 := NewNodeArrayType(NewNodeIntType(), 17)
 
-	assert.Equal("ARRAY(17, NUMBER(U8))", t1.String())
+	assert.Equal("ARRAY(17, INT)", t1.String())
 
 	t2 := NewNodeStructType(map[string]bool{"aa": true, "bb": true, "cc": true})
 
@@ -28,9 +28,9 @@ func TestNodes(t *testing.T) {
 
 	assert.Equal("MAP[STRING]BOOL", t3.String())
 
-	t4 := NewNodeSliceType(NewNodeNumberType(FlavorU32))
+	t4 := NewNodeSliceType(NewNodeIntType())
 
-	assert.Equal("SLICE(NUMBER(U32))", t4.String())
+	assert.Equal("SLICE(INT)", t4.String())
 }
 
 func TestNodeEquality(t *testing.T) {
@@ -40,12 +40,13 @@ func TestNodeEquality(t *testing.T) {
 	//	return a == b
 	//}
 
-	a := NewNodeSliceType(NewNodeNumberType(FlavorU32))
-	b := NewNodeSliceType(NewNodeNumberType(FlavorU32))
+	a := NewNodeSliceType(NewNodeIntType())
+	b := NewNodeSliceType(NewNodeIntType())
 	c := NewNodeStringType()
-	d := NewNodeSliceType(NewNodeNumberType(FlavorS32))
+	d := NewNodeFloatType()
 	assert.Equal(a, b)
 	assert.NotEqual(a, c)
 	assert.NotEqual(a, d)
+	assert.NotEqual(c, d)
 	assert.EqualValues(a, b)
 }

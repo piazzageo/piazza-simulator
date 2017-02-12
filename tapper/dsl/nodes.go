@@ -28,45 +28,8 @@ type Node interface {
 	String() string
 	Left() Node
 	Right() Node
-	Value() interface{}
-}
-
-//---------------------------------------------------------------------
-
-type Flavor int
-
-const (
-	FlavorU8 Flavor = iota
-	FlavorU16
-	FlavorU32
-	FlavorU64
-	FlavorS8
-	FlavorS16
-	FlavorS32
-	FlavorS64
-	FlavorF32
-	FlavorF64
-)
-
-var flavorStrings map[Flavor]string
-
-func init() {
-	flavorStrings = map[Flavor]string{
-		FlavorU8:  "U8",
-		FlavorU16: "U16",
-		FlavorU32: "U32",
-		FlavorU64: "U64",
-		FlavorS8:  "S8",
-		FlavorS16: "S16",
-		FlavorS32: "S32",
-		FlavorS64: "S64",
-		FlavorF32: "F32",
-		FlavorF64: "F64",
-	}
-}
-
-func (f Flavor) String() string {
-	return flavorStrings[f]
+	//Value() interface{}
+	//Eval(*Environment) interface{}
 }
 
 //---------------------------------------------------------------------
@@ -161,7 +124,7 @@ func NewNodeStructType(fields map[string]bool) *NodeStructType {
 func (t *NodeStructType) String() string {
 	fields := t.value.(map[string]bool)
 	s := ""
-	for k, _ := range fields {
+	for k := range fields {
 		if s != "" {
 			s += ", "
 		}
@@ -200,19 +163,30 @@ func (t *NodeSliceType) String() string {
 	return fmt.Sprintf("SLICE(%v)", t.left)
 }
 
-type NodeNumberType struct {
-	// value is Flavor
+type NodeIntType struct {
 	NodeCore
 }
 
-func NewNodeNumberType(flavor Flavor) *NodeNumberType {
-	n := &NodeNumberType{}
-	n.value = flavor
+func NewNodeIntType() *NodeIntType {
+	n := &NodeIntType{}
 	return n
 }
 
-func (t *NodeNumberType) String() string {
-	return fmt.Sprintf("NUMBER(%v)", t.value.(Flavor))
+func (t *NodeIntType) String() string {
+	return fmt.Sprintf("INT")
+}
+
+type NodeFloatType struct {
+	NodeCore
+}
+
+func NewNodeFloatType() *NodeFloatType {
+	n := &NodeFloatType{}
+	return n
+}
+
+func (t *NodeFloatType) String() string {
+	return fmt.Sprintf("FLOAT")
 }
 
 type NodeBoolType struct {
@@ -232,8 +206,7 @@ type NodeStringType struct {
 }
 
 func NewNodeStringType() *NodeStringType {
-	n := &NodeStringType{}
-	return n
+	return &NodeStringType{}
 }
 
 func (t *NodeStringType) String() string {

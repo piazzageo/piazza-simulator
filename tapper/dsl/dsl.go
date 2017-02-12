@@ -66,3 +66,13 @@ func (d *Dsl) ParseExpression(expr string) (Id, error) {
 
 	return id, nil
 }
+
+func (d *Dsl) Evaluate(exprId Id, typeId Id, env *Environment) (interface{}, error) {
+	eval := &Eval{}
+	result, err := eval.Evaluate(d.Exprs[exprId], d.TypeTables[typeId], env)
+	if err != nil {
+		return nil, err
+	}
+
+	return result, nil
+}

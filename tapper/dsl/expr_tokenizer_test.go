@@ -6,20 +6,36 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-//--------------------------
+//---------------------------------------------------------------------------
 
-func TestExprTokenizer(t *testing.T) {
-	assert := assert.New(t)
+type exprTestItem struct {
+	expr  string
+	token []*Token
+	node  Node
+}
 
-	data := map[string][]*Token{
-		"  a*(b + c )": []*Token{
+var exprTestData = []exprTestItem{
+	exprTestItem{
+		expr: "  a*(b + c )",
+		token: []*Token{
 			&Token{Line: 1, Column: 4, Id: TokenSymbol, Text: "a"},
 			&Token{Line: 1, Column: 7, Id: TokenSymbol, Text: "b"},
 			&Token{Line: 1, Column: 11, Id: TokenSymbol, Text: "c"},
 			&Token{Line: 1, Column: 9, Id: TokenAdd, Text: "+"},
 			&Token{Line: 1, Column: 5, Id: TokenMultiply, Text: "*"},
 		},
-	}
+		node: NewNodeMultiply(
+			NewNodeAdd(NewNodeSymbol("c"), NewNodeSymbol("b")),
+			NewNodeSymbol("a")),
+	},
+}
+
+//---------------------------------------------------------------------------
+
+func TestExprTokenizer(t *testing.T) {
+	assert := assert.New(t)
+
+	data := map[string][]*Token{}
 
 	for k, v := range data {
 

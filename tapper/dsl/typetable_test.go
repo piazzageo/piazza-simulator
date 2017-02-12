@@ -14,12 +14,12 @@ func TestTypeTable(t *testing.T) {
 
 	tt, err := NewTypeTable()
 	assert.NoError(err)
-	assert.Equal(13, tt.size())
+	assert.Equal(5, tt.size())
 
 	// add a symbol
 	err = tt.add("myint")
 	assert.NoError(err)
-	assert.Equal(14, tt.size())
+	assert.Equal(6, tt.size())
 
 	// fail to add a symbol
 	err = tt.add("myint")
@@ -37,14 +37,14 @@ func TestTypeTable(t *testing.T) {
 	assert.Error(err)
 
 	// set node
-	err = tt.setNode("myint", NewNodeNumberType(FlavorS32))
+	err = tt.setNode("myint", NewNodeIntType())
 	assert.NoError(err)
-	assert.Equal(NewNodeNumberType(FlavorS32), tt.getNode("myint"))
+	assert.Equal(NewNodeIntType(), tt.getNode("myint"))
 
 	// fail to set node
-	err = tt.setNode("myint", NewNodeNumberType(FlavorS32))
+	err = tt.setNode("myint", NewNodeIntType())
 	assert.Error(err)
-	err = tt.setNode("barbarbar", NewNodeNumberType(FlavorS32))
+	err = tt.setNode("barbarbar", NewNodeIntType())
 	assert.Error(err)
 
 	// test has()

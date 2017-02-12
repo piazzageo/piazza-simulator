@@ -14,7 +14,7 @@ func TestTypeParser(t *testing.T) {
 	assert.NoError(err)
 
 	for _, tc := range typeTestData {
-		//log.Printf("========= %s ================", tc.name)
+		//log.Printf("========= %s ====== %v ==========", tc.name, tc.node)
 		if tc.token == nil {
 			continue
 		}

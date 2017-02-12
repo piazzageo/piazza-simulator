@@ -9,31 +9,22 @@ import (
 // this is a DeclBlock, containing both struct decls and string decls
 var typeTestString = `
 { 
-    "MyIntU8": "uint8",
-    "MyIntU16": "uint16",
-    "MyIntU32": "uint32",
-    "MyIntU64": "uint64",
-    "MyInt8": "int8",
-    "MyInt16": "int16",
-    "MyInt32": "int32",
-    "MyInt64": "int64",
-    "MyFloat32": "float32",
-    "MyFloat64": "float64",
-
+    "MyInt": "int",
+    "MyFloat": "float",
     "MyBool": "bool",
     "MyString": "string",
     "MyAny": "any",
 
-    "MyMapInt32": "[map]int32",
+    "MyMapInt": "[map]int",
     "MyMapPoint": "[map]Point",
-    "MySliceIntU8": "[]uint8",
+    "MySliceInt": "[]int",
     "MySlicePoint": "[]Point",
-    "MyArray10Float32": "[10]float32",
+    "MyArray10Float": "[10]float",
     "MyArray4Point": "[4]Point",
 
     "Point": {
-        "x32": "float32",
-        "y64": "float64"
+        "x": "float",
+        "y": "float"
     },
 
     "MyStruct": {
@@ -52,54 +43,14 @@ type typeTestItem struct {
 
 var typeTestData = []typeTestItem{
 	typeTestItem{
-		name:  "MyIntU8",
-		token: []Token{Token{Line: 1, Column: 6, Id: 21, Text: "uint8"}},
-		node:  NewNodeNumberType(FlavorU8),
+		name:  "MyInt",
+		token: []Token{Token{Line: 1, Column: 4, Id: 21, Text: "int"}},
+		node:  NewNodeIntType(),
 	},
 	typeTestItem{
-		name:  "MyIntU16",
-		token: []Token{Token{Line: 1, Column: 7, Id: 21, Text: "uint16"}},
-		node:  NewNodeNumberType(FlavorU16),
-	},
-	typeTestItem{
-		name:  "MyIntU32",
-		token: []Token{Token{Line: 1, Column: 7, Id: 21, Text: "uint32"}},
-		node:  NewNodeNumberType(FlavorU32),
-	},
-	typeTestItem{
-		name:  "MyIntU64",
-		token: []Token{Token{Line: 1, Column: 7, Id: 21, Text: "uint64"}},
-		node:  NewNodeNumberType(FlavorU64),
-	},
-	typeTestItem{
-		name:  "MyInt8",
-		token: []Token{Token{Line: 1, Column: 5, Id: 21, Text: "int8"}},
-		node:  NewNodeNumberType(FlavorS8),
-	},
-	typeTestItem{
-		name:  "MyInt16",
-		token: []Token{Token{Line: 1, Column: 6, Id: 21, Text: "int16"}},
-		node:  NewNodeNumberType(FlavorS16),
-	},
-	typeTestItem{
-		name:  "MyInt32",
-		token: []Token{Token{Line: 1, Column: 6, Id: 21, Text: "int32"}},
-		node:  NewNodeNumberType(FlavorS32),
-	},
-	typeTestItem{
-		name:  "MyInt64",
-		token: []Token{Token{Line: 1, Column: 6, Id: 21, Text: "int64"}},
-		node:  NewNodeNumberType(FlavorS64),
-	},
-	typeTestItem{
-		name:  "MyFloat32",
-		token: []Token{Token{Line: 1, Column: 8, Id: 21, Text: "float32"}},
-		node:  NewNodeNumberType(FlavorF32),
-	},
-	typeTestItem{
-		name:  "MyFloat64",
-		token: []Token{Token{Line: 1, Column: 8, Id: 21, Text: "float64"}},
-		node:  NewNodeNumberType(FlavorF64),
+		name:  "MyFloat",
+		token: []Token{Token{Line: 1, Column: 6, Id: 21, Text: "float"}},
+		node:  NewNodeFloatType(),
 	},
 	typeTestItem{
 		name:  "MyBool",
@@ -117,12 +68,12 @@ var typeTestData = []typeTestItem{
 		node:  NewNodeAnyType(),
 	},
 	typeTestItem{
-		name: "MyMapInt32",
+		name: "MyMapInt",
 		token: []Token{
 			Token{Line: 1, Column: 2, Id: 25, Text: "[map]"},
-			Token{Line: 1, Column: 11, Id: 21, Text: "int32"},
+			Token{Line: 1, Column: 9, Id: 21, Text: "int"},
 		},
-		node: NewNodeMapType(NewNodeStringType(), NewNodeNumberType(FlavorS32)),
+		node: NewNodeMapType(NewNodeStringType(), NewNodeIntType()),
 	},
 	typeTestItem{
 		name: "MyMapPoint",
@@ -133,12 +84,12 @@ var typeTestData = []typeTestItem{
 		node: NewNodeMapType(NewNodeStringType(), NewNodeUserType("Point")),
 	},
 	typeTestItem{
-		name: "MySliceIntU8",
+		name: "MySliceInt",
 		token: []Token{
 			Token{Line: 1, Column: 2, Id: 23, Text: "[]"},
-			Token{Line: 1, Column: 8, Id: 21, Text: "uint8"},
+			Token{Line: 1, Column: 6, Id: 21, Text: "int"},
 		},
-		node: NewNodeSliceType(NewNodeNumberType(FlavorU8)),
+		node: NewNodeSliceType(NewNodeIntType()),
 	},
 	typeTestItem{
 		name: "MySlicePoint",
@@ -149,12 +100,12 @@ var typeTestData = []typeTestItem{
 		node: NewNodeSliceType(NewNodeUserType("Point")),
 	},
 	typeTestItem{
-		name: "MyArray10Float32",
+		name: "MyArray10Float",
 		token: []Token{
 			Token{Line: 1, Column: 2, Id: 24, Text: "[10]", Value: 10},
-			Token{Line: 1, Column: 12, Id: 21, Text: "float32"},
+			Token{Line: 1, Column: 10, Id: 21, Text: "float"},
 		},
-		node: NewNodeArrayType(NewNodeNumberType(FlavorF32), 10),
+		node: NewNodeArrayType(NewNodeFloatType(), 10),
 	},
 	typeTestItem{
 		name: "MyArray4Point",
@@ -165,14 +116,14 @@ var typeTestData = []typeTestItem{
 		node: NewNodeArrayType(NewNodeUserType("Point"), 4),
 	},
 	typeTestItem{
-		name:  "Point.x32",
-		token: []Token{Token{Line: 1, Column: 8, Id: 21, Text: "float32"}},
-		node:  NewNodeNumberType(FlavorF32),
+		name:  "Point.x",
+		token: []Token{Token{Line: 1, Column: 6, Id: 21, Text: "float"}},
+		node:  NewNodeFloatType(),
 	},
 	typeTestItem{
-		name:  "Point.y64",
-		token: []Token{Token{Line: 1, Column: 8, Id: 21, Text: "float64"}},
-		node:  NewNodeNumberType(FlavorF64),
+		name:  "Point.y",
+		token: []Token{Token{Line: 1, Column: 6, Id: 21, Text: "float"}},
+		node:  NewNodeFloatType(),
 	},
 	typeTestItem{
 		name:  "MyStruct",
@@ -210,12 +161,14 @@ func TestTypeTokenizer(t *testing.T) {
 	assert.NoError(err)
 	assert.NotNil(typeTable)
 
-	//	assert.Len(typeTable.Types, len(data))
+	//log.Printf("===== %#v ====", typeTable)
 
 	for _, item := range typeTestData {
 		if typeTable.isBuiltin(item.name) {
 			continue
 		}
+
+		//log.Printf("===== %s ====", item.name)
 
 		tte, ok := typeTable.Types[item.name]
 		assert.True(ok)

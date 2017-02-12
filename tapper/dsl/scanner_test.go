@@ -43,8 +43,8 @@ func TestScanner(t *testing.T) {
 			tokens: []string{"as", ">", "10", "|", "b", "+", "3", "<", "c"},
 		},
 		{
-			source: `[map] int32`,
-			tokens: []string{"[map]", "int32"},
+			source: `[map] int`,
+			tokens: []string{"[map]", "int"},
 		},
 	}
 
@@ -54,7 +54,7 @@ func TestScanner(t *testing.T) {
 		assert.NotNil(tokens)
 
 		assert.Len(tokens, len(testcase.tokens))
-		for i, _ := range testcase.tokens {
+		for i := range testcase.tokens {
 			assert.Equal(testcase.tokens[i], tokens[i].Text)
 		}
 	}
