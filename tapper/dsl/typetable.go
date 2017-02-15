@@ -3,9 +3,9 @@ package dsl
 import "fmt"
 
 type TypeTableEntry struct {
-	Name  string
-	Token []Token
-	Node  Node
+	Name string
+	//Token []Token
+	Typ TypeNode
 }
 
 type TypeTable struct {
@@ -37,25 +37,20 @@ const (
 	StringType
 )
 
-var builtinTypes map[string]Node
+var builtinTypes map[string]TypeNode
 
 func (st *TypeTable) setBuiltins() error {
 	var err error
 
-	builtinTypes = map[string]Node{
-		"int":    NewNodeIntType(),
-		"float":  NewNodeFloatType(),
-		"bool":   NewNodeBoolType(),
-		"string": NewNodeStringType(),
-		"any":    NewNodeAnyType(),
+	builtinTypes = map[string]TypeNode{
+		"int":    NewTypeNodeInt(),
+		"float":  NewTypeNodeFloat(),
+		"bool":   NewTypeNodeBool(),
+		"string": NewTypeNodeString(),
 	}
 
 	for k, v := range builtinTypes {
-		err = st.add(k)
-		if err != nil {
-			return err
-		}
-		err = st.setNode(k, v)
+		err = st.addNode(k, v)
 		if err != nil {
 			return err
 		}
@@ -68,7 +63,7 @@ func (st *TypeTable) setBuiltins() error {
 
 func (e *TypeTableEntry) String() string {
 	s := fmt.Sprintf("%s:", e.Name)
-	s += fmt.Sprintf("[%v]", e.Node)
+	s += fmt.Sprintf("[%v]", e.Typ)
 	return s
 }
 
@@ -89,52 +84,23 @@ func (st *TypeTable) isBuiltin(name string) bool {
 	return ok
 }
 
-func (st *TypeTable) add(name string) error {
+func (st *TypeTable) addNode(name string, node TypeNode) error {
 	if st.has(name) {
 		return fmt.Errorf("type table entry already exists: %s", name)
 	}
 	st.Types[name] = &TypeTableEntry{
 		Name: name,
+		Typ:  node,
 	}
 	return nil
 }
 
-func (st *TypeTable) setNode(name string, node Node) error {
-	if !st.has(name) {
-		return fmt.Errorf("type table entry does not exist: %s", name)
-	}
-	if st.Types[name].Node != nil {
-		return fmt.Errorf("type table entry already has node: %s", name)
-	}
-	st.Types[name].Node = node
-	return nil
-}
-
-func (st *TypeTable) setToken(name string, token []Token) error {
-	if !st.has(name) {
-		return fmt.Errorf("type table entry does not exist: %s", name)
-	}
-	if st.Types[name].Token != nil {
-		return fmt.Errorf("type table entry already has token: %s", name)
-	}
-	st.Types[name].Token = token
-	return nil
-}
-
-func (st *TypeTable) getNode(s string) Node {
+func (st *TypeTable) getNode(s string) TypeNode {
 	v, ok := st.Types[s]
 	if !ok {
 		return nil
 	}
-	return v.Node
-}
-
-func (st *TypeTable) getToken(s string) []Token {
-	v, ok := st.Types[s]
-	if !ok {
-		return nil
-	}
-	return v.Token
+	return v.Typ
 }
 
 func (st *TypeTable) has(s string) bool {

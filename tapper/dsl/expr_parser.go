@@ -49,6 +49,7 @@ func (ep *ExprParser) buildTree() (Node, error) {
 		if err != nil {
 			return nil, err
 		}
+
 		out = NewNodeMultiply(left, right)
 
 	case TokenAdd:

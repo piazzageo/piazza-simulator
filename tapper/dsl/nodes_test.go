@@ -15,7 +15,13 @@ func TestNodes(t *testing.T) {
 
 	assert.Equal("ARRAY(17, INT)", t1.String())
 
-	t2 := NewNodeStructType(map[string]bool{"aa": true, "bb": true, "cc": true})
+	t2 := &NodeStruct{
+		Fields: map[string]Node{
+			"aa": NewNodeBoolType(),
+			"bb": NewNodeBoolType(),
+			"cc": NewNodeBoolType(),
+		},
+	}
 
 	t2s := t2.String()
 	assert.Contains(t2s, "STRUCT(")

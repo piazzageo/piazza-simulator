@@ -14,13 +14,9 @@ func TestEnvironment(t *testing.T) {
 	// setup
 	tt, err := NewTypeTable()
 	assert.NoError(err)
-	err = tt.add("i")
+	err = tt.addNode("i", NewNodeIntType())
 	assert.NoError(err)
-	err = tt.setNode("i", NewNodeIntType())
-	assert.NoError(err)
-	err = tt.add("f")
-	assert.NoError(err)
-	err = tt.setNode("f", NewNodeFloatType())
+	err = tt.addNode("f", NewNodeFloatType())
 	assert.NoError(err)
 
 	env := NewEnvironment(tt)

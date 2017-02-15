@@ -14,7 +14,7 @@ type evalTestItem struct {
 
 type varItem struct {
 	value    interface{}
-	datatype Node
+	datatype TypeNode
 }
 
 var evalTestData = []evalTestItem{
@@ -23,9 +23,9 @@ var evalTestData = []evalTestItem{
 			NewNodeAdd(NewNodeSymbol("c"), NewNodeSymbol("b")),
 			NewNodeSymbol("a")),
 		vars: map[string]varItem{
-			"a": varItem{value: 2, datatype: NewNodeIntType()},
-			"b": varItem{value: 3, datatype: NewNodeIntType()},
-			"c": varItem{value: 4, datatype: NewNodeIntType()},
+			"a": varItem{value: 2, datatype: NewTypeNodeInt()},
+			"b": varItem{value: 3, datatype: NewTypeNodeInt()},
+			"c": varItem{value: 4, datatype: NewTypeNodeInt()},
 		},
 		result: 14,
 	},
@@ -42,9 +42,7 @@ func TestEval(t *testing.T) {
 		env := NewEnvironment(typeTable)
 
 		for k, v := range item.vars {
-			err = typeTable.add(k)
-			assert.NoError(err)
-			typeTable.setNode(k, v.datatype)
+			err = typeTable.addNode(k, v.datatype)
 			assert.NoError(err)
 
 			env.set(k, v.value)

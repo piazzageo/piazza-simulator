@@ -6,221 +6,229 @@ import (
 
 //---------------------------------------------------------------------
 
-type NodeCore struct {
-	left  Node
-	right Node
-	value interface{}
-}
-
-func (n *NodeCore) Left() Node {
-	return n.left
-}
-
-func (n *NodeCore) Right() Node {
-	return n.right
-}
-
-func (n *NodeCore) Value() interface{} {
-	return n.value
-}
-
 type Node interface {
 	String() string
-	Left() Node
-	Right() Node
-	//Value() interface{}
-	//Eval(*Environment) interface{}
+	Type() TypeNode
 }
 
 //---------------------------------------------------------------------
 
 type NodeMultiply struct {
-	NodeCore
+	Typ   TypeNode
+	Left  Node
+	Right Node
 }
 
 func NewNodeMultiply(left Node, right Node) *NodeMultiply {
-	n := &NodeMultiply{}
-	n.left = left
-	n.right = right
+	n := &NodeMultiply{
+		Left:  left,
+		Right: right,
+	}
 	return n
+}
+
+func (n *NodeMultiply) Type() TypeNode {
+	return n.Typ
 }
 
 func (n *NodeMultiply) String() string {
-	return fmt.Sprintf("(* %v %v)", n.left, n.right)
+	return fmt.Sprintf("(* %v %v)", n.Left, n.Right)
 }
 
+//---------------------------------------------------------------------
+
 type NodeAdd struct {
-	NodeCore
+	Typ   TypeNode
+	Left  Node
+	Right Node
 }
 
 func NewNodeAdd(left Node, right Node) *NodeAdd {
-	n := &NodeAdd{}
-	n.left = left
-	n.right = right
+	n := &NodeAdd{
+		Left:  left,
+		Right: right,
+	}
 	return n
+}
+
+func (n *NodeAdd) Type() TypeNode {
+	return n.Typ
 }
 
 func (n *NodeAdd) String() string {
-	return fmt.Sprintf("(+ %v %v)", n.left, n.right)
-}
-
-type NodeSymbol struct {
-	NodeCore
-}
-
-func NewNodeSymbol(name string) *NodeSymbol {
-	n := &NodeSymbol{}
-	n.value = name
-	return n
-}
-
-func (n *NodeSymbol) String() string {
-	return fmt.Sprintf("%s", n.value.(string))
+	return fmt.Sprintf("(+ %v %v)", n.Left, n.Right)
 }
 
 //---------------------------------------------------------------------------
 
-type NodeMapType struct {
-	// left is key type
-	// right is value type
-	NodeCore
+type NodeSymbol struct {
+	Typ  TypeNode
+	Name string
 }
 
-func NewNodeMapType(elemType Node, valueType Node) *NodeMapType {
-	n := &NodeMapType{}
-	n.left = elemType
-	n.right = valueType
-	return n
-}
-
-func (t *NodeMapType) String() string {
-	return fmt.Sprintf("MAP[%v]%v", t.left, t.right)
-}
-
-type NodeUserType struct {
-	NodeCore
-}
-
-func NewNodeUserType(name string) *NodeUserType {
-	n := &NodeUserType{}
-	n.value = name
-	return n
-}
-
-func (t *NodeUserType) String() string {
-	return fmt.Sprintf("USERTYPE(%s)", t.value.(string))
-}
-
-type NodeStructType struct {
-	NodeCore
-}
-
-func NewNodeStructType(fields map[string]bool) *NodeStructType {
-	n := &NodeStructType{}
-	n.value = fields
-	return n
-}
-
-func (t *NodeStructType) String() string {
-	fields := t.value.(map[string]bool)
-	s := ""
-	for k := range fields {
-		if s != "" {
-			s += ", "
-		}
-		s += fmt.Sprintf("%v", k)
+func NewNodeSymbol(name string) *NodeSymbol {
+	n := &NodeSymbol{
+		Name: name,
 	}
-	return fmt.Sprintf("STRUCT(%s)", s)
-}
-
-type NodeArrayType struct {
-	// left is elem type
-	// value is length (siz)
-	NodeCore
-}
-
-func NewNodeArrayType(elemType Node, siz int) *NodeArrayType {
-	n := &NodeArrayType{}
-	n.left = elemType
-	n.value = siz
-	return n
-}
-func (t *NodeArrayType) String() string {
-	return fmt.Sprintf("ARRAY(%d, %v)", t.value.(int), t.left)
-}
-
-type NodeSliceType struct {
-	NodeCore
-}
-
-func NewNodeSliceType(elemType Node) *NodeSliceType {
-	n := &NodeSliceType{}
-	n.left = elemType
 	return n
 }
 
-func (t *NodeSliceType) String() string {
-	return fmt.Sprintf("SLICE(%v)", t.left)
+func (n *NodeSymbol) Type() TypeNode {
+	return n.Typ
 }
 
-type NodeIntType struct {
-	NodeCore
+func (t *NodeSymbol) String() string {
+	return fmt.Sprintf("SYMBOL(%s)", t.Name)
 }
 
-func NewNodeIntType() *NodeIntType {
-	n := &NodeIntType{}
+//---------------------------------------------------------------------------
+
+type NodeIntConstant struct {
+	Value int
+}
+
+func NewNodeIntConstant(value int) *NodeIntConstant {
+	n := &NodeIntConstant{
+		Value: value,
+	}
 	return n
 }
 
-func (t *NodeIntType) String() string {
-	return fmt.Sprintf("INT")
+func (n *NodeIntConstant) Type() TypeNode {
+	return NewTypeNodeInt()
 }
 
-type NodeFloatType struct {
-	NodeCore
+func (t *NodeIntConstant) String() string {
+	return fmt.Sprintf("INTCONSTANT(%d)", t.Value)
 }
 
-func NewNodeFloatType() *NodeFloatType {
-	n := &NodeFloatType{}
+//---------------------------------------------------------------------------
+
+type NodeFloatConstant struct {
+	Value float64
+}
+
+func NewNodeFloatConstant(value float64) *NodeFloatConstant {
+	n := &NodeFloatConstant{
+		Value: value,
+	}
 	return n
 }
 
-func (t *NodeFloatType) String() string {
-	return fmt.Sprintf("FLOAT")
+func (n *NodeFloatConstant) Type() TypeNode {
+	return NewTypeNodeFloat()
 }
 
-type NodeBoolType struct {
-	NodeCore
+func (t *NodeFloatConstant) String() string {
+	return fmt.Sprintf("FLOATCONSTANT(%f)", t.Value)
 }
 
-func NewNodeBoolType() *NodeBoolType {
-	return &NodeBoolType{}
+//---------------------------------------------------------------------------
+
+type NodeBoolConstant struct {
+	Value bool
 }
 
-func (t *NodeBoolType) String() string {
-	return "BOOL"
+func NewNodeBoolConstant(value bool) *NodeBoolConstant {
+	n := &NodeBoolConstant{
+		Value: value,
+	}
+	return n
 }
 
-type NodeStringType struct {
-	NodeCore
+func (n *NodeBoolConstant) Type() TypeNode {
+	return NewTypeNodeBool()
 }
 
-func NewNodeStringType() *NodeStringType {
-	return &NodeStringType{}
+func (t *NodeBoolConstant) String() string {
+	return fmt.Sprintf("BOOLCONSTANT(%t)", t.Value)
 }
 
-func (t *NodeStringType) String() string {
-	return "STRING"
+//---------------------------------------------------------------------------
+
+type NodeStringConstant struct {
+	Value string
 }
 
-type NodeAnyType struct {
-	NodeCore
+func NewNodeStringConstant(value string) *NodeStringConstant {
+	n := &NodeStringConstant{
+		Value: value,
+	}
+	return n
 }
 
-func NewNodeAnyType() *NodeAnyType {
-	return &NodeAnyType{}
+func (n *NodeStringConstant) Type() TypeNode {
+	return NewTypeNodeString()
 }
 
-func (t *NodeAnyType) String() string {
-	return "ANY"
+func (t *NodeStringConstant) String() string {
+	return fmt.Sprintf("STRINGCONSTANT(%s)", t.Value)
 }
+
+//---------------------------------------------------------------------------
+
+type NodeStructField struct {
+	Typ  TypeNode
+	Name string
+}
+
+func NewNodeStructField(name string) *NodeStructField {
+	n := &NodeStructField{
+		Name: name,
+	}
+	return n
+}
+
+func (n *NodeStructField) Type() TypeNode {
+	return n.Typ
+}
+
+func (t *NodeStructField) String() string {
+	return fmt.Sprintf("FIELD(%s)", t.Name)
+}
+
+//---------------------------------------------------------------------------
+
+type NodeArrayIndex struct {
+	Typ   TypeNode
+	Index int
+}
+
+func NewNodeArrayIndex(index int) *NodeArrayIndex {
+	n := &NodeArrayIndex{
+		Index: index,
+	}
+	return n
+}
+
+func (n *NodeArrayIndex) Type() TypeNode {
+	return n.Typ
+}
+
+func (t *NodeArrayIndex) String() string {
+	return fmt.Sprintf("INDEX(%d)", t.Index)
+}
+
+//---------------------------------------------------------------------------
+
+type NodeMapKey struct {
+	Typ TypeNode
+	Key string
+}
+
+func NewNodeMapKey(key string) *NodeMapKey {
+	n := &NodeMapKey{
+		Key: key,
+	}
+	return n
+}
+
+func (n *NodeMapKey) Type() TypeNode {
+	return n.Typ
+}
+
+func (t *NodeMapKey) String() string {
+	return fmt.Sprintf("MAPKEY(%s)", t.Key)
+}
+
+//---------------------------------------------------------------------------
