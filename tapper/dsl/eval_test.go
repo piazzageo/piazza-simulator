@@ -7,25 +7,26 @@ import (
 )
 
 type evalTestItem struct {
-	node   Node
-	vars   map[string]varItem
+	node   ExprNode
+	values map[string]*ExprValue
+	typs   map[string]TypeNode
 	result interface{}
-}
-
-type varItem struct {
-	value    interface{}
-	datatype TypeNode
 }
 
 var evalTestData = []evalTestItem{
 	evalTestItem{ // "a * (b + c )"
-		node: NewNodeMultiply(
-			NewNodeAdd(NewNodeSymbol("c"), NewNodeSymbol("b")),
-			NewNodeSymbol("a")),
-		vars: map[string]varItem{
-			"a": varItem{value: 2, datatype: NewTypeNodeInt()},
-			"b": varItem{value: 3, datatype: NewTypeNodeInt()},
-			"c": varItem{value: 4, datatype: NewTypeNodeInt()},
+		node: NewExprNodeMultiply(
+			NewExprNodeAdd(NewExprNodeSymbolRef("c"), NewExprNodeSymbolRef("b")),
+			NewExprNodeSymbolRef("a")),
+		values: map[string]*ExprValue{
+			"a": &ExprValue{Type: IntType, Value: 2},
+			"b": &ExprValue{Type: IntType, Value: 3},
+			"c": &ExprValue{Type: IntType, Value: 4},
+		},
+		typs: map[string]TypeNode{
+			"a": NewTypeNodeInt(),
+			"b": NewTypeNodeInt(),
+			"c": NewTypeNodeInt(),
 		},
 		result: 14,
 	},
@@ -41,11 +42,13 @@ func TestEval(t *testing.T) {
 
 		env := NewEnvironment(typeTable)
 
-		for k, v := range item.vars {
-			err = typeTable.addNode(k, v.datatype)
+		for k, v := range item.typs {
+			err = typeTable.addNode(k, v)
 			assert.NoError(err)
+		}
 
-			env.set(k, v.value)
+		for k, v := range item.values {
+			env.set(k, v)
 		}
 
 		eval := &Eval{}

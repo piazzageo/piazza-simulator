@@ -85,7 +85,7 @@ var typeTestData = []typeTestItem{
 	typeTestItem{
 		name: "Point",
 		node: &TypeNodeStruct{
-			Fields: map[stringType]Node{
+			Fields: map[string]TypeNode{
 				"x": NewTypeNodeFloat(),
 				"y": NewTypeNodeFloat(),
 			},
@@ -96,8 +96,8 @@ var typeTestData = []typeTestItem{
 		node: &TypeNodeStruct{
 			Fields: map[string]TypeNode{
 				"alpha": NewTypeNodeString(),
-				"beta":  NewTypeNodeSymbol("Point"),
-				"gamma": NewTypeNodeSymbol("MyStruct"),
+				"beta":  NewTypeNodeName("Point"),
+				"gamma": NewTypeNodeName("MyStruct"),
 			},
 		},
 	},

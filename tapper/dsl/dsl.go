@@ -17,13 +17,13 @@ func newId() Id {
 
 type Dsl struct {
 	TypeTables map[Id]*TypeTable
-	Exprs      map[Id]Node
+	Exprs      map[Id]ExprNode
 }
 
 func NewDsl() (*Dsl, error) {
 	d := &Dsl{}
 	d.TypeTables = map[Id]*TypeTable{}
-	d.Exprs = map[Id]Node{}
+	d.Exprs = map[Id]ExprNode{}
 	return d, nil
 }
 

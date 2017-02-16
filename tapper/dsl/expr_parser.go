@@ -9,7 +9,7 @@ type ExprParser struct {
 // TODO: <<, >>
 
 // Parser converts tokens in RPN to a Node tree
-func (ep *ExprParser) Parse(toks []*Token) (Node, error) {
+func (ep *ExprParser) Parse(toks []*Token) (ExprNode, error) {
 
 	ep.tokens = toks
 
@@ -30,12 +30,12 @@ func (ep *ExprParser) pop() *Token {
 	return x
 }
 
-func (ep *ExprParser) buildTree() (Node, error) {
+func (ep *ExprParser) buildTree() (ExprNode, error) {
 
 	var err error
-	var left Node
-	var right Node
-	var out Node
+	var left ExprNode
+	var right ExprNode
+	var out ExprNode
 	tok := ep.pop()
 
 	switch tok.Id {
@@ -50,7 +50,7 @@ func (ep *ExprParser) buildTree() (Node, error) {
 			return nil, err
 		}
 
-		out = NewNodeMultiply(left, right)
+		out = NewExprNodeMultiply(left, right)
 
 	case TokenAdd:
 		left, err = ep.buildTree()
@@ -61,10 +61,10 @@ func (ep *ExprParser) buildTree() (Node, error) {
 		if err != nil {
 			return nil, err
 		}
-		out = NewNodeAdd(left, right)
+		out = NewExprNodeAdd(left, right)
 
 	case TokenSymbol:
-		out = NewNodeSymbol(tok.Text)
+		out = NewExprNodeSymbolRef(tok.Text)
 
 	default:
 		return nil, fmt.Errorf("Unknown token building ast: %d (\"%s\")", tok.Id, tok.Text)

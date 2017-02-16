@@ -14,13 +14,13 @@ func TestEnvironment(t *testing.T) {
 	// setup
 	tt, err := NewTypeTable()
 	assert.NoError(err)
-	err = tt.addNode("i", NewNodeIntType())
+	err = tt.addNode("i", NewTypeNodeInt())
 	assert.NoError(err)
-	err = tt.addNode("f", NewNodeFloatType())
+	err = tt.addNode("f", NewTypeNodeFloat())
 	assert.NoError(err)
 
 	env := NewEnvironment(tt)
 
-	env.set("i", 12)
-	assert.Equal(12, env.get("i"))
+	env.set("i", &ExprValue{Type: IntType, Value: 12})
+	assert.Equal(ExprValue{Type: IntType, Value: 12}, env.get("i"))
 }

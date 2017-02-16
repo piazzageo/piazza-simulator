@@ -3,7 +3,7 @@ package dsl
 type Eval struct {
 }
 
-func (e *Eval) Evaluate(expr Node, env *Environment) (interface{}, error) {
+func (e *Eval) Evaluate(expr ExprNode, env *Environment) (interface{}, error) {
 	return nil, nil
 }
 

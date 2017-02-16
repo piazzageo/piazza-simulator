@@ -11,32 +11,17 @@ import (
 func TestNodes(t *testing.T) {
 	assert := assert.New(t)
 
-	t1 := NewNodeArrayType(NewNodeIntType(), 17)
-
+	t1 := NewExprNodeArrayRef("arrayo", NewExprNodeIntConstant(17))
 	assert.Equal("ARRAY(17, INT)", t1.String())
 
-	t2 := &NodeStruct{
-		Fields: map[string]Node{
-			"aa": NewNodeBoolType(),
-			"bb": NewNodeBoolType(),
-			"cc": NewNodeBoolType(),
-		},
-	}
-
+	t2 := NewExprNodeStructRef("structo", "aa")
 	t2s := t2.String()
-	assert.Contains(t2s, "STRUCT(")
-	assert.Contains(t2s, "aa")
-	assert.Contains(t2s, "bb")
-	assert.Contains(t2s, "cc")
+	assert.Contains(t2s, "STRUCT(aa)")
 	assert.Contains(t2s, ")")
 
-	t3 := NewNodeMapType(NewNodeStringType(), NewNodeBoolType())
+	t3 := NewExprNodeMapRef("mappo", NewExprNodeBoolConstant(true))
 
 	assert.Equal("MAP[STRING]BOOL", t3.String())
-
-	t4 := NewNodeSliceType(NewNodeIntType())
-
-	assert.Equal("SLICE(INT)", t4.String())
 }
 
 func TestNodeEquality(t *testing.T) {
@@ -46,10 +31,10 @@ func TestNodeEquality(t *testing.T) {
 	//	return a == b
 	//}
 
-	a := NewNodeSliceType(NewNodeIntType())
-	b := NewNodeSliceType(NewNodeIntType())
-	c := NewNodeStringType()
-	d := NewNodeFloatType()
+	a := NewExprNodeMapRef("mappy", NewExprNodeStringConstant("asdf"))
+	b := NewExprNodeMapRef("mappy", NewExprNodeStringConstant("asdf"))
+	c := NewExprNodeStringConstant("qwerty")
+	d := NewExprNodeFloatConstant(2.1)
 	assert.Equal(a, b)
 	assert.NotEqual(a, c)
 	assert.NotEqual(a, d)

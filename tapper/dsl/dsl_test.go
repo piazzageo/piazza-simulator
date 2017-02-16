@@ -18,7 +18,11 @@ var dslTestData = []dslTestItem{
 		decl: `{ "Point": { "x": "float", "y": "float" } }`,
 		expr: "a * (b + c )",
 		env: &Environment{
-			data: map[string]interface{}{"a": 2, "b": 3, "c": 4},
+			data: map[string]*ExprValue{
+				"a": &ExprValue{Type: IntType, Value: 2},
+				"b": &ExprValue{Type: IntType, Value: 3},
+				"c": &ExprValue{Type: IntType, Value: 4},
+			},
 		},
 		result: 14,
 	},

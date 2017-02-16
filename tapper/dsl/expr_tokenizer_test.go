@@ -11,7 +11,7 @@ import (
 type exprTestItem struct {
 	expr  string
 	token []*Token
-	node  Node
+	node  ExprNode
 }
 
 var exprTestData = []exprTestItem{
@@ -24,9 +24,9 @@ var exprTestData = []exprTestItem{
 			&Token{Line: 1, Column: 9, Id: TokenAdd, Text: "+"},
 			&Token{Line: 1, Column: 5, Id: TokenMultiply, Text: "*"},
 		},
-		node: NewNodeMultiply(
-			NewNodeAdd(NewNodeSymbol("c"), NewNodeSymbol("b")),
-			NewNodeSymbol("a")),
+		node: NewExprNodeMultiply(
+			NewExprNodeAdd(NewExprNodeSymbolRef("c"), NewExprNodeSymbolRef("b")),
+			NewExprNodeSymbolRef("a")),
 	},
 }
 
