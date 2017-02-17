@@ -1,7 +1,6 @@
 package dsl
 
 import (
-	"log"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -103,23 +102,22 @@ var typeTestData = []typeTestItem{
 	},
 }
 
-func TestTypeTokenizer(t *testing.T) {
+func TestTypeParser(t *testing.T) {
 	assert := assert.New(t)
 
-	tt, err := NewTypeTokenizer()
-	assert.NoError(err)
+	tt := TypeTokenizer{}
 	typeTable, err := tt.ParseJson(typeTestString)
 	assert.NoError(err)
 	assert.NotNil(typeTable)
 
-	log.Printf("===== %#v ====", typeTable)
+	//log.Printf("===== %#v ====", typeTable)
 
 	for _, item := range typeTestData {
 		if typeTable.isBuiltin(item.name) {
 			continue
 		}
 
-		log.Printf("===== %s ====", item.name)
+		//	log.Printf("===== %s ====", item.name)
 
 		tte, ok := typeTable.Types[item.name]
 		assert.True(ok)

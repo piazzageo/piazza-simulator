@@ -16,7 +16,7 @@ type ExprTokenizer struct {
 func (ep *ExprTokenizer) Tokenize(s string) ([]*Token, error) {
 	sc := &Scanner{}
 
-	tokens, err := sc.Scan(s)
+	tokens, err := sc.Scan(s, false)
 	if err != nil {
 		return nil, err
 	}
@@ -50,16 +50,24 @@ func init() {
 	associativities = make(map[string]bool, 0)
 
 	priorities[TokenSymbol] = 99
-	priorities[TokenNumber] = 99
+	priorities[TokenString] = 99
+	priorities[TokenBool] = 99
+	priorities[TokenFloat] = 99
+	priorities[TokenInt] = 99
+	priorities[TokenLeftBracket] = 99
+	priorities[TokenRightBracket] = 99
+	priorities[TokenBang] = 99
+
+	priorities[TokenPeriod] = 6
 	priorities[TokenMultiply] = 5
 	priorities[TokenDivide] = 5
-	priorities[TokenMod] = 5
+	priorities[TokenModulus] = 5
 	priorities[TokenBitwiseAnd] = 5
 	priorities[TokenAdd] = 4
 	priorities[TokenSubtract] = 4
 	priorities[TokenBitwiseOr] = 4
-	priorities[TokenExponent] = 4
-	priorities[TokenEquals] = 3
+	priorities[TokenBitwiseXor] = 4
+	priorities[TokenEqualsEquals] = 3
 	priorities[TokenNotEquals] = 3
 	priorities[TokenLessThan] = 3
 	priorities[TokenLessOrEqualThan] = 3
@@ -73,7 +81,7 @@ func init() {
 
 func (ep *ExprTokenizer) makeRPN(tokens []Token) ([]*Token, error) {
 	var ret []*Token
-
+	//log.Printf("==== %v", tokens)
 	var operators []Token
 	for _, token := range tokens {
 		if token.Id == -2 || token.Id == -3 {
@@ -104,7 +112,7 @@ func (ep *ExprTokenizer) makeRPN(tokens []Token) ([]*Token, error) {
 				// operator priority and associativity
 				priority, ok := priorities[token.Id]
 				if !ok {
-					return nil, fmt.Errorf("Unknown operator: %v", &token)
+					return nil, fmt.Errorf("expr_tokenizer: Unknown operator: %v", &token)
 				}
 				rightAssociative := associativities[token.Text]
 
@@ -142,6 +150,8 @@ func (ep *ExprTokenizer) makeRPN(tokens []Token) ([]*Token, error) {
 		}
 		ret = append(ret, &operator)
 	}
+
+	//log.Printf("==== %v", ret)
 
 	return ret, nil
 }

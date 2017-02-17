@@ -22,5 +22,5 @@ func TestEnvironment(t *testing.T) {
 	env := NewEnvironment(tt)
 
 	env.set("i", &ExprValue{Type: IntType, Value: 12})
-	assert.Equal(ExprValue{Type: IntType, Value: 12}, env.get("i"))
+	assert.Equal(&ExprValue{Type: IntType, Value: 12}, env.get("i"))
 }

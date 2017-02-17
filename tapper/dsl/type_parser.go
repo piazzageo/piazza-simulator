@@ -6,20 +6,6 @@ import (
 )
 
 type TypeTokenizer struct {
-	typeTable *TypeTable
-}
-
-func NewTypeTokenizer() (*TypeTokenizer, error) {
-	typeTable, err := NewTypeTable()
-	if err != nil {
-		return nil, err
-	}
-
-	tp := &TypeTokenizer{
-		typeTable: typeTable,
-	}
-
-	return tp, nil
 }
 
 // A DeclBlock is a JSON object that is a map from symbol names
@@ -51,15 +37,20 @@ func (p *TypeTokenizer) ParseJson(s string) (*TypeTable, error) {
 func (p *TypeTokenizer) Parse(block *DeclBlock) (*TypeTable, error) {
 	var err error
 
-	err = p.parseBlock(block)
+	typeTable, err := NewTypeTable()
 	if err != nil {
 		return nil, err
 	}
 
-	return p.typeTable, nil
+	err = p.parseBlock(block, typeTable)
+	if err != nil {
+		return nil, err
+	}
+
+	return typeTable, nil
 }
 
-func (p *TypeTokenizer) parseBlock(block *DeclBlock) error {
+func (p *TypeTokenizer) parseBlock(block *DeclBlock, typeTable *TypeTable) error {
 	var err error
 	var tnode TypeNode
 
@@ -73,24 +64,24 @@ func (p *TypeTokenizer) parseBlock(block *DeclBlock) error {
 			structDecl := decl.(map[string]interface{})
 			for fieldName, xfieldDecl := range structDecl {
 				fieldDecl := xfieldDecl.(string)
-				tnode, err = p.parseDecl(name+"."+fieldName, fieldDecl)
+				tnode, err = p.parseDecl(name+"."+fieldName, fieldDecl, typeTable)
 				if err != nil {
 					return err
 				}
 				structNode.Fields[fieldName] = NewTypeNodeField(fieldName, tnode)
 			}
-			err = p.typeTable.addNode(name, structNode)
+			err = typeTable.addNode(name, structNode)
 			if err != nil {
 				return err
 			}
 
 		case string:
 			stringDecl := decl.(string)
-			tnode, err = p.parseDecl(name, stringDecl)
+			tnode, err = p.parseDecl(name, stringDecl, typeTable)
 			if err != nil {
 				return err
 			}
-			err = p.typeTable.addNode(name, tnode)
+			err = typeTable.addNode(name, tnode)
 			if err != nil {
 				return err
 			}
@@ -104,16 +95,16 @@ func (p *TypeTokenizer) parseBlock(block *DeclBlock) error {
 	return nil
 }
 
-func (p *TypeTokenizer) parseDecl(name string, decl string) (TypeNode, error) {
+func (p *TypeTokenizer) parseDecl(name string, decl string, typeTable *TypeTable) (TypeNode, error) {
 
 	scanner := Scanner{}
 
-	toks, err := scanner.Scan(decl)
+	toks, err := scanner.Scan(decl, true)
 	if err != nil {
 		return nil, err
 	}
 
-	tnode, err := parseTheTokens(toks, p.typeTable)
+	tnode, err := parseTheTokens(toks, typeTable)
 	if err != nil {
 		return nil, err
 	}

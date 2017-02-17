@@ -31,7 +31,8 @@ func NewTypeTable() (*TypeTable, error) {
 type BaseType int
 
 const (
-	IntType BaseType = iota
+	InvalidType BaseType = iota
+	IntType
 	FloatType
 	BoolType
 	StringType

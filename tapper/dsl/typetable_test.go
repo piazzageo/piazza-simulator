@@ -14,17 +14,17 @@ func TestTypeTable(t *testing.T) {
 
 	tt, err := NewTypeTable()
 	assert.NoError(err)
-	assert.Equal(5, tt.size())
+	assert.Equal(4, tt.size())
 
 	// add a symbol
 	err = tt.addNode("myint", NewTypeNodeInt())
 	assert.NoError(err)
-	assert.Equal(6, tt.size())
+	assert.Equal(5, tt.size())
 
 	// add a symbol again
 	err = tt.addNode("myint", NewTypeNodeInt())
 	assert.Error(err)
-	assert.Equal(6, tt.size())
+	assert.Equal(5, tt.size())
 
 	// test has()
 	assert.True(tt.has("myint"))

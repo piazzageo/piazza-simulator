@@ -8,20 +8,39 @@ import (
 
 //---------------------------------------------------------------------------
 
-func TestNodes(t *testing.T) {
+func TestExprNodes(t *testing.T) {
 	assert := assert.New(t)
 
-	t1 := NewExprNodeArrayRef("arrayo", NewExprNodeIntConstant(17))
-	assert.Equal("ARRAY(17, INT)", t1.String())
+	multiply := NewExprNodeMultiply(NewExprNodeIntConstant(17), NewExprNodeIntConstant(19))
+	assert.Equal("MULTIPLY(17, 19)", multiply.String())
 
-	t2 := NewExprNodeStructRef("structo", "aa")
-	t2s := t2.String()
-	assert.Contains(t2s, "STRUCT(aa)")
-	assert.Contains(t2s, ")")
+	add := NewExprNodeAdd(NewExprNodeIntConstant(2), NewExprNodeIntConstant(-3))
+	assert.Equal("ADD(2, -3)", add.String())
 
-	t3 := NewExprNodeMapRef("mappo", NewExprNodeBoolConstant(true))
+	symbolRef := NewExprNodeSymbolRef("sym", FloatType)
+	assert.Equal("symF", symbolRef.String())
 
-	assert.Equal("MAP[STRING]BOOL", t3.String())
+	intConstant := NewExprNodeIntConstant(2)
+	assert.Equal("2", intConstant.String())
+
+	floatConstant := NewExprNodeFloatConstant(0.5)
+	assert.Equal("0.500000", floatConstant.String())
+
+	boolConstant := NewExprNodeBoolConstant(true)
+	assert.Equal("true", boolConstant.String())
+
+	stringConstant := NewExprNodeStringConstant("ssttrriinngg")
+	assert.Equal(`"ssttrriinngg"`, stringConstant.String())
+
+	structRef := NewExprNodeStructRef("structo", "aa")
+	assert.Equal("STRUCTREF(structo.aa)", structRef.String())
+
+	arrayRef := NewExprNodeArrayRef("arrayo", NewExprNodeIntConstant(17))
+	assert.Equal("ARRAYREF(arrayo,17)", arrayRef.String())
+
+	mapRef := NewExprNodeMapRef("mappo", NewExprNodeBoolConstant(true))
+	assert.Equal("MAPREF(mappo,true)", mapRef.String())
+
 }
 
 func TestNodeEquality(t *testing.T) {
