@@ -10,18 +10,20 @@ import (
 // this is a DeclBlock, containing both struct decls and string decls
 var typeTestString = `
 { 
-    "MyInt": "int",
-    "MyFloat": "float",
-    "MyBool": "bool",
-    "MyString": "string",
-    "MyAny": "any",
+	"Main": {
+        "MyInt": "int",
+        "MyFloat": "float",
+        "MyBool": "bool",
+        "MyString": "string",
+        "MyAny": "any",
 
-    "MyMapInt": "[map]int",
-    "MyMapPoint": "[map]Point",
-    "MySliceInt": "[]int",
-    "MySlicePoint": "[]Point",
-    "MyArray10Float": "[10]float",
-    "MyArray4Point": "[4]Point",
+        "MyMapInt": "[map]int",
+        "MyMapPoint": "[map]Point",
+        "MySliceInt": "[]int",
+        "MySlicePoint": "[]Point",
+        "MyArray10Float": "[10]float",
+        "MyArray4Point": "[4]Point"
+    },
 
     "Point": {
         "x": "float",
@@ -36,68 +38,99 @@ var typeTestString = `
     }
 }`
 
-type typeTestItem struct {
-	name string
-	node TypeNode
+type typeTestStructItem struct {
+	structName StructName
+	node       TypeNode
+	fields     []typeTestFieldItem
 }
 
-var typeTestData = []typeTestItem{
-	typeTestItem{
-		name: "MyInt",
-		node: NewTypeNodeInt(),
-	},
-	typeTestItem{
-		name: "MyFloat",
-		node: NewTypeNodeFloat(),
-	},
-	typeTestItem{
-		name: "MyBool",
-		node: NewTypeNodeBool(),
-	},
-	typeTestItem{
-		name: "MyString",
-		node: NewTypeNodeString(),
-	},
-	typeTestItem{
-		name: "MyMapInt",
-		node: NewTypeNodeMap(NewTypeNodeString(), NewTypeNodeInt()),
-	},
-	typeTestItem{
-		name: "MyMapPoint",
-		node: NewTypeNodeMap(NewTypeNodeString(), NewTypeNodeName("Point")),
-	},
-	typeTestItem{
-		name: "MySliceInt",
-		node: NewTypeNodeSlice(NewTypeNodeInt()),
-	},
-	typeTestItem{
-		name: "MySlicePoint",
-		node: NewTypeNodeSlice(NewTypeNodeName("Point")),
-	},
-	typeTestItem{
-		name: "MyArray10Float",
-		node: NewTypeNodeArray(NewTypeNodeFloat(), 10),
-	},
-	typeTestItem{
-		name: "MyArray4Point",
-		node: NewTypeNodeArray(NewTypeNodeName("Point"), 4),
-	},
-	typeTestItem{
-		name: "Point",
-		node: &TypeNodeStruct{
-			Fields: map[string]TypeNode{
-				"x": NewTypeNodeFloat(),
-				"y": NewTypeNodeFloat(),
+type typeTestFieldItem struct {
+	fieldName FieldName
+	node      TypeNode
+}
+
+var typeTestData = []typeTestStructItem{
+	typeTestStructItem{
+		structName: "Main",
+		node:       nil,
+		fields: []typeTestFieldItem{
+			typeTestFieldItem{
+				fieldName: "MyInt",
+				node:      NewTypeNodeInt(),
+			},
+			typeTestFieldItem{
+				fieldName: "MyFloat",
+				node:      NewTypeNodeFloat(),
+			},
+			typeTestFieldItem{
+				fieldName: "MyBool",
+				node:      NewTypeNodeBool(),
+			},
+			typeTestFieldItem{
+				fieldName: "MyString",
+				node:      NewTypeNodeString(),
+			},
+			typeTestFieldItem{
+				fieldName: "MyMapInt",
+				node:      NewTypeNodeMap(NewTypeNodeString(), NewTypeNodeInt()),
+			},
+			typeTestFieldItem{
+				fieldName: "MyMapPoint",
+				node:      NewTypeNodeMap(NewTypeNodeString(), NewTypeNodeName("Point")),
+			},
+			typeTestFieldItem{
+				fieldName: "MySliceInt",
+				node:      NewTypeNodeSlice(NewTypeNodeInt()),
+			},
+			typeTestFieldItem{
+				fieldName: "MySlicePoint",
+				node:      NewTypeNodeSlice(NewTypeNodeName("Point")),
+			},
+			typeTestFieldItem{
+				fieldName: "MyArray10Float",
+				node:      NewTypeNodeArray(NewTypeNodeFloat(), 10),
+			},
+			typeTestFieldItem{
+				fieldName: "MyArray4Point",
+				node:      NewTypeNodeArray(NewTypeNodeName("Point"), 4),
 			},
 		},
 	},
-	typeTestItem{
-		name: "MyStruct",
+	typeTestStructItem{
+		structName: "Point",
+		node:       nil,
+		fields: []typeTestFieldItem{
+			typeTestFieldItem{
+				fieldName: "x",
+				node:      NewTypeNodeFloat(),
+			},
+			typeTestFieldItem{
+				fieldName: "y",
+				node:      NewTypeNodeFloat(),
+			},
+		},
+	},
+	typeTestStructItem{
+		structName: "MyStruct",
 		node: &TypeNodeStruct{
-			Fields: map[string]TypeNode{
+			Fields: map[FieldName]TypeNode{
 				"alpha": NewTypeNodeString(),
 				"beta":  NewTypeNodeName("Point"),
 				"gamma": NewTypeNodeName("MyStruct"),
+			},
+		},
+		fields: []typeTestFieldItem{
+			typeTestFieldItem{
+				fieldName: "alpha",
+				node:      NewTypeNodeString(),
+			},
+			typeTestFieldItem{
+				fieldName: "beta",
+				node:      NewTypeNodeName("Point"),
+			},
+			typeTestFieldItem{
+				fieldName: "gamma",
+				node:      NewTypeNodeName("MyStruct"),
 			},
 		},
 	},
@@ -114,15 +147,21 @@ func TestTypeTokenizer(t *testing.T) {
 
 	log.Printf("===== %#v ====", typeTable)
 
-	for _, item := range typeTestData {
-		if typeTable.isBuiltin(item.name) {
-			continue
-		}
+	for _, sItem := range typeTestData {
+		log.Printf("===== %s ====", sItem.structName)
 
-		log.Printf("===== %s ====", item.name)
-
-		tte, ok := typeTable.Types[item.name]
+		se, ok := typeTable.Structs[sItem.structName]
 		assert.True(ok)
-		assert.Equal(item.name, tte.Name)
+		assert.Equal(sItem.structName, se.Name)
+		assert.Equal(sItem.node, se.Type)
+
+		for _, fItem := range se.Fields {
+
+			fe, ok := se.Fields[fItem.Name]
+			assert.True(ok)
+			assert.Equal(fItem.Name, fe.Name)
+			assert.Equal(fItem.Type, fe.Type)
+
+		}
 	}
 }

@@ -47,12 +47,12 @@ func (t *TypeNodeMap) String() string {
 //---------------------------------------------------------------------------
 
 type TypeNodeStruct struct {
-	Fields map[string]TypeNode
+	Fields map[FieldName]TypeNode
 }
 
 func NewTypeNodeStruct() *TypeNodeStruct {
 	n := &TypeNodeStruct{
-		Fields: map[string]TypeNode{},
+		Fields: map[FieldName]TypeNode{},
 	}
 	return n
 }
@@ -71,11 +71,11 @@ func (t *TypeNodeStruct) String() string {
 //---------------------------------------------------------------------------
 
 type TypeNodeField struct {
-	Name string
+	Name FieldName
 	Node TypeNode
 }
 
-func NewTypeNodeField(name string, node TypeNode) *TypeNodeField {
+func NewTypeNodeField(name FieldName, node TypeNode) *TypeNodeField {
 	n := &TypeNodeField{
 		Node: node,
 		Name: name,

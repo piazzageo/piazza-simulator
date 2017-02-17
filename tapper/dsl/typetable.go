@@ -2,27 +2,27 @@ package dsl
 
 import "fmt"
 
-type TypeTableEntry struct {
-	Name string
-	//Token []Token
-	Typ TypeNode
+type TypeTableFieldEntry struct {
+	Name FieldName
+	Type TypeNode
+}
+
+type TypeTableStructEntry struct {
+	Name   StructName
+	Type   TypeNode
+	Fields map[FieldName]*TypeTableFieldEntry
 }
 
 type TypeTable struct {
-	Types map[string]*TypeTableEntry
+	Structs map[StructName]*TypeTableStructEntry
 }
 
 func NewTypeTable() (*TypeTable, error) {
-	entries := map[string]*TypeTableEntry{}
 
 	tt := &TypeTable{
-		Types: entries,
+		Structs: map[StructName]*TypeTableStructEntry{},
 	}
 
-	err := tt.setBuiltins()
-	if err != nil {
-		return nil, err
-	}
 	return tt, nil
 }
 
@@ -37,73 +37,88 @@ const (
 	StringType
 )
 
-var builtinTypes map[string]TypeNode
-
-func (st *TypeTable) setBuiltins() error {
-	var err error
-
-	builtinTypes = map[string]TypeNode{
-		"int":    NewTypeNodeInt(),
-		"float":  NewTypeNodeFloat(),
-		"bool":   NewTypeNodeBool(),
-		"string": NewTypeNodeString(),
-	}
-
-	for k, v := range builtinTypes {
-		err = st.addNode(k, v)
-		if err != nil {
-			return err
-		}
-	}
-
-	return nil
-}
-
 //---------------------------------------------------------------------------
 
-func (e *TypeTableEntry) String() string {
+func (e *TypeTableFieldEntry) String() string {
 	s := fmt.Sprintf("%s:", e.Name)
-	s += fmt.Sprintf("[%v]", e.Typ)
+	s += fmt.Sprintf("[%v]", e.Type)
+	return s
+}
+
+func (e *TypeTableStructEntry) String() string {
+	s := fmt.Sprintf("%s:", e.Name)
+	s += fmt.Sprintf("[%v]", e.Type)
+	for _, f := range e.Fields {
+		s += fmt.Sprintf("  %v", f)
+	}
 	return s
 }
 
 func (st *TypeTable) String() string {
-	s := fmt.Sprintf("size: %d\n", len(st.Types))
-	for _, tte := range st.Types {
+	s := ""
+	for _, tte := range st.Structs {
 		s += fmt.Sprintf("  %v\n", tte)
 	}
 	return s
 }
 
-func (st *TypeTable) size() int {
-	return len(st.Types)
-}
-
-func (st *TypeTable) isBuiltin(name string) bool {
-	_, ok := builtinTypes[name]
-	return ok
-}
-
-func (st *TypeTable) addNode(name string, node TypeNode) error {
-	if st.has(name) {
-		return fmt.Errorf("type table entry already exists: %s", name)
+func (st *TypeTable) addStruct(name StructName, node TypeNode) error {
+	if st.hasStruct(name) {
+		return fmt.Errorf("type table struct entry already exists: %s", name)
 	}
-	st.Types[name] = &TypeTableEntry{
-		Name: name,
-		Typ:  node,
+	st.Structs[name] = &TypeTableStructEntry{
+		Name:   name,
+		Type:   node,
+		Fields: map[FieldName]*TypeTableFieldEntry{},
 	}
 	return nil
 }
 
-func (st *TypeTable) getNode(s string) TypeNode {
-	v, ok := st.Types[s]
+func (st *TypeTable) getStruct(s StructName) TypeNode {
+	v, ok := st.Structs[s]
 	if !ok {
 		return nil
 	}
-	return v.Typ
+	return v.Type
 }
 
-func (st *TypeTable) has(s string) bool {
-	_, ok := st.Types[s]
+func (st *TypeTable) hasStruct(s StructName) bool {
+	_, ok := st.Structs[s]
+	return ok
+}
+
+func (st *TypeTable) addField(sn StructName, fn FieldName, node TypeNode) error {
+	se, ok := st.Structs[sn]
+	if !ok {
+		return fmt.Errorf("type table field struct entry does not exist: %s", sn)
+	}
+	if st.hasField(sn, fn) {
+		return fmt.Errorf("type table field entry already exists: %s.%s", sn, fn)
+	}
+	se.Fields[fn] = &TypeTableFieldEntry{
+		Name: fn,
+		Type: node,
+	}
+	return nil
+}
+
+func (st *TypeTable) getField(sn StructName, fn FieldName) TypeNode {
+	se, ok := st.Structs[sn]
+	if !ok {
+		return nil
+	}
+	fe, ok := se.Fields[fn]
+	if !ok {
+		return nil
+	}
+	return fe.Type
+}
+
+func (st *TypeTable) hasField(sn StructName, fn FieldName) bool {
+	se, ok := st.Structs[sn]
+	if !ok {
+		return false
+	}
+	_, ok = se.Fields[fn]
 	return ok
 }
