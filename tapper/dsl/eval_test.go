@@ -12,8 +12,8 @@ type evalTestItem struct {
 var evalTestData = []evalTestItem{
 	evalTestItem{ // "a * (b + c )"
 		node: NewExprNodeMultiply(
-			NewExprNodeAdd(NewExprNodeSymbolRef("c"), NewExprNodeSymbolRef("b")),
-			NewExprNodeSymbolRef("a")),
+			NewExprNodeAdd(NewExprNodeSymbolRef("c", IntType), NewExprNodeSymbolRef("b", IntType)),
+			NewExprNodeSymbolRef("a", IntType)),
 		values: map[string]*ExprValue{
 			"a": &ExprValue{Type: IntType, Value: 2},
 			"b": &ExprValue{Type: IntType, Value: 3},

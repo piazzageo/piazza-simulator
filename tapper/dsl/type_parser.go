@@ -78,7 +78,7 @@ type StructName string
 type FieldName string
 type FieldDecl string
 type DeclBlock map[StructName]*StructDecl
-type StructDecl map[FieldName]*FieldDecl
+type StructDecl map[FieldName]FieldDecl
 
 // ParseJson takes a declaration block expressed as JSON string and parses it.
 func (p *TypeTokenizer) ParseJson(s string) (*TypeTable, error) {
@@ -119,7 +119,7 @@ func (p *TypeTokenizer) parseStruct(structName StructName, structDecl *StructDec
 
 	for fieldName, fieldDecl := range *structDecl {
 
-		tnode, err = p.parseField(structName, fieldName, fieldDecl)
+		tnode, err = p.parseField(structName, fieldName, &fieldDecl)
 		if err != nil {
 			return nil, err
 		}
@@ -152,7 +152,7 @@ func (p *TypeTokenizer) parseFieldDecl(decl *FieldDecl) (TypeNode, error) {
 
 	s := string(*decl)
 
-	toks, err := scanner.Scan(s)
+	toks, err := scanner.Scan(s, true)
 	if err != nil {
 		return nil, err
 	}
