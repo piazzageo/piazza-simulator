@@ -1,20 +1,25 @@
 package dsl
 
 type Environment struct {
-	values map[string]*ExprValue
+	// symbol -> type
+	tabl *TypeTable
+
+	// symbol -> value
+	data map[string]*ExprValue
 }
 
-func NewEnvironment(typeTable *TypeTable) *Environment {
+func NewEnvironment(tabl *TypeTable) *Environment {
 	env := &Environment{
-		values: map[string]*ExprValue{},
+		tabl: tabl,
+		data: map[string]*ExprValue{},
 	}
 	return env
 }
 
 func (env *Environment) set(name string, value *ExprValue) {
-	env.values[name] = value
+	env.data[name] = value
 }
 
 func (env *Environment) get(name string) *ExprValue {
-	return env.values[name]
+	return env.data[name]
 }

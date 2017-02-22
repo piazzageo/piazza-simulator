@@ -8,43 +8,31 @@ type TokenId int
 
 const (
 	TokenInvalid TokenId = iota
-	TokenBool
-	TokenSymbol
-	TokenInt
-	TokenFloat
-	TokenString
 	TokenEquals
+	TokenNotEquals
+	TokenGreaterThan
+	TokenGreaterOrEqualThan
+	TokenLessThan
+	TokenLessOrEqualThan
 	TokenAdd
+	TokenSubtract
 	TokenMultiply
-	TokenBang
+	TokenDivide
+	TokenExponent
+	TokenMod
 	TokenBitwiseOr
 	TokenBitwiseAnd
+	TokenLogicalAnd
+	TokenLogicalOr
 	TokenLeftParen
 	TokenRightParen
 	TokenLeftBracket
 	TokenRightBracket
-	TokenPeriod
-	TokenSubtract
-	TokenDivide
-	TokenBitwiseXor
-	TokenModulus
-	TokenGreaterThan
-	TokenLessThan
-
-	// derived, for exprs
-	TokenEqualsEquals
-	TokenNotEquals
-	TokenLogicalAnd
-	TokenLogicalOr
-
-	// derived, for decls
-	TokenTypeMap
-	TokenTypeArray
+	TokenSymbol // 16
+	TokenNumber
 	TokenTypeSlice
-
-	// not yet used
-	TokenGreaterOrEqualThan
-	TokenLessOrEqualThan
+	TokenTypeArray
+	TokenTypeMap
 )
 
 type Token struct {
@@ -68,17 +56,7 @@ func convertId(r rune) TokenId {
 	case -2:
 		return TokenSymbol
 	case -3:
-		return TokenInt
-	case -4:
-		return TokenFloat
-	case -6:
-		return TokenString
-	case 33:
-		return TokenBang
-	case 37:
-		return TokenModulus
-	case 38:
-		return TokenBitwiseAnd
+		return TokenNumber
 	case 40:
 		return TokenLeftParen
 	case 41:
@@ -87,24 +65,14 @@ func convertId(r rune) TokenId {
 		return TokenMultiply
 	case 43:
 		return TokenAdd
-	case 45:
-		return TokenSubtract
-	case 46:
-		return TokenPeriod
-	case 47:
-		return TokenDivide
 	case 60:
 		return TokenLessThan
-	case 61:
-		return TokenEquals
 	case 62:
 		return TokenGreaterThan
 	case 91:
 		return TokenLeftBracket
 	case 93:
 		return TokenRightBracket
-	case 94:
-		return TokenBitwiseXor
 	case 124:
 		return TokenBitwiseOr
 	default:

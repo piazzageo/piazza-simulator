@@ -33,36 +33,23 @@ func TestScanner(t *testing.T) {
 	s := &Scanner{}
 
 	type data struct {
-		asDecl bool
 		source string
 		tokens []string
 	}
 
 	table := []data{
 		{
-			asDecl: false,
 			source: "  as > 10 | b +3 < c",
 			tokens: []string{"as", ">", "10", "|", "b", "+", "3", "<", "c"},
 		},
 		{
-			asDecl: true,
 			source: `[map] int`,
 			tokens: []string{"[map]", "int"},
-		},
-		{
-			asDecl: true,
-			source: `[] int`,
-			tokens: []string{"[]", "int"},
-		},
-		{
-			asDecl: true,
-			source: `[4] int`,
-			tokens: []string{"[4]", "int"},
 		},
 	}
 
 	for _, testcase := range table {
-		tokens, err := s.Scan(testcase.source, testcase.asDecl)
+		tokens, err := s.Scan(testcase.source)
 		assert.NoError(err)
 		assert.NotNil(tokens)
 

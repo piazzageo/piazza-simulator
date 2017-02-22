@@ -30,7 +30,7 @@ func NewDsl() (*Dsl, error) {
 func (d *Dsl) ParseDeclaration(decl string) (Id, error) {
 	var err error
 
-	tt := &TypeTokenizer{}
+	tt, err := NewTypeTokenizer()
 	if err != nil {
 		return InvalidId, err
 	}
@@ -46,7 +46,7 @@ func (d *Dsl) ParseDeclaration(decl string) (Id, error) {
 	return id, nil
 }
 
-func (d *Dsl) ParseExpression(typeTableId Id, expr string) (Id, error) {
+func (d *Dsl) ParseExpression(expr string) (Id, error) {
 	var err error
 
 	et := &ExprTokenizer{}
@@ -56,7 +56,7 @@ func (d *Dsl) ParseExpression(typeTableId Id, expr string) (Id, error) {
 	}
 
 	ep := &ExprParser{}
-	node, err := ep.Parse(d.TypeTables[typeTableId], toks)
+	node, err := ep.Parse(toks)
 	if err != nil {
 		return InvalidId, err
 	}
@@ -67,7 +67,7 @@ func (d *Dsl) ParseExpression(typeTableId Id, expr string) (Id, error) {
 	return id, nil
 }
 
-func (d *Dsl) Evaluate(exprId Id, typeTableId Id, env *Environment) (interface{}, error) {
+func (d *Dsl) Evaluate(exprId Id, typeId Id, env *Environment) (interface{}, error) {
 	eval := &Eval{}
 	result, err := eval.Evaluate(d.Exprs[exprId], env)
 	if err != nil {
