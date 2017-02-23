@@ -1,7 +1,6 @@
 package dsl
 
 import (
-	"log"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -15,7 +14,6 @@ var typeTestString = `
         "MyFloat": "float",
         "MyBool": "bool",
         "MyString": "string",
-        "MyAny": "any",
 
         "MyMapInt": "[map]int",
         "MyMapPoint": "[map]Point",
@@ -33,8 +31,7 @@ var typeTestString = `
     "MyStruct": {
         "alpha": "string",
         "beta": "Point",
-        "gamma": "MyStruct",
-        "delta": "any"
+        "gamma": "MyStruct"
     }
 }`
 
@@ -52,7 +49,20 @@ type typeTestFieldItem struct {
 var typeTestData = []typeTestStructItem{
 	typeTestStructItem{
 		structName: "Main",
-		node:       nil,
+		node: &TypeNodeStruct{
+			Fields: map[FieldName]TypeNode{
+				"MyInt":          NewTypeNodeInt(),
+				"MyFloat":        NewTypeNodeFloat(),
+				"MyString":       NewTypeNodeString(),
+				"MyBool":         NewTypeNodeBool(),
+				"MyMapInt":       NewTypeNodeMap(NewTypeNodeString(), NewTypeNodeInt()),
+				"MyMapPoint":     NewTypeNodeMap(NewTypeNodeString(), NewTypeNodeName("Point")),
+				"MySliceInt":     NewTypeNodeSlice(NewTypeNodeInt()),
+				"MySlicePoint":   NewTypeNodeSlice(NewTypeNodeName("Point")),
+				"MyArray10Float": NewTypeNodeArray(NewTypeNodeFloat(), 10),
+				"MyArray4Point":  NewTypeNodeArray(NewTypeNodeName("Point"), 4),
+			},
+		},
 		fields: []typeTestFieldItem{
 			typeTestFieldItem{
 				fieldName: "MyInt",
@@ -98,7 +108,12 @@ var typeTestData = []typeTestStructItem{
 	},
 	typeTestStructItem{
 		structName: "Point",
-		node:       nil,
+		node: &TypeNodeStruct{
+			Fields: map[FieldName]TypeNode{
+				"x": NewTypeNodeFloat(),
+				"y": NewTypeNodeFloat(),
+			},
+		},
 		fields: []typeTestFieldItem{
 			typeTestFieldItem{
 				fieldName: "x",
@@ -145,15 +160,13 @@ func TestTypeTokenizer(t *testing.T) {
 	assert.NoError(err)
 	assert.NotNil(typeTable)
 
-	log.Printf("===== %#v ====", typeTable)
-
 	for _, sItem := range typeTestData {
-		log.Printf("===== %s ====", sItem.structName)
 
 		se, ok := typeTable.Structs[sItem.structName]
 		assert.True(ok)
 		assert.Equal(sItem.structName, se.Name)
-		// TODO assert.EqualValues(sItem.node, se.Type)
+
+		assert.EqualValues(sItem.node.String(), se.Type.String())
 
 		for _, fItem := range se.Fields {
 

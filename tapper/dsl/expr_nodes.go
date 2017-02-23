@@ -14,7 +14,7 @@ type ExprValue struct {
 
 type ExprNode interface {
 	String() string
-	Eval(*Environment) *ExprValue
+	Eval(*Environment) ExprValue
 }
 
 //---------------------------------------------------------------------
@@ -32,7 +32,7 @@ func NewExprNodeMultiply(left ExprNode, right ExprNode) *ExprNodeMultiply {
 	return n
 }
 
-func (n *ExprNodeMultiply) Eval(env *Environment) *ExprValue {
+func (n *ExprNodeMultiply) Eval(env *Environment) ExprValue {
 	l := n.left.Eval(env)
 	r := n.right.Eval(env)
 
@@ -41,9 +41,9 @@ func (n *ExprNodeMultiply) Eval(env *Environment) *ExprValue {
 	}
 	switch l.Type {
 	case IntType:
-		return &ExprValue{Type: IntType, Value: l.Value.(int) * r.Value.(int)}
+		return ExprValue{Type: IntType, Value: l.Value.(int) * r.Value.(int)}
 	case FloatType:
-		return &ExprValue{Type: FloatType, Value: l.Value.(float64) * r.Value.(float64)}
+		return ExprValue{Type: FloatType, Value: l.Value.(float64) * r.Value.(float64)}
 	}
 	panic(19)
 }
@@ -67,7 +67,7 @@ func NewExprNodeAdd(left ExprNode, right ExprNode) *ExprNodeAdd {
 	return n
 }
 
-func (n *ExprNodeAdd) Eval(env *Environment) *ExprValue {
+func (n *ExprNodeAdd) Eval(env *Environment) ExprValue {
 	l := n.left.Eval(env)
 	r := n.right.Eval(env)
 
@@ -76,9 +76,9 @@ func (n *ExprNodeAdd) Eval(env *Environment) *ExprValue {
 	}
 	switch l.Type {
 	case IntType:
-		return &ExprValue{Type: IntType, Value: l.Value.(int) + r.Value.(int)}
+		return ExprValue{Type: IntType, Value: l.Value.(int) + r.Value.(int)}
 	case FloatType:
-		return &ExprValue{Type: FloatType, Value: l.Value.(float64) + r.Value.(float64)}
+		return ExprValue{Type: FloatType, Value: l.Value.(float64) + r.Value.(float64)}
 	}
 	panic(19)
 }
@@ -100,7 +100,7 @@ func NewExprNodeSymbolRef(name string) *ExprNodeSymbolRef {
 	return n
 }
 
-func (n *ExprNodeSymbolRef) Eval(env *Environment) *ExprValue {
+func (n *ExprNodeSymbolRef) Eval(env *Environment) ExprValue {
 	return env.get(n.name)
 }
 
@@ -111,17 +111,17 @@ func (n *ExprNodeSymbolRef) String() string {
 //---------------------------------------------------------------------------
 
 type ExprNodeIntConstant struct {
-	value *ExprValue
+	value ExprValue
 }
 
 func NewExprNodeIntConstant(value int) *ExprNodeIntConstant {
 	n := &ExprNodeIntConstant{
-		value: &ExprValue{Type: IntType, Value: value},
+		value: ExprValue{Type: IntType, Value: value},
 	}
 	return n
 }
 
-func (n *ExprNodeIntConstant) Eval(env *Environment) *ExprValue {
+func (n *ExprNodeIntConstant) Eval(env *Environment) ExprValue {
 	return n.value
 }
 
@@ -132,17 +132,17 @@ func (n *ExprNodeIntConstant) String() string {
 //---------------------------------------------------------------------------
 
 type ExprNodeFloatConstant struct {
-	value *ExprValue
+	value ExprValue
 }
 
 func NewExprNodeFloatConstant(value float64) *ExprNodeFloatConstant {
 	n := &ExprNodeFloatConstant{
-		value: &ExprValue{Type: FloatType, Value: value},
+		value: ExprValue{Type: FloatType, Value: value},
 	}
 	return n
 }
 
-func (n *ExprNodeFloatConstant) Eval(env *Environment) *ExprValue {
+func (n *ExprNodeFloatConstant) Eval(env *Environment) ExprValue {
 	return n.value
 }
 
@@ -153,17 +153,17 @@ func (n *ExprNodeFloatConstant) String() string {
 //---------------------------------------------------------------------------
 
 type ExprNodeBoolConstant struct {
-	value *ExprValue
+	value ExprValue
 }
 
 func NewExprNodeBoolConstant(value bool) *ExprNodeBoolConstant {
 	n := &ExprNodeBoolConstant{
-		value: &ExprValue{Type: BoolType, Value: value},
+		value: ExprValue{Type: BoolType, Value: value},
 	}
 	return n
 }
 
-func (n *ExprNodeBoolConstant) Eval(env *Environment) *ExprValue {
+func (n *ExprNodeBoolConstant) Eval(env *Environment) ExprValue {
 	return n.value
 }
 
@@ -174,17 +174,17 @@ func (n *ExprNodeBoolConstant) String() string {
 //---------------------------------------------------------------------------
 
 type ExprNodeStringConstant struct {
-	value *ExprValue
+	value ExprValue
 }
 
 func NewExprNodeStringConstant(value string) *ExprNodeStringConstant {
 	n := &ExprNodeStringConstant{
-		value: &ExprValue{Type: StringType, Value: value},
+		value: ExprValue{Type: StringType, Value: value},
 	}
 	return n
 }
 
-func (n *ExprNodeStringConstant) Eval(env *Environment) *ExprValue {
+func (n *ExprNodeStringConstant) Eval(env *Environment) ExprValue {
 	return n.value
 }
 
@@ -208,7 +208,7 @@ func NewExprNodeStructRef(symbol string, field string) *ExprNodeStructRef {
 	return n
 }
 
-func (n *ExprNodeStructRef) Eval(env *Environment) *ExprValue {
+func (n *ExprNodeStructRef) Eval(env *Environment) ExprValue {
 	return env.get(n.symbol + "." + n.field)
 }
 
@@ -231,7 +231,7 @@ func NewExprNodeArrayRef(symbol string, index ExprNode) *ExprNodeArrayRef {
 	return n
 }
 
-func (n *ExprNodeArrayRef) Eval(env *Environment) *ExprValue {
+func (n *ExprNodeArrayRef) Eval(env *Environment) ExprValue {
 	idx := n.index.Eval(env)
 	if idx.Type != IntType {
 		panic(19)

@@ -1,6 +1,9 @@
 package dsl
 
-import "fmt"
+import (
+	"fmt"
+	"sort"
+)
 
 //---------------------------------------------------------------------
 
@@ -57,9 +60,21 @@ func NewTypeNodeStruct() *TypeNodeStruct {
 	return n
 }
 
+func sortFields(m map[FieldName]TypeNode) []string {
+	mk := make([]string, len(m))
+	i := 0
+	for k, _ := range m {
+		mk[i] = string(k)
+		i++
+	}
+	sort.Strings(mk)
+	return mk
+}
+
 func (t *TypeNodeStruct) String() string {
 	s := ""
-	for k := range t.Fields {
+	keys := sortFields(t.Fields)
+	for _, k := range keys {
 		if s != "" {
 			s += ", "
 		}
