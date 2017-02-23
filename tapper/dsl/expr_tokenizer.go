@@ -145,5 +145,3 @@ func (ep *ExprTokenizer) makeRPN(tokens []Token) ([]*Token, error) {
 
 	return ret, nil
 }
-
-//===========================================================================

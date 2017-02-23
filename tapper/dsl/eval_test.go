@@ -42,6 +42,7 @@ func TestEval(t *testing.T) {
 		env := NewEnvironment()
 
 		err = typeTable.addStruct("x", nil)
+		assert.NoError(err)
 		for k, v := range item.typs {
 			err = typeTable.addField("x", FieldName(k), v)
 			assert.NoError(err)

@@ -11,13 +11,16 @@ import (
 func TestScannerPrefixMatch(t *testing.T) {
 	assert := assert.New(t)
 
-	ok, siz := matchArrayTypePrefix("[]")
+	var siz int
+	var ok bool
+
+	ok, _ = matchArrayTypePrefix("[]")
 	assert.False(ok)
-	ok, siz = matchArrayTypePrefix(" []")
+	ok, _ = matchArrayTypePrefix(" []")
 	assert.False(ok)
-	ok, siz = matchArrayTypePrefix("[}")
+	ok, _ = matchArrayTypePrefix("[}")
 	assert.False(ok)
-	ok, siz = matchArrayTypePrefix("[3a]")
+	ok, _ = matchArrayTypePrefix("[3a]")
 	assert.False(ok)
 	ok, siz = matchArrayTypePrefix("[3]")
 	assert.True(ok)
