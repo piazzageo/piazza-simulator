@@ -22,11 +22,15 @@ import (
 	"os"
 )
 
-const CURRENT_SPRINT = "Sprint 07"
+const CURRENT_SPRINT = "Sprint 42"
+const READY_SPRINT = "Ready"
 const BACKLOG_SPRINT = "Backlog"
 const EPIC_SPRINT = "Pz Epics"
 
 var PastSprints = []string{
+	"Brisket",
+	"Deckle",
+	"xRejected",
 	"Sprint 0",
 	"Sprint 01",
 	"Sprint 02",
@@ -34,12 +38,44 @@ var PastSprints = []string{
 	"Sprint 04",
 	"Sprint 05",
 	"Sprint 06",
-}
-
-var FutureSprints = []string{
+	"Sprint 07",
 	"Sprint 08",
 	"Sprint 09",
+	"Sprint 10",
+	"Sprint 11",
+	"Sprint 12",
+	"Sprint 13",
+	"Sprint 14",
+	"Sprint 15",
+	"Sprint 16",
+	"Sprint 17",
+	"Sprint 18",
+	"Sprint 19",
+	"Sprint 20",
+	"Sprint 21",
+	"Sprint 22",
+	"Sprint 23",
+	"Sprint 24",
+	"Sprint 25",
+	"Sprint 26",
+	"Sprint 27",
+	"Sprint 28",
+	"Sprint 29",
+	"Sprint 30",
+	"Sprint 31",
+	"Sprint 32",
+	"Sprint 33",
+	"Sprint 34",
+	"Sprint 35",
+	"Sprint 36",
+	"Sprint 37",
+	"Sprint 38",
+	"Sprint 39",
+	"Sprint 40",
+	"Sprint 41",
 }
+
+var FutureSprints = []string{}
 
 func Errorf(mssg string, args ...interface{}) {
 	s := fmt.Sprintf(mssg, args...)

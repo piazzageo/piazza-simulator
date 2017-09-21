@@ -68,19 +68,19 @@ func runCurrentSprintRules(issue *Issue) {
 		if parent == nil {
 			issue.Errorf("story's parent is not set")
 		} else if parent.tracker() != "Epic" {
-			issue.Errorf("Story's parent is not an Epic")
+			issue.Errorf("story's parent is not an Epic")
 		}
 	} else if issue.isTask() {
 		if parent == nil {
 			issue.Errorf("task's parent is not set")
 		} else if parent.tracker() != "Story" && parent.tracker() != "Bug" {
-			issue.Errorf("Task's parent is not an Story or Bug")
+			issue.Errorf("task's parent is not an Story or Bug")
 		}
 	} else if issue.isBug() {
 		if parent == nil {
 			issue.Errorf("bug's parent is not set")
 		} else if parent.tracker() != "Epic" && parent.tracker() != "Story" {
-			issue.Errorf("Bug's parent is not a Story or Bug")
+			issue.Errorf("bug's parent is not a Story or Bug")
 		}
 	} else {
 		issue.Errorf("issue's type (\"tracker\") is invalid: \"%s\"", issue.tracker())
@@ -115,11 +115,11 @@ func runCurrentSprintRules(issue *Issue) {
 	}
 
 	if issue.isStory() && !issue.isRejected() && !issue.hasAcceptanceCriteria() {
-		issue.Warnf("Story does not have any acceptance criteria")
+		issue.Warnf("story does not have any acceptance criteria")
 	}
 
 	if issue.isBug() && !issue.isRejected() && !issue.hasAcceptanceCriteria() {
-		issue.Warnf("Bug does not have any acceptance criteria")
+		issue.Warnf("bug does not have any acceptance criteria")
 	}
 }
 
@@ -167,7 +167,7 @@ func runBacklogSprintRules(issue *Issue) {
 //
 func runEpicSprintRules(issue *Issue) {
 	if !issue.isEpic() {
-		issue.Errorf("Issue is not an Epic but has target version set to \"Pz Epic\"")
+		issue.Errorf("issue is not an Epic but has target version set to \"Pz Epic\"")
 	}
 }
 
@@ -176,8 +176,17 @@ func runEpicSprintRules(issue *Issue) {
 //
 func runInvalidSprintRules(issue *Issue) {
 	if issue.targetVersion() == "" {
-		issue.Errorf("No sprint set")
+		issue.Errorf("no sprint set")
 	} else {
-		issue.Errorf("Invalid sprint: %s", issue.targetVersion())
+		issue.Errorf("invalid sprint: %s", issue.targetVersion())
 	}
+}
+
+//
+// rules for issues with target version set to "Ready"
+//
+func runReadySprintRules(issue *Issue) {
+	//	if !issue.isEpic() {
+	//		issue.Errorf("Issue is not an Epic but has target version set to \"Pz Epic\"")
+	//	}
 }

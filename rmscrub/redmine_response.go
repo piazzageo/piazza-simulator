@@ -56,7 +56,7 @@ func makeRequest(apiKey string, projectId int, offset int, limit int) (*RedmineR
 
 	client := &http.Client{}
 
-	Logf("url: %s", url)
+	Logf("\n((((((((((((((((((((((\nurl: %s", url)
 
 	request, err := http.NewRequest("GET", url, nil)
 	if err != nil {
@@ -85,7 +85,7 @@ func makeRequest(apiKey string, projectId int, offset int, limit int) (*RedmineR
 	if err != nil {
 		return nil, err
 	}
-	Logf("request: offset=%d, limit=%d, totalCount=%d, len=%d",
+	Logf("request: offset=%d, limit=%d, totalCount=%d, len=%d\n))))))))))))))))))))))))\n",
 		resp.Offset, resp.Limit, resp.TotalCount, len(resp.Issues))
 
 	return &resp, nil

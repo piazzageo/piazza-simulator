@@ -118,6 +118,10 @@ func (issue *Issue) isCurrentSprint() bool {
 	return issue.targetVersion() == CURRENT_SPRINT
 }
 
+func (issue *Issue) isReadySprint() bool {
+	return issue.targetVersion() == READY_SPRINT
+}
+
 func (issue *Issue) isPastSprint() bool {
 	for _, s := range PastSprints {
 		if issue.targetVersion() == s {

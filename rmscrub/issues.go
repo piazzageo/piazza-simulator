@@ -35,7 +35,8 @@ func getIssues(projectId int) (*Issues, error) {
 	issues.Map = make(map[int]*Issue)
 
 	offset := 0
-	limit := 100
+	const limit = 100
+
 	for {
 		resp, err := makeRequest(apiKey, projectId, offset, limit)
 		if err != nil {

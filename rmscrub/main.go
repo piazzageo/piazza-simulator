@@ -133,14 +133,15 @@ func main() {
 	for _, issue := range issues.Map {
 
 		/*
-			if issue.targetVersion() == "Sprint 07" && issue.hasStartDate() {
-				fmt.Printf("%d - %s\n", issue.Id, issue.StartDate)
+			if !issue.isPastSprint() {
+				fmt.Printf("%d - %s - %t\n", issue.Id, issue.targetVersion(), issue.isPastSprint())
 			}
-			continue
 		*/
 
 		if issue.isCurrentSprint() {
 			runCurrentSprintRules(issue)
+		} else if issue.isReadySprint() {
+			runReadySprintRules(issue)
 		} else if issue.isPastSprint() {
 			runPastSprintRules(issue)
 		} else if issue.isFutureSprint() {
@@ -152,6 +153,7 @@ func main() {
 		} else {
 			runInvalidSprintRules(issue)
 		}
+
 	}
 
 	showErrors(issues)
