@@ -25,7 +25,8 @@ import (
 const CURRENT_SPRINT = "Sprint 42"
 const READY_SPRINT = "Ready"
 const BACKLOG_SPRINT = "Backlog"
-const EPIC_SPRINT = "Pz Epics"
+const EPIC_SPRINT1 = "Pz Epics"
+const EPIC_SPRINT2 = "BF Epics"
 
 var PastSprints = []string{
 	"Brisket",

@@ -24,15 +24,15 @@ func runCommonRules(issue *Issue) {
 	parent := issue.parent()
 
 	if issue.hasStartDate() {
-		issue.Warnf("start date is not empty")
+		issue.Errorf("start date is not empty")
 	}
 
 	if issue.hasDueDate() {
-		issue.Warnf("due date is not empty")
+		issue.Errorf("due date is not empty")
 	}
 
 	if issue.hasEstimatedTime() {
-		issue.Warnf("estimated time is not empty")
+		issue.Errorf("estimated time is not empty")
 	}
 
 	if parent != nil && parent.isClosed() && (!issue.isClosed() && !issue.isRejected()) {
@@ -87,39 +87,39 @@ func runCurrentSprintRules(issue *Issue) {
 	}
 
 	if !issue.isAssigned() {
-		issue.Warnf("issue is not assigned to anyone")
+		issue.Errorf("issue is not assigned to anyone")
 	}
 
 	if issue.category() == "" {
-		issue.Warnf("'category' not set")
+		issue.Errorf("'category' not set")
 	}
 
 	if issue.isClosed() && issue.percentDone() != 100 {
-		issue.Warnf("'percent done' on closed issue is not 100%%")
+		issue.Errorf("'percent done' on closed issue is not 100%%")
 	}
 
 	if issue.isResolved() && issue.percentDone() != 100 {
-		issue.Warnf("'percent done' on resolved issue is not 100%%")
+		issue.Errorf("'percent done' on resolved issue is not 100%%")
 	}
 
 	if issue.isNew() && issue.percentDone() != 0 {
-		issue.Warnf("'percent done' on new issue is not 0%%")
+		issue.Errorf("'percent done' on new issue is not 0%%")
 	}
 
 	if issue.isInProgress() && issue.percentDone() == 0 {
-		issue.Warnf("'percent done' on in-progress issue is 0%%")
+		issue.Errorf("'percent done' on in-progress issue is 0%%")
 	}
 
 	if issue.isInProgress() && issue.percentDone() == 100 {
-		issue.Warnf("'percent done' on in-progress issue is 100%%")
+		issue.Errorf("'percent done' on in-progress issue is 100%%")
 	}
 
 	if issue.isStory() && !issue.isRejected() && !issue.hasAcceptanceCriteria() {
-		issue.Warnf("story does not have any acceptance criteria")
+		issue.Errorf("story does not have any acceptance criteria")
 	}
 
 	if issue.isBug() && !issue.isRejected() && !issue.hasAcceptanceCriteria() {
-		issue.Warnf("bug does not have any acceptance criteria")
+		issue.Errorf("bug does not have any acceptance criteria")
 	}
 }
 

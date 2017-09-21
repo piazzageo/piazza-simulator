@@ -33,6 +33,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"sort"
 	"strings"
 )
 
@@ -57,43 +58,63 @@ func getApiKey() (string, error) {
 
 func showErrors(issues *Issues) {
 
-	warnings := 0
 	errors := 0
 	cleanIssues := 0
 	dirtyIssues := 0
 
+	byOwner := map[string][]*Issue{}
+
+	// sort the issues by owner
 	for i := 0; i <= issues.MaxId; i++ {
 		issue, ok := issues.Map[i]
 		if !ok {
 			continue
 		}
 
-		owner := func(issue *Issue) string {
-			s := ""
-			if issue.isAssigned() {
-				s = "(" + issue.assignee() + ")"
-			}
-			return s
+		owner := "(no owner)"
+		if issue.isAssigned() {
+			owner = issue.assignee()
 		}
 
-		for _, s := range issue.errors {
-			Printf("Issue %d: error: %s %s", issue.Id, s, owner(issue))
-			errors++
+		_, ok2 := byOwner[owner]
+		if !ok2 {
+			byOwner[owner] = make([]*Issue, 0)
 		}
-		for _, s := range issue.warnings {
-			Printf("Issue %d: warning: %s %s", issue.Id, s, owner(issue))
-			warnings++
-		}
+		byOwner[owner] = append(byOwner[owner], issue)
 
-		if len(issue.errors) > 0 || len(issue.warnings) > 0 {
+		if len(issue.errors) > 0 {
 			dirtyIssues++
 		} else {
 			cleanIssues++
 		}
 	}
 
-	Printf("Found %d errors and %d warnings (across %d of %d total issues)",
-		errors, warnings, dirtyIssues, dirtyIssues+cleanIssues)
+	names := []string{}
+	for owner, _ := range byOwner {
+		names = append(names, owner)
+	}
+
+	sort.Strings(names)
+
+	for _, owner := range names {
+		issues := byOwner[owner]
+
+		titled := false
+
+		for _, issue := range issues {
+			for _, s := range issue.errors {
+				if !titled {
+					Printf("%s", owner)
+					titled = true
+				}
+				Printf("\t%d: %s", issue.Id, s)
+				errors++
+			}
+		}
+	}
+
+	Printf("Found %d errors (across %d of %d total issues)",
+		errors, dirtyIssues, dirtyIssues+cleanIssues)
 }
 
 func main() {

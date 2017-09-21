@@ -51,16 +51,10 @@ type Issue struct {
 
 	Issues *Issues // back link
 
-	warnings []string
-	errors   []string
+	errors []string
 }
 
 //---------------------------------------------------------------------
-
-func (issue *Issue) Warnf(mssg string, args ...interface{}) {
-	s := fmt.Sprintf(mssg, args...)
-	issue.warnings = append(issue.warnings, s)
-}
 
 func (issue *Issue) Errorf(mssg string, args ...interface{}) {
 	s := fmt.Sprintf(mssg, args...)
@@ -145,7 +139,7 @@ func (issue *Issue) isBacklogSprint() bool {
 }
 
 func (issue *Issue) isEpicSprint() bool {
-	return issue.targetVersion() == EPIC_SPRINT
+	return issue.targetVersion() == EPIC_SPRINT1 || issue.targetVersion() == EPIC_SPRINT2
 }
 
 func (issue *Issue) isNoSprint() bool {

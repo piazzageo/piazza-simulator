@@ -49,7 +49,6 @@ func getIssues(projectId int) (*Issues, error) {
 				issues.MaxId = issue.Id
 			}
 
-			issue.warnings = make([]string, 0)
 			issue.errors = make([]string, 0)
 
 			issue.Issues = issues
