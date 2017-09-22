@@ -56,15 +56,9 @@ func getApiKey() (string, error) {
 	return s, nil
 }
 
-func showErrors(issues *Issues) {
+func buildOwnerToIssuesMap(issues *Issues) map[string][]*Issue {
+	m := map[string][]*Issue{}
 
-	errors := 0
-	cleanIssues := 0
-	dirtyIssues := 0
-
-	byOwner := map[string][]*Issue{}
-
-	// sort the issues by owner
 	for i := 0; i <= issues.MaxId; i++ {
 		issue, ok := issues.Map[i]
 		if !ok {
@@ -76,45 +70,56 @@ func showErrors(issues *Issues) {
 			owner = issue.assignee()
 		}
 
-		_, ok2 := byOwner[owner]
+		_, ok2 := m[owner]
 		if !ok2 {
-			byOwner[owner] = make([]*Issue, 0)
+			m[owner] = make([]*Issue, 0)
 		}
-		byOwner[owner] = append(byOwner[owner], issue)
-
-		if len(issue.errors) > 0 {
-			dirtyIssues++
-		} else {
-			cleanIssues++
-		}
+		m[owner] = append(m[owner], issue)
 	}
 
-	names := []string{}
-	for owner, _ := range byOwner {
-		names = append(names, owner)
+	return m
+}
+
+func getSortedKeys(m map[string][]*Issue) []string {
+	keys := []string{}
+	for owner, _ := range m {
+		keys = append(keys, owner)
 	}
 
-	sort.Strings(names)
+	sort.Strings(keys)
+
+	return keys
+}
+
+func showErrors(issues *Issues) {
+
+	totalErrors := 0
+
+	ownerToIssuesMap := buildOwnerToIssuesMap(issues)
+
+	names := getSortedKeys(ownerToIssuesMap)
 
 	for _, owner := range names {
-		issues := byOwner[owner]
+		issues := ownerToIssuesMap[owner]
 
-		titled := false
-
+		errs := 0
 		for _, issue := range issues {
-			for _, s := range issue.errors {
-				if !titled {
-					Printf("%s", owner)
-					titled = true
+			errs += len(issue.errors)
+		}
+
+		if errs > 0 {
+			Printf("%s (%d)", owner, errs)
+			for _, issue := range issues {
+				for _, s := range issue.errors {
+					Printf("\t%d: %s", issue.Id, s)
 				}
-				Printf("\t%d: %s", issue.Id, s)
-				errors++
 			}
+
+			totalErrors += errs
 		}
 	}
 
-	Printf("Found %d errors (across %d of %d total issues)",
-		errors, dirtyIssues, dirtyIssues+cleanIssues)
+	Printf("Found %d errors ", totalErrors)
 }
 
 func main() {
