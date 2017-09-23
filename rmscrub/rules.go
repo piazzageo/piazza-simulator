@@ -39,8 +39,8 @@ func runCommonRules(issue *Issue) {
 		issue.Errorf("issue's parent is closed but issue is not")
 	}
 
-	if parent != nil && parent.isResolved() && !issue.isResolved() {
-		issue.Errorf("issue's parent is resolved but issue is not")
+	if parent != nil && parent.isResolved() && (!issue.isResolved() && !issue.isClosed()) {
+		issue.Errorf("issue's parent is resolved but issue is not resolved or closed")
 	}
 
 	if parent != nil && parent.isRejected() && !issue.isRejected() {
