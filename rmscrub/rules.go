@@ -86,8 +86,8 @@ func runCurrentSprintRules(issue *Issue) {
 		issue.Errorf("issue's type (\"tracker\") is invalid: \"%s\"", issue.tracker())
 	}
 
-	if !issue.isAssigned() {
-		issue.Errorf("issue is not assigned to anyone")
+	if !issue.isAssigned() && !issue.isNew() {
+		issue.Errorf("issue in current sprint is not assigned to anyone")
 	}
 
 	if issue.category() == "" {
