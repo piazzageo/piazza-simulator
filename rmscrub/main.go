@@ -142,31 +142,14 @@ func main() {
 
 	Logf("%d issues in project", len(allIssues.GetMap()))
 
-	for _, issue := range allIssues.GetMap() {
-
-		/*
-			if !issue.isPastSprint() {
-				fmt.Printf("%d - %s - %t\n", issue.Id, issue.targetVersion(), issue.isPastSprint())
-			}
-		*/
-
-		if issue.isCurrentSprint() {
-			runCurrentSprintRules(issue)
-		} else if issue.isReadySprint() {
-			runReadySprintRules(issue)
-		} else if issue.isPastSprint() {
-			runPastSprintRules(issue)
-		} else if issue.isFutureSprint() {
-			runFutureSprintRules(issue)
-		} else if issue.isBacklogSprint() {
-			runBacklogSprintRules(issue)
-		} else if issue.isEpicSprint() {
-			runEpicSprintRules(issue)
-		} else {
-			runInvalidSprintRules(issue)
-		}
-
-	}
+	rules := Rules{}
+	rules.Run(allIssues)
 
 	showErrors(allIssues)
+
+	fmt.Printf("\n")
+
+	tagChecker := NewTagCheker()
+	tagChecker.Run(allIssues)
+	tagChecker.Report()
 }

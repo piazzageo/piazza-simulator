@@ -85,7 +85,7 @@ func (list *IssueList) Read(project *Project) error {
 			break
 		}
 		perc := (float64(offset) / float64(resp.TotalCount)) * 100.0
-		fmt.Fprintf(os.Stderr, "\r%d%%", int(perc))
+		fmt.Fprintf(os.Stderr, "\r%3d%%", int(perc))
 	}
 	fmt.Fprintf(os.Stderr, "\r100%%\n")
 

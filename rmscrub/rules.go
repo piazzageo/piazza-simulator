@@ -16,10 +16,44 @@ limitations under the License.
 
 package main
 
+type Rules struct {
+}
+
+func (r *Rules) Run(list *IssueList) {
+	for _, issue := range list.GetMap() {
+
+		/*
+			if !issue.isPastSprint() {
+				fmt.Printf("%d - %s - %t\n", issue.Id, issue.targetVersion(), issue.isPastSprint())
+			}
+		*/
+
+		if issue.isCurrentSprint() {
+			r.runCommonRules(issue)
+			r.runCurrentSprintRules(issue)
+		} else if issue.isReadySprint() {
+			r.runReadySprintRules(issue)
+		} else if issue.isPastSprint() {
+			r.runPastSprintRules(issue)
+		} else if issue.isFutureSprint() {
+			r.runCommonRules(issue)
+			r.runFutureSprintRules(issue)
+		} else if issue.isBacklogSprint() {
+			r.runCommonRules(issue)
+			r.runBacklogSprintRules(issue)
+		} else if issue.isEpicSprint() {
+			r.runEpicSprintRules(issue)
+		} else {
+			r.runInvalidSprintRules(issue)
+		}
+
+	}
+}
+
 //
 // just some common rules used by the functions below
 //
-func runCommonRules(issue *Issue) {
+func (r *Rules) runCommonRules(issue *Issue) {
 
 	parent := issue.parent()
 
@@ -59,8 +93,7 @@ func runCommonRules(issue *Issue) {
 //
 // rules for issues in the Current sprint
 //
-func runCurrentSprintRules(issue *Issue) {
-	runCommonRules(issue)
+func (r *Rules) runCurrentSprintRules(issue *Issue) {
 
 	parent := issue.parent()
 
@@ -130,7 +163,7 @@ func runCurrentSprintRules(issue *Issue) {
 //
 // rules for issues in a Past sprint
 //
-func runPastSprintRules(issue *Issue) {
+func (r *Rules) runPastSprintRules(issue *Issue) {
 	if !issue.isClosed() && !issue.isRejected() {
 		issue.Errorf("issue from past sprint is not closed or rejected")
 	}
@@ -139,9 +172,7 @@ func runPastSprintRules(issue *Issue) {
 //
 // rules for issues in a Future sprint
 //
-func runFutureSprintRules(issue *Issue) {
-
-	runCommonRules(issue)
+func (r *Rules) runFutureSprintRules(issue *Issue) {
 
 	if issue.isClosed() {
 		issue.Errorf("issue from future sprint is already closed")
@@ -157,9 +188,7 @@ func runFutureSprintRules(issue *Issue) {
 //
 // rules for issues in the Backlog
 //
-func runBacklogSprintRules(issue *Issue) {
-
-	runCommonRules(issue)
+func (r *Rules) runBacklogSprintRules(issue *Issue) {
 
 	if !issue.isNew() && !issue.isRejected() {
 		issue.Errorf("issue in backlog does not have status 'new' or 'rejected'")
@@ -169,7 +198,7 @@ func runBacklogSprintRules(issue *Issue) {
 //
 // rules for issues with target version set to "Pz Epic"
 //
-func runEpicSprintRules(issue *Issue) {
+func (r *Rules) runEpicSprintRules(issue *Issue) {
 	if !issue.isEpic() {
 		issue.Errorf("issue is not an Epic but has target version set to \"Pz Epic\"")
 	}
@@ -178,7 +207,7 @@ func runEpicSprintRules(issue *Issue) {
 //
 // rules for issues with no target version set at all
 //
-func runInvalidSprintRules(issue *Issue) {
+func (r *Rules) runInvalidSprintRules(issue *Issue) {
 	if issue.targetVersion() == "" {
 		issue.Errorf("no sprint set")
 	} else {
@@ -189,7 +218,7 @@ func runInvalidSprintRules(issue *Issue) {
 //
 // rules for issues with target version set to "Ready"
 //
-func runReadySprintRules(issue *Issue) {
+func (r *Rules) runReadySprintRules(issue *Issue) {
 	//	if !issue.isEpic() {
 	//		issue.Errorf("Issue is not an Epic but has target version set to \"Pz Epic\"")
 	//	}
