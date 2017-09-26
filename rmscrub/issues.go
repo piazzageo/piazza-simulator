@@ -19,39 +19,58 @@ package main
 //---------------------------------------------------------------------
 
 type Issues struct {
-	Map   map[int]*Issue
+	data  map[int]*Issue
 	MaxId int
 }
 
+func NewIssues() *Issues {
+	issues := &Issues{}
+	issues.data = make(map[int]*Issue)
+	return issues
+}
+
+func (issues *Issues) GetMap() map[int]*Issue {
+	return issues.data
+}
+
+func (issues *Issues) Issue(id int) (*Issue, bool) {
+	issue, ok := issues.data[id]
+	return issue, ok
+}
+
+func (issues *Issues) Add(issue *Issue) {
+	issues.data[issue.Id] = issue
+
+	if issue.Id > issues.MaxId {
+		issues.MaxId = issue.Id
+	}
+
+	issue.errors = make([]string, 0)
+
+	issue.Issues = issues
+}
+
 // returns issues table and highest id value
-func getIssues(projectId int) (*Issues, error) {
+func getIssues(project *Project) (*Issues, error) {
 
 	apiKey, err := getApiKey()
 	if err != nil {
 		return nil, err
 	}
 
-	issues := &Issues{}
-	issues.Map = make(map[int]*Issue)
+	issues := NewIssues()
 
 	offset := 0
 	const limit = 100
 
 	for {
-		resp, err := makeRequest(apiKey, projectId, offset, limit)
+		resp, err := makeRequest(apiKey, project.Id, offset, limit)
 		if err != nil {
 			return nil, err
 		}
 
 		for _, issue := range resp.Issues {
-			issues.Map[issue.Id] = issue
-			if issue.Id > issues.MaxId {
-				issues.MaxId = issue.Id
-			}
-
-			issue.errors = make([]string, 0)
-
-			issue.Issues = issues
+			issues.Add(issue)
 		}
 
 		offset += limit
@@ -61,4 +80,12 @@ func getIssues(projectId int) (*Issues, error) {
 	}
 
 	return issues, nil
+}
+
+// returns issues table and highest id value
+func (issues *Issues) Merge(newIssue *Issues) error {
+	for _, v := range newIssue.GetMap() {
+		issues.Add(v)
+	}
+	return nil
 }

@@ -75,7 +75,7 @@ func (issue *Issue) hasValidParent() bool {
 		return true
 	}
 
-	_, ok := issue.Issues.Map[pid]
+	_, ok := issue.Issues.Issue(pid)
 	return ok
 }
 
@@ -84,7 +84,7 @@ func (issue *Issue) parent() *Issue {
 		return nil
 	}
 	pid := issue.Parent.Id
-	p, _ := issue.Issues.Map[pid]
+	p, _ := issue.Issues.Issue(pid)
 	return p
 }
 

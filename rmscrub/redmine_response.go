@@ -30,22 +30,7 @@ type RedmineResponse struct {
 	Limit      int      `json:"limit"`
 }
 
-type Project struct {
-	Id         int    `json:"id"`
-	Name       string `json:"name"`
-	Identifier string `json:"identifier"`
-}
 
-type Projects struct {
-	Map map[int]*Project
-}
-
-type ProjectsResponse struct {
-	Projects   []*Project `json:"projects"`
-	TotalCount int        `json:"total_count"`
-	Offset     int        `json:"offset"`
-	Limit      int        `json:"limit"`
-}
 
 func makeRequest(apiKey string, projectId int, offset int, limit int) (*RedmineResponse, error) {
 
@@ -87,50 +72,6 @@ func makeRequest(apiKey string, projectId int, offset int, limit int) (*RedmineR
 	}
 	Logf("request: offset=%d, limit=%d, totalCount=%d, len=%d\n))))))))))))))))))))))))\n",
 		resp.Offset, resp.Limit, resp.TotalCount, len(resp.Issues))
-
-	return &resp, nil
-}
-
-func getProjects(apiKey string, offset int, limit int) (*ProjectsResponse, error) {
-
-	url := fmt.Sprintf("%s/%s?offset=%d&limit=%d&status_id=*",
-		"https://redmine.devops.geointservices.io",
-		"/projects.json",
-		offset, limit)
-
-	client := &http.Client{}
-
-	Logf("url: %s", url)
-
-	request, err := http.NewRequest("GET", url, nil)
-	if err != nil {
-		return nil, err
-	}
-
-	request.SetBasicAuth(apiKey, "random")
-
-	response, err := client.Do(request)
-	if err != nil {
-		return nil, err
-	}
-	if response.StatusCode != 200 {
-		return nil, fmt.Errorf("GET failed with status code %s", response.Status)
-	}
-
-	body, err := ioutil.ReadAll(response.Body)
-	if err != nil {
-		return nil, err
-	}
-
-	Logf("Raw result: %s...", string(body[0:60]))
-
-	resp := ProjectsResponse{}
-	err = json.Unmarshal(body, &resp)
-	if err != nil {
-		return nil, err
-	}
-	Logf("request: offset=%d, limit=%d, totalCount=%d, len=%d",
-		resp.Offset, resp.Limit, resp.TotalCount, len(resp.Projects))
 
 	return &resp, nil
 }

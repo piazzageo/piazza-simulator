@@ -14,19 +14,6 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-// This app reads in a CSV export of a Redmine project and "validates" all
-// the issues based on various rules such as:
-//    a Story must have a parent, and that parent must be an Epic
-//    a Task in the current milestone must have an estimate, and that
-//      estimate must be <= 16 hours
-// This app is still underdevelopment -- will be adding rules as we need them.
-//
-// To use:
-//   - in Redmine, click on "View all issues" (right-hand column, top)
-//   - then click on "Also available in... CSV" (main panel, bottom-right)
-//   - run the app:  $ go run redmine-scrub.go downloadedfile.csv
-//
-
 package main
 
 import (
@@ -60,7 +47,7 @@ func buildOwnerToIssuesMap(issues *Issues) map[string][]*Issue {
 	m := map[string][]*Issue{}
 
 	for i := 0; i <= issues.MaxId; i++ {
-		issue, ok := issues.Map[i]
+		issue, ok := issues.Issue(i)
 		if !ok {
 			continue
 		}
@@ -123,8 +110,11 @@ func showErrors(issues *Issues) {
 }
 
 func main() {
-	if len(os.Args) != 2 {
-		Errorf("usage:  $ rm-scrub project")
+	targetProjectNames := []string(nil)
+	if len(os.Args) == 2 {
+		targetProjectNames = []string{os.Args[1]}
+	} else {
+		targetProjectNames = []string{"Piazza", "Beachfront"}
 	}
 
 	apiKey, err := getApiKey()
@@ -132,31 +122,28 @@ func main() {
 		Errorf("Failed to get API key: %s", err)
 	}
 
-	projectsResponse, err := getProjects(apiKey, 0, 100)
+	availableProjects, err := getProjects(apiKey)
 	if err != nil {
 		Errorf("Failed to get projects: %s", err)
 	}
 
-	project := os.Args[1]
-	projectId := -1
-	for _, p := range (*projectsResponse).Projects {
-		if p.Identifier == project || p.Name == project {
-			projectId = p.Id
-			break
+	targetProjects := availableProjects.Filter(targetProjectNames)
+	if len(targetProjects.GetMap()) == 0 {
+		Errorf("Unknown project name(s): %s", strings.Join(targetProjectNames, " ,"))
+	}
+
+	allIssues := NewIssues()
+	for _, project := range targetProjects.GetMap() {
+		issues, err := getIssues(project)
+		if err != nil {
+			Errorf(err.Error())
 		}
-	}
-	if projectId == -1 {
-		Errorf("Unknown project name: %s", project)
+		allIssues.Merge(issues)
 	}
 
-	issues, err := getIssues(projectId)
-	if err != nil {
-		Errorf(err.Error())
-	}
+	Logf("%d issues in project", len(allIssues.GetMap()))
 
-	Logf("%d issues in project", len(issues.Map))
-
-	for _, issue := range issues.Map {
+	for _, issue := range allIssues.GetMap() {
 
 		/*
 			if !issue.isPastSprint() {
@@ -182,5 +169,5 @@ func main() {
 
 	}
 
-	showErrors(issues)
+	showErrors(allIssues)
 }
