@@ -43,11 +43,11 @@ func getApiKey() (string, error) {
 	return s, nil
 }
 
-func buildOwnerToIssuesMap(issues *Issues) map[string][]*Issue {
+func buildOwnerToIssuesMap(list *IssueList) map[string][]*Issue {
 	m := map[string][]*Issue{}
 
-	for i := 0; i <= issues.MaxId; i++ {
-		issue, ok := issues.Issue(i)
+	for i := 0; i <= list.MaxId(); i++ {
+		issue, ok := list.Issue(i)
 		if !ok {
 			continue
 		}
@@ -78,11 +78,11 @@ func getSortedKeys(m map[string][]*Issue) []string {
 	return keys
 }
 
-func showErrors(issues *Issues) {
+func showErrors(list *IssueList) {
 
 	totalErrors := 0
 
-	ownerToIssuesMap := buildOwnerToIssuesMap(issues)
+	ownerToIssuesMap := buildOwnerToIssuesMap(list)
 
 	names := getSortedKeys(ownerToIssuesMap)
 
@@ -122,23 +122,22 @@ func main() {
 		Errorf("Failed to get API key: %s", err)
 	}
 
-	availableProjects, err := getProjects(apiKey)
+	availableProjects, err := NewProjectList(apiKey)
 	if err != nil {
 		Errorf("Failed to get projects: %s", err)
 	}
 
-	targetProjects := availableProjects.Filter(targetProjectNames)
-	if len(targetProjects.GetMap()) == 0 {
+	availableProjects.Filter(targetProjectNames)
+	if len(availableProjects.GetMap()) == 0 {
 		Errorf("Unknown project name(s): %s", strings.Join(targetProjectNames, " ,"))
 	}
 
-	allIssues := NewIssues()
-	for _, project := range targetProjects.GetMap() {
-		issues, err := getIssues(project)
+	allIssues := NewIssueList()
+	for _, project := range availableProjects.GetMap() {
+		err := allIssues.Read(project)
 		if err != nil {
 			Errorf(err.Error())
 		}
-		allIssues.Merge(issues)
 	}
 
 	Logf("%d issues in project", len(allIssues.GetMap()))

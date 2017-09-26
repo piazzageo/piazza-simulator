@@ -50,6 +50,10 @@ func runCommonRules(issue *Issue) {
 	if !issue.hasValidParent() {
 		issue.Errorf("issue's parent %d is invalid", issue.Parent.Id)
 	}
+
+	if issue.hasBadTitleTag() {
+		issue.Errorf("issue has invalid title tag: %s", issue.Subject)
+	}
 }
 
 //

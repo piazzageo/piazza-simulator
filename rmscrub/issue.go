@@ -19,6 +19,7 @@ package main
 import (
 	"fmt"
 	"regexp"
+	"strings"
 )
 
 //---------------------------------------------------------------------
@@ -49,7 +50,7 @@ type Issue struct {
 	Parent         RmObject `json:"parent"`
 	StoryPoints    int      `json:"story_points"`
 
-	Issues *Issues // back link
+	Issues *IssueList // back link
 
 	errors []string
 }
@@ -197,4 +198,20 @@ func (issue *Issue) hasAcceptanceCriteria() bool {
 		Errorf("Regep failed for issue %d", issue.Id)
 	}
 	return matched
+}
+
+func (issue *Issue) hasBadTitleTag() bool {
+	subj := issue.Subject
+
+	if !strings.ContainsAny(subj, "[]") {
+		return false
+	}
+
+	// remove the legal tags
+	for _, tag := range TitleTags {
+		subj = strings.Replace(subj, tag, "", 1)
+	}
+
+	// if we still have markers, we've bad
+	return strings.ContainsAny(subj, "[]")
 }

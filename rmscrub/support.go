@@ -78,6 +78,20 @@ var PastSprints = []string{
 
 var FutureSprints = []string{}
 
+var TitleTags = []string{
+	"[PP]",
+	"[ATO Engineering]",
+	"[Engineering]",
+	"[ATO Management]",
+	"[Management]",
+	"[Testing]",
+	"[ATO Testing]",
+	"[DevOps]",
+	"[ATO DevOps]",
+	"[Security]",
+	"[ATO Security]",
+}
+
 func Errorf(mssg string, args ...interface{}) {
 	s := fmt.Sprintf(mssg, args...)
 	fmt.Printf("error: %s\n", s)

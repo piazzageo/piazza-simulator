@@ -16,49 +16,56 @@ limitations under the License.
 
 package main
 
+import (
+	"fmt"
+	"os"
+)
+
 //---------------------------------------------------------------------
 
-type Issues struct {
+type IssueList struct {
 	data  map[int]*Issue
-	MaxId int
+	maxId int
 }
 
-func NewIssues() *Issues {
-	issues := &Issues{}
-	issues.data = make(map[int]*Issue)
-	return issues
+func NewIssueList() *IssueList {
+	list := &IssueList{}
+	list.data = make(map[int]*Issue)
+	return list
 }
 
-func (issues *Issues) GetMap() map[int]*Issue {
-	return issues.data
+func (list *IssueList) GetMap() map[int]*Issue {
+	return list.data
 }
 
-func (issues *Issues) Issue(id int) (*Issue, bool) {
-	issue, ok := issues.data[id]
+func (list *IssueList) Issue(id int) (*Issue, bool) {
+	issue, ok := list.data[id]
 	return issue, ok
 }
 
-func (issues *Issues) Add(issue *Issue) {
-	issues.data[issue.Id] = issue
+func (list *IssueList) MaxId() int {
+	return list.maxId
+}
 
-	if issue.Id > issues.MaxId {
-		issues.MaxId = issue.Id
+func (list *IssueList) Add(issue *Issue) {
+	list.data[issue.Id] = issue
+
+	if issue.Id > list.maxId {
+		list.maxId = issue.Id
 	}
 
 	issue.errors = make([]string, 0)
 
-	issue.Issues = issues
+	issue.Issues = list
 }
 
 // returns issues table and highest id value
-func getIssues(project *Project) (*Issues, error) {
+func (list *IssueList) Read(project *Project) error {
 
 	apiKey, err := getApiKey()
 	if err != nil {
-		return nil, err
+		return err
 	}
-
-	issues := NewIssues()
 
 	offset := 0
 	const limit = 100
@@ -66,26 +73,29 @@ func getIssues(project *Project) (*Issues, error) {
 	for {
 		resp, err := makeRequest(apiKey, project.Id, offset, limit)
 		if err != nil {
-			return nil, err
+			return err
 		}
 
 		for _, issue := range resp.Issues {
-			issues.Add(issue)
+			list.Add(issue)
 		}
 
 		offset += limit
 		if offset > resp.TotalCount {
 			break
 		}
+		perc := (float64(offset) / float64(resp.TotalCount)) * 100.0
+		fmt.Fprintf(os.Stderr, "\r%d%%", int(perc))
 	}
+	fmt.Fprintf(os.Stderr, "\r100%%\n")
 
-	return issues, nil
+	return nil
 }
 
 // returns issues table and highest id value
-func (issues *Issues) Merge(newIssue *Issues) error {
+func (list *IssueList) Merge(newIssue *IssueList) error {
 	for _, v := range newIssue.GetMap() {
-		issues.Add(v)
+		list.Add(v)
 	}
 	return nil
 }
