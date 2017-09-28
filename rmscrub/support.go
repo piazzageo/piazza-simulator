@@ -22,7 +22,7 @@ import (
 	"os"
 )
 
-const CURRENT_SPRINT = "Sprint 42"
+const CURRENT_SPRINT = "Sprint 43"
 const READY_SPRINT = "Ready"
 const BACKLOG_SPRINT = "Backlog"
 const EPIC_SPRINT1 = "Pz Epics"
@@ -74,6 +74,7 @@ var PastSprints = []string{
 	"Sprint 39",
 	"Sprint 40",
 	"Sprint 41",
+	"Sprint 42",
 }
 
 var FutureSprints = []string{}
