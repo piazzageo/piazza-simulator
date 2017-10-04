@@ -23,6 +23,9 @@ func (t *TagChecker) Report() {
 	sort.Strings(TitleTags)
 
 	for _, tag := range TitleTags {
+		if !strings.HasPrefix(tag, "[ATO") {
+			continue
+		}
 		statusMap := t.counts[tag]
 
 		new := statusMap["New"]
