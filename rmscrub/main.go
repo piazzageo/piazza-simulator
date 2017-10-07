@@ -22,6 +22,7 @@ import (
 	"os"
 	"sort"
 	"strings"
+	"sync"
 )
 
 var DEBUG = false
@@ -140,15 +141,26 @@ func main() {
 		Errorf("Unknown project name(s): %s", strings.Join(targetProjectNames, " ,"))
 	}
 
+	wg := &sync.WaitGroup{}
+	wgx := &sync.WaitGroup{}
+
 	allIssues := NewIssueList()
 	for _, project := range availableProjects.GetMap() {
-		err := allIssues.Read(project)
-		if err != nil {
-			Errorf(err.Error())
-		}
+		wgx.Add(1)
+		go func(project *Project) {
+			defer wgx.Done()
+			err := allIssues.Read(wg, project)
+			if err != nil {
+				panic(err)
+			}
+		}(project)
 	}
 
-	Logf("%d issues in project", len(allIssues.GetMap()))
+	wgx.Wait()
+	wg.Wait()
+	fmt.Fprintf(os.Stderr, "\n")
+
+	Logf("%d issues in projects", len(allIssues.GetMap()))
 
 	rules := Rules{}
 	rules.Run(allIssues)

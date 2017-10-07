@@ -59,6 +59,9 @@ type Issue struct {
 
 func (issue *Issue) Errorf(mssg string, args ...interface{}) {
 	s := fmt.Sprintf(mssg, args...)
+	if issue.errors == nil {
+		issue.errors = make([]string, 0)
+	}
 	issue.errors = append(issue.errors, s)
 }
 

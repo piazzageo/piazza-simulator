@@ -19,6 +19,7 @@ package main
 import (
 	"fmt"
 	"os"
+	"sync"
 )
 
 //---------------------------------------------------------------------
@@ -26,11 +27,13 @@ import (
 type IssueList struct {
 	data  map[int]*Issue
 	maxId int
+	mutex *sync.Mutex
 }
 
 func NewIssueList() *IssueList {
 	list := &IssueList{}
 	list.data = make(map[int]*Issue)
+	list.mutex = &sync.Mutex{}
 	return list
 }
 
@@ -47,20 +50,33 @@ func (list *IssueList) MaxId() int {
 	return list.maxId
 }
 
-func (list *IssueList) Add(issue *Issue) {
-	list.data[issue.Id] = issue
+// AddList IS threadsafe!
+func (list *IssueList) AddList(issues []*Issue) {
+	list.mutex.Lock()
+	defer list.mutex.Unlock()
+	for _, issue := range issues {
+		list.Add(issue)
+	}
+}
 
-	if issue.Id > list.maxId {
-		list.maxId = issue.Id
+// Add is NOT threadsafe!
+func (list *IssueList) Add(issue *Issue) {
+
+	id := issue.Id
+
+	list.data[id] = issue
+
+	if id > list.maxId {
+		list.maxId = id
 	}
 
-	issue.errors = make([]string, 0)
+	issue.errors = nil
 
 	issue.Issues = list
 }
 
 // returns issues table and highest id value
-func (list *IssueList) Read(project *Project) error {
+func (list *IssueList) Read(wg *sync.WaitGroup, project *Project) error {
 
 	apiKey, err := getApiKey()
 	if err != nil {
@@ -70,32 +86,36 @@ func (list *IssueList) Read(project *Project) error {
 	offset := 0
 	const limit = 100
 
-	for {
+	resp, err := makeRequest(apiKey, project.Id, offset, limit)
+	if err != nil {
+		return err
+	}
+	max := resp.TotalCount
+
+	readChunk := func(offset, limit int) error {
 		resp, err := makeRequest(apiKey, project.Id, offset, limit)
 		if err != nil {
 			return err
 		}
 
-		for _, issue := range resp.Issues {
-			list.Add(issue)
-		}
+		list.AddList(resp.Issues)
 
-		offset += limit
-		if offset > resp.TotalCount {
-			break
-		}
-		perc := (float64(offset) / float64(resp.TotalCount)) * 100.0
-		fmt.Fprintf(os.Stderr, "\r%3d%%", int(perc))
+		fmt.Fprintf(os.Stderr, ".")
+		return nil
 	}
-	fmt.Fprintf(os.Stderr, "\r100%%\n")
 
-	return nil
-}
-
-// returns issues table and highest id value
-func (list *IssueList) Merge(newIssue *IssueList) error {
-	for _, v := range newIssue.GetMap() {
-		list.Add(v)
+	for offset := 0; offset < max; offset += limit {
+		wg.Add(1)
+		go func(offset, limit int) {
+			defer wg.Done()
+			err = readChunk(offset, limit)
+			if err != nil {
+				panic(err)
+			}
+		}(offset, limit)
 	}
+
+	fmt.Fprintf(os.Stderr, "*")
+
 	return nil
 }
