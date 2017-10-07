@@ -78,6 +78,15 @@ func getSortedKeys(m map[string][]*Issue) []string {
 	return keys
 }
 
+func slackStyle(name string) string {
+	if name == "Jeffrey Yutzler" {
+		name = "Jeff Yutzler"
+	}
+	name = "@" + strings.Replace(name, " ", ".", 1)
+	name = strings.ToLower(name)
+	return name
+}
+
 func showErrors(list *IssueList) {
 
 	totalErrors := 0
@@ -95,10 +104,9 @@ func showErrors(list *IssueList) {
 		}
 
 		if errs > 0 {
-			Printf("%s (%d)", owner, errs)
 			for _, issue := range issues {
 				for _, s := range issue.errors {
-					Printf("\t%d: %s", issue.Id, s)
+					Printf("%s  ==>  %d: %s", slackStyle(owner), issue.Id, s)
 				}
 			}
 
