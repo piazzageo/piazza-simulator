@@ -26,7 +26,7 @@ import (
 
 type IssueList struct {
 	data  map[int]*Issue
-	maxId int
+	maxID int
 	mutex *sync.Mutex
 }
 
@@ -46,8 +46,8 @@ func (list *IssueList) Issue(id int) (*Issue, bool) {
 	return issue, ok
 }
 
-func (list *IssueList) MaxId() int {
-	return list.maxId
+func (list *IssueList) MaxID() int {
+	return list.maxID
 }
 
 // AddList IS threadsafe!
@@ -62,12 +62,12 @@ func (list *IssueList) AddList(issues []*Issue) {
 // Add is NOT threadsafe!
 func (list *IssueList) Add(issue *Issue) {
 
-	id := issue.Id
+	id := issue.ID
 
 	list.data[id] = issue
 
-	if id > list.maxId {
-		list.maxId = id
+	if id > list.maxID {
+		list.maxID = id
 	}
 
 	issue.errors = nil
@@ -78,7 +78,7 @@ func (list *IssueList) Add(issue *Issue) {
 // returns issues table and highest id value
 func (list *IssueList) Read(wg *sync.WaitGroup, project *Project) error {
 
-	apiKey, err := getApiKey()
+	apiKey, err := getAPIKey()
 	if err != nil {
 		return err
 	}
@@ -86,14 +86,14 @@ func (list *IssueList) Read(wg *sync.WaitGroup, project *Project) error {
 	offset := 0
 	const limit = 100
 
-	resp, err := makeRequest(apiKey, project.Id, offset, limit)
+	resp, err := makeRequest(apiKey, project.ID, offset, limit)
 	if err != nil {
 		return err
 	}
 	max := resp.TotalCount
 
 	readChunk := func(offset, limit int) error {
-		resp, err := makeRequest(apiKey, project.Id, offset, limit)
+		resp, err := makeRequest(apiKey, project.ID, offset, limit)
 		if err != nil {
 			return err
 		}

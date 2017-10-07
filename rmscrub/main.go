@@ -27,7 +27,7 @@ import (
 
 var DEBUG = false
 
-func getApiKey() (string, error) {
+func getAPIKey() (string, error) {
 	home := os.Getenv("HOME")
 	if home == "" {
 		return "", fmt.Errorf("$HOME not found")
@@ -47,7 +47,7 @@ func getApiKey() (string, error) {
 func buildOwnerToIssuesMap(list *IssueList) map[string][]*Issue {
 	m := map[string][]*Issue{}
 
-	for i := 0; i <= list.MaxId(); i++ {
+	for i := 0; i <= list.MaxID(); i++ {
 		issue, ok := list.Issue(i)
 		if !ok {
 			continue
@@ -70,7 +70,7 @@ func buildOwnerToIssuesMap(list *IssueList) map[string][]*Issue {
 
 func getSortedKeys(m map[string][]*Issue) []string {
 	keys := []string{}
-	for owner, _ := range m {
+	for owner := range m {
 		keys = append(keys, owner)
 	}
 
@@ -107,7 +107,7 @@ func showErrors(list *IssueList) {
 		if errs > 0 {
 			for _, issue := range issues {
 				for _, s := range issue.errors {
-					Printf("%s  ==>  %d: %s", slackStyle(owner), issue.Id, s)
+					Printf("%s  ==>  %d: %s", slackStyle(owner), issue.ID, s)
 				}
 			}
 
@@ -126,7 +126,7 @@ func main() {
 		targetProjectNames = []string{"Piazza", "Beachfront"}
 	}
 
-	apiKey, err := getApiKey()
+	apiKey, err := getAPIKey()
 	if err != nil {
 		Errorf("Failed to get API key: %s", err)
 	}

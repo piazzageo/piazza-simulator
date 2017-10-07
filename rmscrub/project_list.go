@@ -12,7 +12,7 @@ type ProjectList struct {
 }
 
 func (list *ProjectList) Add(p *Project) {
-	list.data[p.Id] = p
+	list.data[p.ID] = p
 }
 
 func (list *ProjectList) GetMap() map[int]*Project {

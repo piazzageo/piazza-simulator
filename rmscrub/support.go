@@ -22,11 +22,11 @@ import (
 	"os"
 )
 
-const CURRENT_SPRINT = "Sprint 43"
-const READY_SPRINT = "Ready"
-const BACKLOG_SPRINT = "Backlog"
-const EPIC_SPRINT1 = "Pz Epics"
-const EPIC_SPRINT2 = "BF Epics"
+const CurrentSprint = "Sprint 43"
+const ReadySprint = "Ready"
+const BacklogSprint = "Backlog"
+const EpicSprint1 = "Pz Epics"
+const EpicSprint2 = "BF Epics"
 
 var PastSprints = []string{
 	"Brisket",

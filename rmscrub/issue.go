@@ -25,12 +25,12 @@ import (
 //---------------------------------------------------------------------
 
 type RmObject struct {
-	Id   int
+	ID   int
 	Name string
 }
 
 type Issue struct {
-	Id             int      `json:"id"`
+	ID             int      `json:"id"`
 	Project        RmObject `json:"project"`
 	Tracker        RmObject `json:"tracker"`
 	Status         RmObject `json:"status"`
@@ -74,7 +74,7 @@ func (issue *Issue) tracker() string {
 }
 
 func (issue *Issue) hasValidParent() bool {
-	pid := issue.Parent.Id
+	pid := issue.Parent.ID
 	if pid == 0 {
 		return true
 	}
@@ -87,7 +87,7 @@ func (issue *Issue) parent() *Issue {
 	if !issue.hasValidParent() {
 		return nil
 	}
-	pid := issue.Parent.Id
+	pid := issue.Parent.ID
 	p, _ := issue.Issues.Issue(pid)
 	return p
 }
@@ -113,11 +113,11 @@ func (issue *Issue) isBug() bool {
 }
 
 func (issue *Issue) isCurrentSprint() bool {
-	return issue.targetVersion() == CURRENT_SPRINT
+	return issue.targetVersion() == CurrentSprint
 }
 
 func (issue *Issue) isReadySprint() bool {
-	return issue.targetVersion() == READY_SPRINT
+	return issue.targetVersion() == ReadySprint
 }
 
 func (issue *Issue) isPastSprint() bool {
@@ -139,11 +139,11 @@ func (issue *Issue) isFutureSprint() bool {
 }
 
 func (issue *Issue) isBacklogSprint() bool {
-	return issue.targetVersion() == BACKLOG_SPRINT
+	return issue.targetVersion() == BacklogSprint
 }
 
 func (issue *Issue) isEpicSprint() bool {
-	return issue.targetVersion() == EPIC_SPRINT1 || issue.targetVersion() == EPIC_SPRINT2
+	return issue.targetVersion() == EpicSprint1 || issue.targetVersion() == EpicSprint2
 }
 
 func (issue *Issue) isNoSprint() bool {
@@ -198,7 +198,7 @@ func (issue *Issue) hasAcceptanceCriteria() bool {
 	d := issue.Description
 	matched, err := regexp.MatchString("A/C", d)
 	if err != nil {
-		Errorf("Regep failed for issue %d", issue.Id)
+		Errorf("Regep failed for issue %d", issue.ID)
 	}
 	return matched
 }

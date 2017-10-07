@@ -82,7 +82,7 @@ func (r *Rules) runCommonRules(issue *Issue) {
 	}
 
 	if !issue.hasValidParent() {
-		issue.Errorf("issue's parent %d is invalid", issue.Parent.Id)
+		issue.Errorf("issue's parent %d is invalid", issue.Parent.ID)
 	}
 
 	if issue.hasBadTitleTag() {
