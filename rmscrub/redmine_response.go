@@ -30,8 +30,6 @@ type RedmineResponse struct {
 	Limit      int      `json:"limit"`
 }
 
-
-
 func makeRequest(apiKey string, projectId int, offset int, limit int) (*RedmineResponse, error) {
 
 	url := fmt.Sprintf("%s/%s?project_id=%d&offset=%d&limit=%d&status_id=*",
