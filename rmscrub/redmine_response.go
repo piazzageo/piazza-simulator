@@ -23,14 +23,15 @@ import (
 	"net/http"
 )
 
-type RedmineResponse struct {
+// IssueRequestResponse is what is returned from a query for issues
+type IssueRequestResponse struct {
 	Issues     []*Issue `json:"issues"`
 	TotalCount int      `json:"total_count"`
 	Offset     int      `json:"offset"`
 	Limit      int      `json:"limit"`
 }
 
-func makeRequest(apiKey string, projectID int, offset int, limit int) (*RedmineResponse, error) {
+func makeRequest(apiKey string, projectID int, offset int, limit int) (*IssueRequestResponse, error) {
 
 	url := fmt.Sprintf("%s/%s?project_id=%d&offset=%d&limit=%d&status_id=*",
 		"https://redmine.devops.geointservices.io",
@@ -63,7 +64,7 @@ func makeRequest(apiKey string, projectID int, offset int, limit int) (*RedmineR
 
 	Logf("Raw result: %s...", string(body)[0:60])
 
-	resp := RedmineResponse{}
+	resp := IssueRequestResponse{}
 	err = json.Unmarshal(body, &resp)
 	if err != nil {
 		return nil, err

@@ -24,31 +24,33 @@ import (
 
 //---------------------------------------------------------------------
 
-type RmObject struct {
+// RedmineObject is how Redmine represents a generic Thing in JSON
+type RedmineObject struct {
 	ID   int
 	Name string
 }
 
+// Issue represents a Redmine Issue
 type Issue struct {
-	ID             int      `json:"id"`
-	Project        RmObject `json:"project"`
-	Tracker        RmObject `json:"tracker"`
-	Status         RmObject `json:"status"`
-	Priority       RmObject `json:"priority"`
-	Author         RmObject `json:"author"`
-	AssignedTo     RmObject `json:"assigned_to"`
-	Category       RmObject `json:"category"`
-	FixedVersion   RmObject `json:"fixed_version"`
-	Subject        string   `json:"subject"`
-	Description    string   `json:"description"`
-	DoneRatio      int      `json:"done_ratio"`
-	CreatedOn      string   `json:"created_on"`
-	UpdatedOn      string   `json:"updated_on"`
-	StartDate      string   `json:"start_date"`
-	DueDate        string   `json:"due_date"`
-	EstimatedHours float64  `json:"estimated_hours"`
-	Parent         RmObject `json:"parent"`
-	StoryPoints    int      `json:"story_points"`
+	ID             int           `json:"id"`
+	Project        RedmineObject `json:"project"`
+	Tracker        RedmineObject `json:"tracker"`
+	Status         RedmineObject `json:"status"`
+	Priority       RedmineObject `json:"priority"`
+	Author         RedmineObject `json:"author"`
+	AssignedTo     RedmineObject `json:"assigned_to"`
+	Category       RedmineObject `json:"category"`
+	FixedVersion   RedmineObject `json:"fixed_version"`
+	Subject        string        `json:"subject"`
+	Description    string        `json:"description"`
+	DoneRatio      int           `json:"done_ratio"`
+	CreatedOn      string        `json:"created_on"`
+	UpdatedOn      string        `json:"updated_on"`
+	StartDate      string        `json:"start_date"`
+	DueDate        string        `json:"due_date"`
+	EstimatedHours float64       `json:"estimated_hours"`
+	Parent         RedmineObject `json:"parent"`
+	StoryPoints    int           `json:"story_points"`
 
 	Issues *IssueList // back link
 
@@ -57,6 +59,7 @@ type Issue struct {
 
 //---------------------------------------------------------------------
 
+// Errorf records an error message
 func (issue *Issue) Errorf(mssg string, args ...interface{}) {
 	s := fmt.Sprintf(mssg, args...)
 	if issue.errors == nil {
@@ -79,7 +82,7 @@ func (issue *Issue) hasValidParent() bool {
 		return true
 	}
 
-	_, ok := issue.Issues.Issue(pid)
+	_, ok := issue.Issues.issue(pid)
 	return ok
 }
 
@@ -88,7 +91,7 @@ func (issue *Issue) parent() *Issue {
 		return nil
 	}
 	pid := issue.Parent.ID
-	p, _ := issue.Issues.Issue(pid)
+	p, _ := issue.Issues.issue(pid)
 	return p
 }
 

@@ -25,6 +25,7 @@ import (
 	"sync"
 )
 
+// DEBUG just for testing
 var DEBUG = false
 
 func getAPIKey() (string, error) {
@@ -47,8 +48,8 @@ func getAPIKey() (string, error) {
 func buildOwnerToIssuesMap(list *IssueList) map[string][]*Issue {
 	m := map[string][]*Issue{}
 
-	for i := 0; i <= list.MaxID(); i++ {
-		issue, ok := list.Issue(i)
+	for i := 0; i <= list.getMaxID(); i++ {
+		issue, ok := list.issue(i)
 		if !ok {
 			continue
 		}
@@ -80,8 +81,11 @@ func getSortedKeys(m map[string][]*Issue) []string {
 }
 
 func slackStyle(name string) string {
-	if name == "Jeffrey Yutzler" {
+	switch name {
+	case "Jeffrey Yutzler":
 		name = "Jeff Yutzler"
+	case "Ben Hosmer":
+		name = "Benjamin Hosmer"
 	}
 	name = "@" + strings.Replace(name, " ", ".", 1)
 	name = strings.ToLower(name)
@@ -115,7 +119,7 @@ func showErrors(list *IssueList) {
 		}
 	}
 
-	Printf("Found %d errors ", totalErrors)
+	//Printf("Found %d errors ", totalErrors)
 }
 
 func main() {
@@ -136,8 +140,8 @@ func main() {
 		Errorf("Failed to get projects: %s", err)
 	}
 
-	availableProjects.Filter(targetProjectNames)
-	if len(availableProjects.GetMap()) == 0 {
+	availableProjects.filter(targetProjectNames)
+	if len(availableProjects.getMap()) == 0 {
 		Errorf("Unknown project name(s): %s", strings.Join(targetProjectNames, " ,"))
 	}
 
@@ -145,7 +149,7 @@ func main() {
 	wgx := &sync.WaitGroup{}
 
 	allIssues := NewIssueList()
-	for _, project := range availableProjects.GetMap() {
+	for _, project := range availableProjects.getMap() {
 		wgx.Add(1)
 		go func(project *Project) {
 			defer wgx.Done()
@@ -160,16 +164,16 @@ func main() {
 	wg.Wait()
 	fmt.Fprintf(os.Stderr, "\n")
 
-	Logf("%d issues in projects", len(allIssues.GetMap()))
+	Logf("%d issues in projects", len(allIssues.getMap()))
 
 	rules := Rules{}
-	rules.Run(allIssues)
+	rules.run(allIssues)
 
 	showErrors(allIssues)
 
 	fmt.Printf("\n")
 
 	tagChecker := NewTagCheker()
-	tagChecker.Run(allIssues)
-	tagChecker.Report()
+	tagChecker.run(allIssues)
+	tagChecker.report()
 }

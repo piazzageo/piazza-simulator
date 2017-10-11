@@ -24,12 +24,14 @@ import (
 
 //---------------------------------------------------------------------
 
+// IssueList is the list of all the issues from all the projects read in
 type IssueList struct {
 	data  map[int]*Issue
 	maxID int
 	mutex *sync.Mutex
 }
 
+// NewIssueList makes a new IssueList
 func NewIssueList() *IssueList {
 	list := &IssueList{}
 	list.data = make(map[int]*Issue)
@@ -37,16 +39,16 @@ func NewIssueList() *IssueList {
 	return list
 }
 
-func (list *IssueList) GetMap() map[int]*Issue {
+func (list *IssueList) getMap() map[int]*Issue {
 	return list.data
 }
 
-func (list *IssueList) Issue(id int) (*Issue, bool) {
+func (list *IssueList) issue(id int) (*Issue, bool) {
 	issue, ok := list.data[id]
 	return issue, ok
 }
 
-func (list *IssueList) MaxID() int {
+func (list *IssueList) getMaxID() int {
 	return list.maxID
 }
 
@@ -55,12 +57,12 @@ func (list *IssueList) AddList(issues []*Issue) {
 	list.mutex.Lock()
 	defer list.mutex.Unlock()
 	for _, issue := range issues {
-		list.Add(issue)
+		list.add(issue)
 	}
 }
 
-// Add is NOT threadsafe!
-func (list *IssueList) Add(issue *Issue) {
+// add is NOT threadsafe!
+func (list *IssueList) add(issue *Issue) {
 
 	id := issue.ID
 
@@ -75,7 +77,7 @@ func (list *IssueList) Add(issue *Issue) {
 	issue.Issues = list
 }
 
-// returns issues table and highest id value
+// Read returns issues table and highest id value
 func (list *IssueList) Read(wg *sync.WaitGroup, project *Project) error {
 
 	apiKey, err := getAPIKey()

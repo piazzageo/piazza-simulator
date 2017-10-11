@@ -7,19 +7,20 @@ import (
 	"net/http"
 )
 
+// ProjectList is just a list of Projects
 type ProjectList struct {
 	data map[int]*Project
 }
 
-func (list *ProjectList) Add(p *Project) {
+func (list *ProjectList) add(p *Project) {
 	list.data[p.ID] = p
 }
 
-func (list *ProjectList) GetMap() map[int]*Project {
+func (list *ProjectList) getMap() map[int]*Project {
 	return list.data
 }
 
-func (list *ProjectList) Filter(names []string) {
+func (list *ProjectList) filter(names []string) {
 
 	newList := &ProjectList{
 		data: map[int]*Project{},
@@ -29,7 +30,7 @@ func (list *ProjectList) Filter(names []string) {
 
 		for _, name := range names {
 			if project.Identifier == name || project.Name == name {
-				newList.Add(project)
+				newList.add(project)
 				break
 			}
 		}
@@ -39,6 +40,7 @@ func (list *ProjectList) Filter(names []string) {
 	list.data = newList.data
 }
 
+// NewProjectList makes a new ProjectList
 func NewProjectList(apiKey string) (*ProjectList, error) {
 
 	list := &ProjectList{
@@ -95,7 +97,7 @@ func NewProjectList(apiKey string) (*ProjectList, error) {
 		resp2.Offset, resp2.Limit, resp2.TotalCount, len(resp2.Projects))
 
 	for _, p := range resp2.Projects {
-		list.Add(p)
+		list.add(p)
 	}
 	return list, nil
 }

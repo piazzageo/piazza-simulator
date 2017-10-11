@@ -20,14 +20,19 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strings"
 )
 
-const CurrentSprint = "Sprint 43"
-const ReadySprint = "Ready"
-const BacklogSprint = "Backlog"
-const EpicSprint1 = "Pz Epics"
-const EpicSprint2 = "BF Epics"
+// names of special sprints
+const (
+	CurrentSprint = "Sprint 43"
+	ReadySprint   = "Ready"
+	BacklogSprint = "Backlog"
+	EpicSprint1   = "Pz Epics"
+	EpicSprint2   = "BF Epics"
+)
 
+// PastSprints is names of sprints gone by
 var PastSprints = []string{
 	"Brisket",
 	"Deckle",
@@ -77,8 +82,10 @@ var PastSprints = []string{
 	"Sprint 42",
 }
 
+// FutureSprints are the things to come (but not used now)
 var FutureSprints = []string{}
 
+// TitleTags are prefixes of issue subject/title
 var TitleTags = []string{
 	"[PP]",
 	"[ATO Engineering]",
@@ -97,6 +104,23 @@ var TitleTags = []string{
 	"[2.0]",
 }
 
+func isATOEngineeringTitleTag(tag string) bool {
+	switch tag {
+	case "[ATO Engineering]":
+		fallthrough
+	case "[ATO Testing]":
+		fallthrough
+	case "[ATO DevOps]":
+		return true
+	}
+	return false
+}
+
+func isATOTitleTag(tag string) bool {
+	return strings.HasPrefix(tag, "[ATO")
+}
+
+// Errorf records an error message
 func Errorf(mssg string, args ...interface{}) {
 	s := fmt.Sprintf(mssg, args...)
 	fmt.Printf("error: %s\n", s)
@@ -106,12 +130,14 @@ func Errorf(mssg string, args ...interface{}) {
 	os.Exit(1)
 }
 
+// Logf records a log (non-error) message
 func Logf(mssg string, args ...interface{}) {
 	if DEBUG {
 		log.Printf(mssg, args...)
 	}
 }
 
+// Printf outputs a message
 func Printf(mssg string, args ...interface{}) {
 	fmt.Printf(mssg, args...)
 	fmt.Printf("\n")

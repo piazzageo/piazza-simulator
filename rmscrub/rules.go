@@ -16,11 +16,11 @@ limitations under the License.
 
 package main
 
-type Rules struct {
-}
+// Rules is what embodies the Rules
+type Rules struct{}
 
-func (r *Rules) Run(list *IssueList) {
-	for _, issue := range list.GetMap() {
+func (r *Rules) run(list *IssueList) {
+	for _, issue := range list.getMap() {
 
 		/*
 			if !issue.isPastSprint() {
