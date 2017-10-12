@@ -65,6 +65,10 @@ func (t *TagChecker) run(list *IssueList) {
 
 	for _, issue := range list.getMap() {
 
+		if issue.isEpic() {
+			continue
+		}
+
 		subj := issue.Subject
 		status := issue.Status.Name
 
