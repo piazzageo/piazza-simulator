@@ -86,6 +86,8 @@ func slackStyle(name string) string {
 		name = "Jeff Yutzler"
 	case "Ben Hosmer":
 		name = "Benjamin Hosmer"
+	case "Benjamin Peizer":
+		name = "Ben Peizer"
 	}
 	name = "@" + strings.Replace(name, " ", ".", 1)
 	name = strings.ToLower(name)
