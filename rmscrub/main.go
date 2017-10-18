@@ -82,6 +82,13 @@ func getSortedKeys(m map[string][]*Issue) []string {
 
 func slackStyle(name string) string {
 	switch name {
+
+	case "(no owner)":
+		return "*NO OWNER*"
+
+	case "Gregory Barrett":
+		return "@gbarrett"
+
 	case "Jeffrey Yutzler":
 		name = "Jeff Yutzler"
 	case "Ben Hosmer":
@@ -89,6 +96,7 @@ func slackStyle(name string) string {
 	case "Benjamin Peizer":
 		name = "Ben Peizer"
 	}
+
 	name = "@" + strings.Replace(name, " ", ".", 1)
 	name = strings.ToLower(name)
 	return name
