@@ -156,22 +156,10 @@ func main() {
 	}
 
 	wg := &sync.WaitGroup{}
-	wgx := &sync.WaitGroup{}
-
 	allIssues := NewIssueList()
-	for _, project := range availableProjects.getMap() {
-		wgx.Add(1)
-		go func(project *Project) {
-			defer wgx.Done()
-			err := allIssues.Read(wg, project)
-			if err != nil {
-				panic(err)
-			}
-		}(project)
-	}
-
-	wgx.Wait()
+	allIssues.Read(apiKey, wg, availableProjects.getMap())
 	wg.Wait()
+
 	fmt.Fprintf(os.Stderr, "\n")
 
 	Logf("%d issues in projects", len(allIssues.getMap()))

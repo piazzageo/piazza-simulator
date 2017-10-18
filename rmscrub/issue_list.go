@@ -18,7 +18,6 @@ package main
 
 import (
 	"fmt"
-	"os"
 	"sync"
 )
 
@@ -77,47 +76,66 @@ func (list *IssueList) add(issue *Issue) {
 	issue.Issues = list
 }
 
-// Read returns issues table and highest id value
-func (list *IssueList) Read(wg *sync.WaitGroup, project *Project) error {
+func (list *IssueList) preread(apiKey string, projects map[int]*Project) (map[int]int, int, error) {
 
-	apiKey, err := getAPIKey()
-	if err != nil {
-		return err
+	const offset = 0
+	const limit = 1
+
+	max := map[int]int{}
+	tot := 0
+
+	for index, project := range projects {
+		resp, err := makeRequest(apiKey, project.ID, offset, limit)
+		if err != nil {
+			return nil, 0, err
+		}
+		max[index] += resp.TotalCount
+		tot += resp.TotalCount
 	}
 
-	offset := 0
-	const limit = 100
+	return max, tot, nil
+}
+
+func (list *IssueList) readChunk(apiKey string, project *Project, offset int, limit int, issueCount int) error {
 
 	resp, err := makeRequest(apiKey, project.ID, offset, limit)
 	if err != nil {
 		return err
 	}
-	max := resp.TotalCount
 
-	readChunk := func(offset, limit int) error {
-		resp, err := makeRequest(apiKey, project.ID, offset, limit)
-		if err != nil {
-			return err
+	list.AddList(resp.Issues)
+
+	return nil
+}
+
+// Read gets all the issues in
+func (list *IssueList) Read(apiKey string, wg *sync.WaitGroup, projects map[int]*Project) error {
+
+	issueCounts, issueTotal, err := list.preread(apiKey, projects)
+	if err != nil {
+		panic(err)
+	}
+
+	const limit = 100
+
+	for index, project := range projects {
+
+		for offset := 0; offset < issueCounts[index]; offset += limit {
+
+			wg.Add(1)
+
+			go func(project *Project, offset int, limit int, issueTotal int) {
+				defer wg.Done()
+				err := list.readChunk(apiKey, project, offset, limit, issueTotal)
+				if err != nil {
+					panic(err)
+				}
+				frac := 100.0 * float64(len(list.data)) / float64(issueTotal)
+				fmt.Printf("\r%d%%", int(frac))
+			}(project, offset, limit, issueTotal)
+
 		}
-
-		list.AddList(resp.Issues)
-
-		fmt.Fprintf(os.Stderr, ".")
-		return nil
 	}
-
-	for offset := 0; offset < max; offset += limit {
-		wg.Add(1)
-		go func(offset, limit int) {
-			defer wg.Done()
-			err = readChunk(offset, limit)
-			if err != nil {
-				panic(err)
-			}
-		}(offset, limit)
-	}
-
-	fmt.Fprintf(os.Stderr, "*")
 
 	return nil
 }
