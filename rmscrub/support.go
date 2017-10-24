@@ -84,7 +84,7 @@ var PastSprints = []string{
 }
 
 // FutureSprints are the things to come (but not used now)
-var FutureSprints = []string{}
+var FutureSprints = []string{"Sprint 45"}
 
 // TitleTags are prefixes of issue subject/title
 var TitleTags = []string{
