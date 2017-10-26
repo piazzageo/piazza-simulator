@@ -121,7 +121,7 @@ func showErrors(list *IssueList) {
 		if errs > 0 {
 			for _, issue := range issues {
 				for _, s := range issue.errors {
-					Printf("%s  ==>  %d: %s", slackStyle(owner), issue.ID, s)
+					Printf("%-20s %d: %s", slackStyle(owner), issue.ID, s)
 				}
 			}
 
