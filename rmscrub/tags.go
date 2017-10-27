@@ -55,10 +55,9 @@ func (t *TagChecker) report() {
 		}
 	}
 
-	fmt.Printf("```\n")
-
 	fmt.Printf("There are %d open ATO tickets, of which %d are engineering-related.\n",
 		atoCount, atoEngineeringCount)
+	fmt.Printf("```\n")
 }
 
 func (t *TagChecker) run(list *IssueList) {

@@ -153,6 +153,11 @@ func (issue *Issue) isNoSprint() bool {
 	return issue.targetVersion() == ""
 }
 
+func (issue *Issue) isValidStatus() bool {
+	return issue.isResolved() || issue.isRejected() ||
+		issue.isClosed() || issue.isNew() || issue.isInProgress()
+}
+
 func (issue *Issue) isResolved() bool {
 	return issue.Status.Name == "Resolved"
 }

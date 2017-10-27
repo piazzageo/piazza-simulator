@@ -32,6 +32,7 @@ func (r *Rules) run(list *IssueList) {
 			r.runCommonRules(issue)
 			r.runCurrentSprintRules(issue)
 		} else if issue.isReadySprint() {
+			r.runCommonRules(issue)
 			r.runReadySprintRules(issue)
 		} else if issue.isPastSprint() {
 			r.runPastSprintRules(issue)
@@ -56,6 +57,10 @@ func (r *Rules) run(list *IssueList) {
 func (r *Rules) runCommonRules(issue *Issue) {
 
 	parent := issue.parent()
+
+	if !issue.isValidStatus() {
+		issue.Errorf("status is invalid")
+	}
 
 	if issue.hasStartDate() {
 		issue.Errorf("start date is not empty")

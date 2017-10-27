@@ -25,7 +25,7 @@ import (
 
 // names of special sprints
 const (
-	CurrentSprint = "Sprint 44"
+	CurrentSprint = "Sprint 45"
 	ReadySprint   = "Ready"
 	BacklogSprint = "Backlog"
 	EpicSprint1   = "Pz Epics"
@@ -81,6 +81,7 @@ var PastSprints = []string{
 	"Sprint 41",
 	"Sprint 42",
 	"Sprint 43",
+	"Sprint 44",
 }
 
 // FutureSprints are the things to come (but not used now)
