@@ -95,6 +95,8 @@ func slackStyle(name string) string {
 		name = "Benjamin Hosmer"
 	case "Benjamin Peizer":
 		name = "Ben Peizer"
+	case "Marjorie Lynum":
+		name = "Marge Lynum"
 	}
 
 	name = "@" + strings.Replace(name, " ", ".", 1)
