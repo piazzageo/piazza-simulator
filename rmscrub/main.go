@@ -110,6 +110,8 @@ func showErrors(list *IssueList) {
 
 	names := getSortedKeys(ownerToIssuesMap)
 
+	Printf("```")
+
 	for _, owner := range names {
 		issues := ownerToIssuesMap[owner]
 
@@ -129,7 +131,8 @@ func showErrors(list *IssueList) {
 		}
 	}
 
-	//Printf("Found %d errors ", totalErrors)
+	Printf("There are %d issues with errors.", totalErrors)
+	Printf("```")
 }
 
 func main() {
