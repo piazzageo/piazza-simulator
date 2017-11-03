@@ -1,4 +1,4 @@
-package main
+package scrubber
 
 import (
 	"fmt"
@@ -6,14 +6,17 @@ import (
 	"strings"
 )
 
-// TagChecker verfiies and counts the subject/title prefixes
-type TagChecker struct {
+// TagReport verfiies and counts the subject/title prefixes
+type TagReport struct {
+	list   *IssueList
 	counts map[string]map[string][]*Issue // tag -> (status -> []Issues)
 }
 
-// NewTagCheker makes a new TagChecker
-func NewTagCheker() *TagChecker {
-	t := &TagChecker{}
+// NewTagReport makes a new TagReport
+func NewTagReport(list *IssueList) *TagReport {
+	t := &TagReport{
+		list: list,
+	}
 
 	//	statusMap := map[string]int{}
 	t.counts = map[string]map[string][]*Issue{}
@@ -29,13 +32,16 @@ func arrayString(issues []*Issue) string {
 	return s
 }
 
-func (t *TagChecker) report() {
+// Report reports
+func (t *TagReport) Report() string {
+	result := ""
+
 	sort.Strings(TitleTags)
 
 	atoCount := 0
 	atoEngineeringCount := 0
 
-	fmt.Printf("```\n")
+	result += fmt.Sprintf("```\n")
 
 	for _, tag := range TitleTags {
 		if isATOTitleTag(tag) {
@@ -55,14 +61,17 @@ func (t *TagChecker) report() {
 		}
 	}
 
-	fmt.Printf("There are %d open ATO tickets, of which %d are engineering-related.\n",
+	result += fmt.Sprintf("There are %d open ATO tickets, of which %d are engineering-related.\n",
 		atoCount, atoEngineeringCount)
-	fmt.Printf("```\n")
+	result += fmt.Sprintf("```\n")
+
+	return result
 }
 
-func (t *TagChecker) run(list *IssueList) {
+// Run runs
+func (t *TagReport) Run() error {
 
-	for _, issue := range list.getMap() {
+	for _, issue := range t.list.GetMap() {
 
 		if issue.isEpic() {
 			continue
@@ -85,4 +94,5 @@ func (t *TagChecker) run(list *IssueList) {
 		}
 	}
 
+	return nil
 }

@@ -14,13 +14,30 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package main
+package scrubber
 
-// Rules is what embodies the Rules
-type Rules struct{}
+import (
+	"fmt"
+	"sort"
+	"strings"
+)
 
-func (r *Rules) run(list *IssueList) {
-	for _, issue := range list.getMap() {
+// ScrubReport is what embodies the ScrubReport
+type ScrubReport struct {
+	list *IssueList
+}
+
+// NewScrubReport returns a new ScrubReport
+func NewScrubReport(list *IssueList) *ScrubReport {
+	r := &ScrubReport{
+		list: list,
+	}
+	return r
+}
+
+// Run runs
+func (r *ScrubReport) Run() error {
+	for _, issue := range r.list.GetMap() {
 
 		/*
 			if !issue.isPastSprint() {
@@ -49,12 +66,14 @@ func (r *Rules) run(list *IssueList) {
 		}
 
 	}
+
+	return nil
 }
 
 //
 // just some common rules used by the functions below
 //
-func (r *Rules) runCommonRules(issue *Issue) {
+func (r *ScrubReport) runCommonRules(issue *Issue) {
 
 	parent := issue.parent()
 
@@ -98,7 +117,7 @@ func (r *Rules) runCommonRules(issue *Issue) {
 //
 // rules for issues in the Current sprint
 //
-func (r *Rules) runCurrentSprintRules(issue *Issue) {
+func (r *ScrubReport) runCurrentSprintRules(issue *Issue) {
 
 	parent := issue.parent()
 
@@ -168,7 +187,7 @@ func (r *Rules) runCurrentSprintRules(issue *Issue) {
 //
 // rules for issues in a Past sprint
 //
-func (r *Rules) runPastSprintRules(issue *Issue) {
+func (r *ScrubReport) runPastSprintRules(issue *Issue) {
 	if !issue.isClosed() && !issue.isRejected() {
 		issue.Errorf("issue from past sprint is not closed or rejected")
 	}
@@ -177,7 +196,7 @@ func (r *Rules) runPastSprintRules(issue *Issue) {
 //
 // rules for issues in a Future sprint
 //
-func (r *Rules) runFutureSprintRules(issue *Issue) {
+func (r *ScrubReport) runFutureSprintRules(issue *Issue) {
 
 	if issue.isClosed() {
 		issue.Errorf("issue from future sprint is already closed")
@@ -193,7 +212,7 @@ func (r *Rules) runFutureSprintRules(issue *Issue) {
 //
 // rules for issues in the Backlog
 //
-func (r *Rules) runBacklogSprintRules(issue *Issue) {
+func (r *ScrubReport) runBacklogSprintRules(issue *Issue) {
 
 	if !issue.isNew() && !issue.isRejected() {
 		issue.Errorf("issue in backlog does not have status 'new' or 'rejected'")
@@ -203,7 +222,7 @@ func (r *Rules) runBacklogSprintRules(issue *Issue) {
 //
 // rules for issues with target version set to "Pz Epic"
 //
-func (r *Rules) runEpicSprintRules(issue *Issue) {
+func (r *ScrubReport) runEpicSprintRules(issue *Issue) {
 	if !issue.isEpic() {
 		issue.Errorf("issue is not an Epic but has target version set to \"Pz Epic\"")
 	}
@@ -212,7 +231,7 @@ func (r *Rules) runEpicSprintRules(issue *Issue) {
 //
 // rules for issues with no target version set at all
 //
-func (r *Rules) runInvalidSprintRules(issue *Issue) {
+func (r *ScrubReport) runInvalidSprintRules(issue *Issue) {
 	if issue.targetVersion() == "" {
 		issue.Errorf("no sprint set")
 	} else {
@@ -223,8 +242,104 @@ func (r *Rules) runInvalidSprintRules(issue *Issue) {
 //
 // rules for issues with target version set to "Ready"
 //
-func (r *Rules) runReadySprintRules(issue *Issue) {
+func (r *ScrubReport) runReadySprintRules(issue *Issue) {
 	//	if !issue.isEpic() {
 	//		issue.Errorf("Issue is not an Epic but has target version set to \"Pz Epic\"")
 	//	}
+}
+
+// Report returns the text report
+func (r *ScrubReport) Report() string {
+
+	result := ""
+
+	totalErrors := 0
+
+	ownerToIssuesMap := buildOwnerToIssuesMap(r.list)
+
+	names := getSortedKeys(ownerToIssuesMap)
+
+	result += fmt.Sprintf("```\n")
+
+	for _, owner := range names {
+		issues := ownerToIssuesMap[owner]
+
+		errs := 0
+		for _, issue := range issues {
+			errs += len(issue.errors)
+		}
+
+		if errs > 0 {
+			for _, issue := range issues {
+				for _, s := range issue.errors {
+					result += fmt.Sprintf("%-20s %d: %s\n", slackStyle(owner), issue.ID, s)
+				}
+			}
+
+			totalErrors += errs
+		}
+	}
+
+	result += fmt.Sprintf("There are %d issues with errors.\n", totalErrors)
+	result += fmt.Sprintf("```\n")
+
+	return result
+}
+
+func buildOwnerToIssuesMap(list *IssueList) map[string][]*Issue {
+	m := map[string][]*Issue{}
+
+	for i := 0; i <= list.getMaxID(); i++ {
+		issue, ok := list.issue(i)
+		if !ok {
+			continue
+		}
+
+		owner := "(no owner)"
+		if issue.isAssigned() {
+			owner = issue.assignee()
+		}
+
+		_, ok2 := m[owner]
+		if !ok2 {
+			m[owner] = make([]*Issue, 0)
+		}
+		m[owner] = append(m[owner], issue)
+	}
+
+	return m
+}
+func getSortedKeys(m map[string][]*Issue) []string {
+	keys := []string{}
+	for owner := range m {
+		keys = append(keys, owner)
+	}
+
+	sort.Strings(keys)
+
+	return keys
+}
+
+func slackStyle(name string) string {
+	switch name {
+
+	case "(no owner)":
+		return "*NO OWNER*"
+
+	case "Gregory Barrett":
+		return "@gbarrett"
+
+	case "Jeffrey Yutzler":
+		name = "Jeff Yutzler"
+	case "Ben Hosmer":
+		name = "Benjamin Hosmer"
+	case "Benjamin Peizer":
+		name = "Ben Peizer"
+	case "Marjorie Lynum":
+		name = "Marge Lynum"
+	}
+
+	name = "@" + strings.Replace(name, " ", ".", 1)
+	name = strings.ToLower(name)
+	return name
 }

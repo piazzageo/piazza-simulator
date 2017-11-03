@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package main
+package scrubber
 
 import (
 	"fmt"
@@ -31,14 +31,23 @@ type IssueList struct {
 }
 
 // NewIssueList makes a new IssueList
-func NewIssueList() *IssueList {
+func NewIssueList(apiKey string, availableProjects *ProjectList) (*IssueList, error) {
 	list := &IssueList{}
 	list.data = make(map[int]*Issue)
 	list.mutex = &sync.Mutex{}
-	return list
+
+	wg := &sync.WaitGroup{}
+	err := list.Read(apiKey, wg, availableProjects.getMap())
+	if err != nil {
+		return nil, err
+	}
+	wg.Wait()
+
+	return list, nil
 }
 
-func (list *IssueList) getMap() map[int]*Issue {
+// GetMap gets the map
+func (list *IssueList) GetMap() map[int]*Issue {
 	return list.data
 }
 

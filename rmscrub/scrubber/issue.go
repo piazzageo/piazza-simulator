@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package main
+package scrubber
 
 import (
 	"fmt"
@@ -206,7 +206,7 @@ func (issue *Issue) hasAcceptanceCriteria() bool {
 	d := issue.Description
 	matched, err := regexp.MatchString("A/C", d)
 	if err != nil {
-		Errorf("Regep failed for issue %d", issue.ID)
+		panic(fmt.Errorf("Regexp failed for issue %d", issue.ID))
 	}
 	return matched
 }

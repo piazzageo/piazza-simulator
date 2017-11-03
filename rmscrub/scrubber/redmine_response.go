@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package main
+package scrubber
 
 import (
 	"encoding/json"
@@ -40,8 +40,6 @@ func makeRequest(apiKey string, projectID int, offset int, limit int) (*IssueReq
 
 	client := &http.Client{}
 
-	Logf("\n((((((((((((((((((((((\nurl: %s", url)
-
 	request, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		return nil, err
@@ -62,15 +60,11 @@ func makeRequest(apiKey string, projectID int, offset int, limit int) (*IssueReq
 		return nil, err
 	}
 
-	Logf("Raw result: %s...", string(body)[0:60])
-
 	resp := IssueRequestResponse{}
 	err = json.Unmarshal(body, &resp)
 	if err != nil {
 		return nil, err
 	}
-	Logf("request: offset=%d, limit=%d, totalCount=%d, len=%d\n))))))))))))))))))))))))\n",
-		resp.Offset, resp.Limit, resp.TotalCount, len(resp.Issues))
 
 	return &resp, nil
 }

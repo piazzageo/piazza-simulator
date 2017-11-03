@@ -14,14 +14,17 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package main
+package scrubber
 
 import (
 	"fmt"
-	"log"
+	"io/ioutil"
 	"os"
 	"strings"
 )
+
+// TargetProjects are the ones we will be scrubbing
+var TargetProjects = []string{"Piazza", "Beachfront"}
 
 // names of special sprints
 const (
@@ -31,6 +34,9 @@ const (
 	EpicSprint1   = "Pz Epics"
 	EpicSprint2   = "BF Epics"
 )
+
+// FutureSprints are the things to come (but not used now)
+var FutureSprints = []string{"Sprint 46"}
 
 // PastSprints is names of sprints gone by
 var PastSprints = []string{
@@ -84,9 +90,6 @@ var PastSprints = []string{
 	"Sprint 44",
 }
 
-// FutureSprints are the things to come (but not used now)
-var FutureSprints = []string{"Sprint 45"}
-
 // TitleTags are prefixes of issue subject/title
 var TitleTags = []string{
 	"[PP]",
@@ -122,25 +125,19 @@ func isATOTitleTag(tag string) bool {
 	return strings.HasPrefix(tag, "[ATO")
 }
 
-// Errorf records an error message
-func Errorf(mssg string, args ...interface{}) {
-	s := fmt.Sprintf(mssg, args...)
-	fmt.Printf("error: %s\n", s)
-	if DEBUG {
-		panic(1)
+// GetAPIKey returns the API key
+func GetAPIKey() (string, error) {
+	home := os.Getenv("HOME")
+	if home == "" {
+		return "", fmt.Errorf("$HOME not found")
 	}
-	os.Exit(1)
-}
 
-// Logf records a log (non-error) message
-func Logf(mssg string, args ...interface{}) {
-	if DEBUG {
-		log.Printf(mssg, args...)
+	key, err := ioutil.ReadFile(home + "/.rm-scrub")
+	if err != nil {
+		return "", err
 	}
-}
 
-// Printf outputs a message
-func Printf(mssg string, args ...interface{}) {
-	fmt.Printf(mssg, args...)
-	fmt.Printf("\n")
+	s := strings.TrimSpace(string(key))
+
+	return s, nil
 }

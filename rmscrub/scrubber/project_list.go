@@ -1,10 +1,11 @@
-package main
+package scrubber
 
 import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"strings"
 )
 
 // ProjectList is just a list of Projects
@@ -64,8 +65,6 @@ func NewProjectList(apiKey string) (*ProjectList, error) {
 
 	client := &http.Client{}
 
-	Logf("url: %s", url)
-
 	request, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		return nil, err
@@ -86,18 +85,21 @@ func NewProjectList(apiKey string) (*ProjectList, error) {
 		return nil, err
 	}
 
-	Logf("Raw result: %s...", string(body[0:60]))
-
 	resp2 := response{}
 	err = json.Unmarshal(body, &resp2)
 	if err != nil {
 		return nil, err
 	}
-	Logf("request: offset=%d, limit=%d, totalCount=%d, len=%d",
-		resp2.Offset, resp2.Limit, resp2.TotalCount, len(resp2.Projects))
 
 	for _, p := range resp2.Projects {
 		list.add(p)
 	}
+
+	list.filter(TargetProjects)
+	if len(list.getMap()) == 0 {
+		return nil, fmt.Errorf("Unknown project name(s): %s", strings.Join(TargetProjects, " ,"))
+	}
+
 	return list, nil
+
 }

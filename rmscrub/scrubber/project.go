@@ -1,4 +1,4 @@
-package main
+package scrubber
 
 // Project represents a Redmine project
 type Project struct {
