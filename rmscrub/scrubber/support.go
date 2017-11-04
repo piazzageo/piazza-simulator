@@ -18,7 +18,6 @@ package scrubber
 
 import (
 	"fmt"
-	"io/ioutil"
 	"os"
 	"strings"
 )
@@ -127,17 +126,9 @@ func isATOTitleTag(tag string) bool {
 
 // GetAPIKey returns the API key
 func GetAPIKey() (string, error) {
-	home := os.Getenv("HOME")
-	if home == "" {
-		return "", fmt.Errorf("$HOME not found")
+	key := os.Getenv("RMKEY")
+	if key == "" {
+		return "", fmt.Errorf("$RMKEY not found")
 	}
-
-	key, err := ioutil.ReadFile(home + "/.rm-scrub")
-	if err != nil {
-		return "", err
-	}
-
-	s := strings.TrimSpace(string(key))
-
-	return s, nil
+	return key, nil
 }

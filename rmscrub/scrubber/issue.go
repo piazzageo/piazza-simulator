@@ -60,12 +60,11 @@ type Issue struct {
 //---------------------------------------------------------------------
 
 // Errorf records an error message
-func (issue *Issue) Errorf(mssg string, args ...interface{}) {
-	s := fmt.Sprintf(mssg, args...)
+func (issue *Issue) Error(mssg string) {
 	if issue.errors == nil {
 		issue.errors = make([]string, 0)
 	}
-	issue.errors = append(issue.errors, s)
+	issue.errors = append(issue.errors, mssg)
 }
 
 func (issue *Issue) category() string {

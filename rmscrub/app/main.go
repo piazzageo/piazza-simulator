@@ -54,8 +54,8 @@ func main() {
 	if err != nil {
 		Errorf("Failed to run ScrubReport: %s", err)
 	}
-	report := scrubReport.Report()
-	fmt.Printf(report)
+	scrubberResults := scrubReport.Report()
+	fmt.Printf(scrubberResults.String())
 
 	fmt.Printf("\n")
 
@@ -64,6 +64,6 @@ func main() {
 	if err != nil {
 		Errorf("Failed to run TagReport: %s", err)
 	}
-	report = tagReport.Report()
-	fmt.Printf(report)
+	tagResults := tagReport.Report()
+	fmt.Printf(tagResults.String())
 }

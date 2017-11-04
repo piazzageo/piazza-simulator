@@ -18,7 +18,6 @@ package scrubber
 
 import (
 	"fmt"
-	"sort"
 	"strings"
 )
 
@@ -26,6 +25,15 @@ import (
 type ScrubReport struct {
 	list *IssueList
 }
+
+// ScrubIssueResult is the issue object to be stored
+type ScrubIssueResult struct {
+	Errors []string
+	Owner  string
+}
+
+// ScrubResults is the report map object to be stored
+type ScrubResults map[int]ScrubIssueResult
 
 // NewScrubReport returns a new ScrubReport
 func NewScrubReport(list *IssueList) *ScrubReport {
@@ -78,39 +86,39 @@ func (r *ScrubReport) runCommonRules(issue *Issue) {
 	parent := issue.parent()
 
 	if !issue.isValidStatus() {
-		issue.Errorf("status is invalid")
+		issue.Error("status is invalid")
 	}
 
 	if issue.hasStartDate() {
-		issue.Errorf("start date is not empty")
+		issue.Error("start date is not empty")
 	}
 
 	if issue.hasDueDate() {
-		issue.Errorf("due date is not empty")
+		issue.Error("due date is not empty")
 	}
 
 	if issue.hasEstimatedTime() {
-		issue.Errorf("estimated time is not empty")
+		issue.Error("estimated time is not empty")
 	}
 
 	if parent != nil && parent.isClosed() && (!issue.isClosed() && !issue.isRejected()) {
-		issue.Errorf("issue's parent is closed but issue is not")
+		issue.Error("issue's parent is closed but issue is not")
 	}
 
 	if parent != nil && parent.isResolved() && (!issue.isResolved() && !issue.isClosed()) {
-		issue.Errorf("issue's parent is resolved but issue is not resolved or closed")
+		issue.Error("issue's parent is resolved but issue is not resolved or closed")
 	}
 
 	if parent != nil && parent.isRejected() && !issue.isRejected() {
-		issue.Errorf("issue's parent is rejected but issue is not")
+		issue.Error("issue's parent is rejected but issue is not")
 	}
 
 	if !issue.hasValidParent() {
-		issue.Errorf("issue's parent %d is invalid", issue.Parent.ID)
+		issue.Error(fmt.Sprintf("issue's parent %d is invalid", issue.Parent.ID))
 	}
 
 	if issue.hasBadTitleTag() {
-		issue.Errorf("issue has invalid title tag: %s", issue.Subject)
+		issue.Error(fmt.Sprintf("issue has invalid title tag: %s", issue.Subject))
 	}
 }
 
@@ -123,64 +131,64 @@ func (r *ScrubReport) runCurrentSprintRules(issue *Issue) {
 
 	if issue.isEpic() {
 		if parent != nil {
-			issue.Errorf("epic's parent is not set")
+			issue.Error("epic's parent is not set")
 		}
 	} else if issue.isStory() {
 		if parent == nil {
-			issue.Errorf("story's parent is not set")
+			issue.Error("story's parent is not set")
 		} else if parent.tracker() != "Epic" {
-			issue.Errorf("story's parent is not an Epic")
+			issue.Error("story's parent is not an Epic")
 		}
 	} else if issue.isTask() {
 		if parent == nil {
-			issue.Errorf("task's parent is not set")
+			issue.Error("task's parent is not set")
 		} else if parent.tracker() != "Story" && parent.tracker() != "Bug" {
-			issue.Errorf("task's parent is not an Story or Bug")
+			issue.Error("task's parent is not an Story or Bug")
 		}
 	} else if issue.isBug() {
 		if parent == nil {
-			issue.Errorf("bug's parent is not set")
+			issue.Error("bug's parent is not set")
 		} else if parent.tracker() != "Epic" && parent.tracker() != "Story" {
-			issue.Errorf("bug's parent is not a Story or Bug")
+			issue.Error("bug's parent is not a Story or Bug")
 		}
 	} else {
-		issue.Errorf("issue's type (\"tracker\") is invalid: \"%s\"", issue.tracker())
+		issue.Error(fmt.Sprintf("issue's type (\"tracker\") is invalid: \"%s\"", issue.tracker()))
 	}
 
 	if !issue.isAssigned() && (!issue.isNew() && !issue.isRejected()) {
-		issue.Errorf("issue in current sprint is not assigned to anyone")
+		issue.Error("issue in current sprint is not assigned to anyone")
 	}
 
 	if issue.category() == "" {
-		issue.Errorf("'category' not set")
+		issue.Error("'category' not set")
 	}
 
 	if issue.isClosed() && issue.percentDone() != 100 {
-		issue.Errorf("'percent done' on closed issue is not 100%%")
+		issue.Error("'percent done' on closed issue is not 100%")
 	}
 
 	if issue.isResolved() && issue.percentDone() != 100 {
-		issue.Errorf("'percent done' on resolved issue is not 100%%")
+		issue.Error("'percent done' on resolved issue is not 100%")
 	}
 
 	if issue.isNew() && issue.percentDone() != 0 {
-		issue.Errorf("'percent done' on new issue is not 0%%")
+		issue.Error("'percent done' on new issue is not 0%")
 	}
 
 	if issue.isInProgress() && issue.percentDone() == 0 {
-		issue.Errorf("'percent done' on in-progress issue is 0%%")
+		issue.Error("'percent done' on in-progress issue is 0%")
 	}
 
 	if issue.isInProgress() && issue.percentDone() == 100 {
-		issue.Errorf("'percent done' on in-progress issue is 100%%")
+		issue.Error("'percent done' on in-progress issue is 100%")
 	}
 
 	if issue.isStory() && !issue.isRejected() && !issue.hasAcceptanceCriteria() {
-		issue.Errorf("story does not have any acceptance criteria")
+		issue.Error("story does not have any acceptance criteria")
 	}
 
 	if issue.isBug() && !issue.isRejected() && !issue.hasAcceptanceCriteria() {
-		issue.Errorf("bug does not have any acceptance criteria")
+		issue.Error("bug does not have any acceptance criteria")
 	}
 }
 
@@ -189,7 +197,7 @@ func (r *ScrubReport) runCurrentSprintRules(issue *Issue) {
 //
 func (r *ScrubReport) runPastSprintRules(issue *Issue) {
 	if !issue.isClosed() && !issue.isRejected() {
-		issue.Errorf("issue from past sprint is not closed or rejected")
+		issue.Error("issue from past sprint is not closed or rejected")
 	}
 }
 
@@ -199,13 +207,13 @@ func (r *ScrubReport) runPastSprintRules(issue *Issue) {
 func (r *ScrubReport) runFutureSprintRules(issue *Issue) {
 
 	if issue.isClosed() {
-		issue.Errorf("issue from future sprint is already closed")
+		issue.Error("issue from future sprint is already closed")
 	}
 	if issue.isRejected() {
-		issue.Errorf("issue from future sprint is already rejected")
+		issue.Error("issue from future sprint is already rejected")
 	}
 	if issue.isResolved() {
-		issue.Errorf("issue from future sprint is already resolved")
+		issue.Error("issue from future sprint is already resolved")
 	}
 }
 
@@ -215,7 +223,7 @@ func (r *ScrubReport) runFutureSprintRules(issue *Issue) {
 func (r *ScrubReport) runBacklogSprintRules(issue *Issue) {
 
 	if !issue.isNew() && !issue.isRejected() {
-		issue.Errorf("issue in backlog does not have status 'new' or 'rejected'")
+		issue.Error("issue in backlog does not have status 'new' or 'rejected'")
 	}
 }
 
@@ -224,7 +232,7 @@ func (r *ScrubReport) runBacklogSprintRules(issue *Issue) {
 //
 func (r *ScrubReport) runEpicSprintRules(issue *Issue) {
 	if !issue.isEpic() {
-		issue.Errorf("issue is not an Epic but has target version set to \"Pz Epic\"")
+		issue.Error("issue is not an Epic but has target version set to \"Pz Epic\"")
 	}
 }
 
@@ -233,9 +241,9 @@ func (r *ScrubReport) runEpicSprintRules(issue *Issue) {
 //
 func (r *ScrubReport) runInvalidSprintRules(issue *Issue) {
 	if issue.targetVersion() == "" {
-		issue.Errorf("no sprint set")
+		issue.Error("no sprint set")
 	} else {
-		issue.Errorf("invalid sprint: %s", issue.targetVersion())
+		issue.Error(fmt.Sprintf("invalid sprint: %s", issue.targetVersion()))
 	}
 }
 
@@ -249,49 +257,13 @@ func (r *ScrubReport) runReadySprintRules(issue *Issue) {
 }
 
 // Report returns the text report
-func (r *ScrubReport) Report() string {
+func (r *ScrubReport) Report() ScrubResults {
 
-	result := ""
+	result := make(ScrubResults)
 
-	totalErrors := 0
+	for id, issue := range r.list.GetMap() {
 
-	ownerToIssuesMap := buildOwnerToIssuesMap(r.list)
-
-	names := getSortedKeys(ownerToIssuesMap)
-
-	result += fmt.Sprintf("```\n")
-
-	for _, owner := range names {
-		issues := ownerToIssuesMap[owner]
-
-		errs := 0
-		for _, issue := range issues {
-			errs += len(issue.errors)
-		}
-
-		if errs > 0 {
-			for _, issue := range issues {
-				for _, s := range issue.errors {
-					result += fmt.Sprintf("%-20s %d: %s\n", slackStyle(owner), issue.ID, s)
-				}
-			}
-
-			totalErrors += errs
-		}
-	}
-
-	result += fmt.Sprintf("There are %d issues with errors.\n", totalErrors)
-	result += fmt.Sprintf("```\n")
-
-	return result
-}
-
-func buildOwnerToIssuesMap(list *IssueList) map[string][]*Issue {
-	m := map[string][]*Issue{}
-
-	for i := 0; i <= list.getMaxID(); i++ {
-		issue, ok := list.issue(i)
-		if !ok {
+		if issue.errors == nil || len(issue.errors) == 0 {
 			continue
 		}
 
@@ -300,24 +272,29 @@ func buildOwnerToIssuesMap(list *IssueList) map[string][]*Issue {
 			owner = issue.assignee()
 		}
 
-		_, ok2 := m[owner]
-		if !ok2 {
-			m[owner] = make([]*Issue, 0)
+		data := ScrubIssueResult{
+			Owner:  owner,
+			Errors: []string{},
 		}
-		m[owner] = append(m[owner], issue)
+
+		for _, s := range issue.errors {
+			data.Errors = append(data.Errors, s)
+		}
+
+		result[id] = data
 	}
 
-	return m
+	return result
 }
-func getSortedKeys(m map[string][]*Issue) []string {
-	keys := []string{}
-	for owner := range m {
-		keys = append(keys, owner)
+
+func (r ScrubResults) String() string {
+	s := ""
+	for id, result := range r {
+		for _, mssg := range result.Errors {
+			s += fmt.Sprintf("%d:  %s  %s\n", id, result.Owner, mssg)
+		}
 	}
-
-	sort.Strings(keys)
-
-	return keys
+	return s
 }
 
 func slackStyle(name string) string {

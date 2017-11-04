@@ -2,14 +2,22 @@ package scrubber
 
 import (
 	"fmt"
-	"sort"
 	"strings"
+	"time"
 )
 
 // TagReport verfiies and counts the subject/title prefixes
 type TagReport struct {
 	list   *IssueList
 	counts map[string]map[string][]*Issue // tag -> (status -> []Issues)
+}
+
+// TagResults is what gets stored
+type TagResults struct {
+	Date                time.Time
+	Data                map[string][]int
+	AtoCount            int
+	AtoEngineeringCount int
 }
 
 // NewTagReport makes a new TagReport
@@ -24,24 +32,15 @@ func NewTagReport(list *IssueList) *TagReport {
 	return t
 }
 
-func arrayString(issues []*Issue) string {
-	s := ""
-	for _, issue := range issues {
-		s += fmt.Sprintf("%d ", issue.ID)
-	}
-	return s
-}
-
 // Report reports
-func (t *TagReport) Report() string {
-	result := ""
-
-	sort.Strings(TitleTags)
+func (t *TagReport) Report() *TagResults {
+	result := &TagResults{
+		Date: time.Now(),
+		Data: map[string][]int{},
+	}
 
 	atoCount := 0
 	atoEngineeringCount := 0
-
-	result += fmt.Sprintf("```\n")
 
 	for _, tag := range TitleTags {
 		if isATOTitleTag(tag) {
@@ -51,8 +50,13 @@ func (t *TagReport) Report() string {
 			atoCount += len(new) + len(inprog)
 
 			if len(new)+len(inprog) > 0 {
-				fmt.Printf("%-20sNew           (%d)   %s\n", tag, len(new), arrayString(new))
-				fmt.Printf("%-20sIn Progress   (%d)   %s\n", tag, len(inprog), arrayString(inprog))
+				result.Data[tag] = []int{}
+				for _, issue := range new {
+					result.Data[tag] = append(result.Data[tag], issue.ID)
+				}
+				for _, issue := range inprog {
+					result.Data[tag] = append(result.Data[tag], issue.ID)
+				}
 			}
 
 			if isATOEngineeringTitleTag(tag) {
@@ -61,11 +65,28 @@ func (t *TagReport) Report() string {
 		}
 	}
 
-	result += fmt.Sprintf("There are %d open ATO tickets, of which %d are engineering-related.\n",
-		atoCount, atoEngineeringCount)
-	result += fmt.Sprintf("```\n")
+	result.AtoCount = atoCount
+	result.AtoEngineeringCount = atoEngineeringCount
 
 	return result
+}
+
+func (r *TagResults) String() string {
+	s := ""
+
+	s += fmt.Sprintf("Date: %s\n", r.Date.Format(time.RFC3339))
+	s += fmt.Sprintf("Engineering issues: %d\n", r.AtoEngineeringCount)
+	s += fmt.Sprintf("Total issues: %d\n", r.AtoCount)
+
+	for tag, ids := range r.Data {
+		s += fmt.Sprintf("%s: (%d)", tag, len(ids))
+		for _, id := range ids {
+			s += fmt.Sprintf(" %d", id)
+		}
+		s += fmt.Sprintf("\n")
+	}
+
+	return s
 }
 
 // Run runs
