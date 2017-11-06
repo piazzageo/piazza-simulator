@@ -1,4 +1,4 @@
-package mainx
+package main
 
 import (
 	"encoding/json"
@@ -8,8 +8,8 @@ import (
 	"github.com/venicegeo/mpg-sandbox/rmscrub/scrubber"
 )
 
-// HandleA is a lambda
-func HandleA(evt json.RawMessage, ctx *runtime.Context) (interface{}, error) {
+// RunScrubber is a lambda
+func RunScrubber(evt json.RawMessage, ctx *runtime.Context) (interface{}, error) {
 	fmt.Print(evt)
 
 	apiKey, err := scrubber.GetAPIKey()
@@ -33,6 +33,11 @@ func HandleA(evt json.RawMessage, ctx *runtime.Context) (interface{}, error) {
 		return nil, fmt.Errorf("Failed to run ScrubReport: %s", err)
 	}
 	scrubberResults := scrubReport.Report()
+
+	err = scrubberResults.Store()
+	if err != nil {
+		return nil, fmt.Errorf("Failed to store ScrubberReport: %s", err)
+	}
 
 	return scrubberResults.String(), nil
 }

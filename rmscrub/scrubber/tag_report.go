@@ -4,6 +4,11 @@ import (
 	"fmt"
 	"strings"
 	"time"
+
+	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go/service/dynamodb"
+	"github.com/aws/aws-sdk-go/service/dynamodb/dynamodbattribute"
 )
 
 // TagReport verfiies and counts the subject/title prefixes
@@ -14,10 +19,10 @@ type TagReport struct {
 
 // TagResults is what gets stored
 type TagResults struct {
-	Date                time.Time
-	Data                map[string][]int
-	AtoCount            int
-	AtoEngineeringCount int
+	Date                time.Time        `json:"date"`
+	Data                map[string][]int `json:"data"`
+	AtoCount            int              `json:"ato_count"`
+	AtoEngineeringCount int              `json:"ato_engineering"`
 }
 
 // NewTagReport makes a new TagReport
@@ -87,6 +92,31 @@ func (r *TagResults) String() string {
 	}
 
 	return s
+}
+
+// Store writes to the database
+func (r *TagResults) Store() error {
+	sess, err := session.NewSession(&aws.Config{
+		Region: aws.String("us-east-1")},
+	)
+
+	// Create DynamoDB client
+	svc := dynamodb.New(sess)
+
+	av, err := dynamodbattribute.MarshalMap(r)
+
+	input := &dynamodb.PutItemInput{
+		Item:      av,
+		TableName: aws.String("RedmineStatusTable"),
+	}
+
+	_, err = svc.PutItem(input)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 // Run runs

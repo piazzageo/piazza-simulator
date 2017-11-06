@@ -57,6 +57,11 @@ func main() {
 	scrubberResults := scrubReport.Report()
 	fmt.Printf(scrubberResults.String())
 
+	err = scrubberResults.Store()
+	if err != nil {
+		Errorf("Failed to store ScrubReport: %s", err)
+	}
+
 	fmt.Printf("\n")
 
 	tagReport := scrubber.NewTagReport(issues)
@@ -66,4 +71,9 @@ func main() {
 	}
 	tagResults := tagReport.Report()
 	fmt.Printf(tagResults.String())
+
+	err = tagResults.Store()
+	if err != nil {
+		Errorf("Failed to store TagReport: %s", err)
+	}
 }

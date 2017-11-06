@@ -19,6 +19,12 @@ package scrubber
 import (
 	"fmt"
 	"strings"
+	"time"
+
+	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go/service/dynamodb"
+	"github.com/aws/aws-sdk-go/service/dynamodb/dynamodbattribute"
 )
 
 // ScrubReport is what embodies the ScrubReport
@@ -28,12 +34,15 @@ type ScrubReport struct {
 
 // ScrubIssueResult is the issue object to be stored
 type ScrubIssueResult struct {
-	Errors []string
-	Owner  string
+	Errors []string `json:"errors"`
+	Owner  string   `json:"owner"`
 }
 
 // ScrubResults is the report map object to be stored
-type ScrubResults map[int]ScrubIssueResult
+type ScrubResults struct {
+	Date time.Time                `json:"date"`
+	Data map[int]ScrubIssueResult `json:"data"`
+}
 
 // NewScrubReport returns a new ScrubReport
 func NewScrubReport(list *IssueList) *ScrubReport {
@@ -257,9 +266,12 @@ func (r *ScrubReport) runReadySprintRules(issue *Issue) {
 }
 
 // Report returns the text report
-func (r *ScrubReport) Report() ScrubResults {
+func (r *ScrubReport) Report() *ScrubResults {
 
-	result := make(ScrubResults)
+	result := &ScrubResults{
+		Date: time.Now(),
+		Data: map[int]ScrubIssueResult{},
+	}
 
 	for id, issue := range r.list.GetMap() {
 
@@ -281,20 +293,45 @@ func (r *ScrubReport) Report() ScrubResults {
 			data.Errors = append(data.Errors, s)
 		}
 
-		result[id] = data
+		result.Data[id] = data
 	}
 
 	return result
 }
 
-func (r ScrubResults) String() string {
+func (r *ScrubResults) String() string {
 	s := ""
-	for id, result := range r {
+	for id, result := range r.Data {
 		for _, mssg := range result.Errors {
 			s += fmt.Sprintf("%d:  %s  %s\n", id, result.Owner, mssg)
 		}
 	}
 	return s
+}
+
+// Store writes to the database
+func (r *ScrubResults) Store() error {
+	sess, err := session.NewSession(&aws.Config{
+		Region: aws.String("us-east-1")},
+	)
+
+	// Create DynamoDB client
+	svc := dynamodb.New(sess)
+
+	av, err := dynamodbattribute.MarshalMap(r)
+
+	input := &dynamodb.PutItemInput{
+		Item:      av,
+		TableName: aws.String("RedmineScrubberTable"),
+	}
+
+	_, err = svc.PutItem(input)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func slackStyle(name string) string {
