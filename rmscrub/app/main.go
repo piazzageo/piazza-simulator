@@ -57,10 +57,11 @@ func main() {
 	scrubberResults := scrubReport.Report()
 	fmt.Printf(scrubberResults.String())
 
-	err = scrubberResults.Store()
+	changed, err := scrubberResults.Store()
 	if err != nil {
 		Errorf("Failed to store ScrubReport: %s", err)
 	}
+	fmt.Printf("Changed: %t\n", changed)
 
 	fmt.Printf("\n")
 
