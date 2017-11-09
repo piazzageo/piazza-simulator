@@ -27,7 +27,7 @@ var TargetProjects = []string{"Piazza", "Beachfront"}
 
 // names of special sprints
 const (
-	CurrentSprint = "Sprint 45"
+	CurrentSprint = "Sprint 46"
 	ReadySprint   = "Ready"
 	BacklogSprint = "Backlog"
 	EpicSprint1   = "Pz Epics"
@@ -35,7 +35,7 @@ const (
 )
 
 // FutureSprints are the things to come (but not used now)
-var FutureSprints = []string{"Sprint 46"}
+var FutureSprints = []string{"Sprint 47"}
 
 // PastSprints is names of sprints gone by
 var PastSprints = []string{
@@ -87,6 +87,7 @@ var PastSprints = []string{
 	"Sprint 42",
 	"Sprint 43",
 	"Sprint 44",
+	"Sprint 45",
 }
 
 // TitleTags are prefixes of issue subject/title
