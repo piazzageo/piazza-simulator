@@ -57,11 +57,11 @@ func main() {
 	scrubberResults := scrubReport.Report()
 	fmt.Printf(scrubberResults.String())
 
-	changed, err := scrubberResults.Store()
+	/*changed, err := scrubberResults.Store()
 	if err != nil {
 		Errorf("Failed to store ScrubReport: %s", err)
 	}
-	fmt.Printf("Changed: %t\n", changed)
+	fmt.Printf("Changed: %t\n", changed)*/
 
 	fmt.Printf("\n")
 
@@ -73,8 +73,8 @@ func main() {
 	tagResults := tagReport.Report()
 	fmt.Printf(tagResults.String())
 
-	err = tagResults.Store()
+	/*err = tagResults.Store()
 	if err != nil {
 		Errorf("Failed to store TagReport: %s", err)
-	}
+	}*/
 }

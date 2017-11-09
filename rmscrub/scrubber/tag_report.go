@@ -79,17 +79,17 @@ func (t *TagReport) Report() *TagResults {
 func (r *TagResults) String() string {
 	s := ""
 
-	s += fmt.Sprintf("Date: %s\n", r.Date.Format(time.RFC3339))
-	s += fmt.Sprintf("Engineering issues: %d\n", r.AtoEngineeringCount)
-	s += fmt.Sprintf("Total issues: %d\n", r.AtoCount)
-
 	for tag, ids := range r.Data {
-		s += fmt.Sprintf("%s: (%d)", tag, len(ids))
-		for _, id := range ids {
+		s += fmt.Sprintf("%s: %d", tag, len(ids))
+		/*for _, id := range ids {
 			s += fmt.Sprintf(" %d", id)
-		}
+		}*/
 		s += fmt.Sprintf("\n")
 	}
+
+	//s += fmt.Sprintf("Date: %s\n", r.Date.Format(time.RFC3339))
+	s += fmt.Sprintf("Engineering issues: %d\n", r.AtoEngineeringCount)
+	s += fmt.Sprintf("Total issues: %d\n", r.AtoCount)
 
 	return s
 }

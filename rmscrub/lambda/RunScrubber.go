@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 
 	"github.com/eawsy/aws-lambda-go-core/service/lambda/runtime"
 	"github.com/venicegeo/mpg-sandbox/rmscrub/scrubber"
@@ -34,9 +35,13 @@ func RunScrubber(evt json.RawMessage, ctx *runtime.Context) (interface{}, error)
 	}
 	scrubberResults := scrubReport.Report()
 
-	err = scrubberResults.Store()
+	changed, err := scrubberResults.Store()
 	if err != nil {
 		return nil, fmt.Errorf("Failed to store ScrubberReport: %s", err)
+	}
+
+	if changed {
+		log.Printf("Changed: %t", changed)
 	}
 
 	return scrubberResults.String(), nil

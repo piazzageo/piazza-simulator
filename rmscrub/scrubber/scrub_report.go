@@ -18,6 +18,7 @@ package scrubber
 
 import (
 	"fmt"
+	"log"
 	"strings"
 	"time"
 
@@ -173,23 +174,23 @@ func (r *ScrubReport) runCurrentSprintRules(issue *Issue) {
 	}
 
 	if issue.isClosed() && issue.percentDone() != 100 {
-		issue.Error("'percent done' on closed issue is not 100%")
+		issue.Error("'percent done' on closed issue is not 100%%")
 	}
 
 	if issue.isResolved() && issue.percentDone() != 100 {
-		issue.Error("'percent done' on resolved issue is not 100%")
+		issue.Error("'percent done' on resolved issue is not 100%%")
 	}
 
 	if issue.isNew() && issue.percentDone() != 0 {
-		issue.Error("'percent done' on new issue is not 0%")
+		issue.Error("'percent done' on new issue is not 0%%")
 	}
 
 	if issue.isInProgress() && issue.percentDone() == 0 {
-		issue.Error("'percent done' on in-progress issue is 0%")
+		issue.Error("'percent done' on in-progress issue is 0%%")
 	}
 
 	if issue.isInProgress() && issue.percentDone() == 100 {
-		issue.Error("'percent done' on in-progress issue is 100%")
+		issue.Error("'percent done' on in-progress issue is 100%%")
 	}
 
 	if issue.isStory() && !issue.isRejected() && !issue.hasAcceptanceCriteria() {
@@ -301,16 +302,19 @@ func (r *ScrubReport) Report() *ScrubResults {
 
 func (r *ScrubResults) String() string {
 	s := ""
+	total := 0
 	for id, result := range r.Data {
 		for _, mssg := range result.Errors {
-			s += fmt.Sprintf("%d:  %s  %s\n", id, result.Owner, mssg)
+			s += fmt.Sprintf("%d:  %-20s  %s\n", id, slackStyle(result.Owner), mssg)
+			total++
 		}
 	}
+	s += fmt.Sprintf("%d total errors\n", total)
 	return s
 }
 
 // Store writes to the database
-func (r *ScrubResults) Store() error {
+func (r *ScrubResults) Store() (bool, error) {
 	sess, err := session.NewSession(&aws.Config{
 		Region: aws.String("us-east-1")},
 	)
@@ -326,12 +330,29 @@ func (r *ScrubResults) Store() error {
 	}
 
 	_, err = svc.PutItem(input)
-
 	if err != nil {
-		return err
+		return false, err
 	}
 
-	return nil
+	{
+		var queryInput = &dynamodb.QueryInput{
+			TableName:     aws.String("RedmineScrubberTable"),
+			IndexName:     aws.String("date"),
+			KeyConditions: map[string]*dynamodb.Condition{},
+		}
+		var resp1, err1 = svc.Query(queryInput)
+		if err1 != nil {
+			fmt.Println(err1)
+		} else {
+			//personObj := []Person{}
+			//err = dynamodbattribute.UnmarshalListOfMaps(resp1.Items, &personObj)
+			log.Println("--------------------")
+			log.Println(resp1.Items)
+			log.Println("--------------------")
+		}
+	}
+
+	return false, nil
 }
 
 func slackStyle(name string) string {

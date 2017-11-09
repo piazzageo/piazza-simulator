@@ -43,6 +43,8 @@ func NewIssueList(apiKey string, availableProjects *ProjectList) (*IssueList, er
 	}
 	wg.Wait()
 
+	fmt.Printf("\n")
+
 	return list, nil
 }
 
