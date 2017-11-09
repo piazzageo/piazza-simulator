@@ -153,13 +153,13 @@ func (r *ScrubReport) runCurrentSprintRules(issue *Issue) {
 		if parent == nil {
 			issue.Error("task's parent is not set")
 		} else if parent.tracker() != "Story" && parent.tracker() != "Bug" {
-			issue.Error("task's parent is not an Story or Bug")
+			issue.Error("task's parent is not a Story or Bug")
 		}
 	} else if issue.isBug() {
 		if parent == nil {
 			issue.Error("bug's parent is not set")
 		} else if parent.tracker() != "Epic" && parent.tracker() != "Story" {
-			issue.Error("bug's parent is not a Story or Bug")
+			issue.Error("bug's parent is not an Epic or Story")
 		}
 	} else {
 		issue.Error(fmt.Sprintf("issue's type (\"tracker\") is invalid: \"%s\"", issue.tracker()))
